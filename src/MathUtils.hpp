@@ -8,34 +8,16 @@
 namespace sw
 {
 
-    struct A
-    {
-        A()
-        {
-            printf("constructed A\n");
-        }
-    };
-
-    struct B
-    {
-        B()
-        {
-            printf("constructed B\n");
-        }
-    };
+    template <typename T>
+    class Vector;
 
     template <typename T>
     class VectorView
     {
     public:
-        A a;
         VectorView() = default;
 
-        VectorView(std::vector<T> vec);
-
-        // VectorView(std::vector<T>::size_type sz);
-
-        // VectorView(std::initializer_list<T> initializerList);
+        VectorView(std::vector<T> *pVec);
 
         T &operator[](int i);
 
@@ -45,7 +27,12 @@ namespace sw
         typename std::common_type<T, U>::type operator*(const VectorView<U> &rhs) const;
 
         template <typename U>
-        VectorView<typename std::common_type<T, U>::type> point_mult(const VectorView<U> &rhs) const;
+        std::enable_if_t<std::is_arithmetic_v<U>,
+                         sw::Vector<typename std::common_type<T, U>::type>>
+        operator*(const U &rhs) const;
+
+        template <typename U>
+        Vector<typename std::common_type<T, U>::type> point_mult(const VectorView<U> &rhs) const;
 
         typename std::vector<T>::size_type size() const;
 
@@ -53,15 +40,14 @@ namespace sw
 
         std::string num2string(T num) const;
 
-    private:
-        std::vector<T> &m_vec;
+    public: // change to protected
+        std::vector<T> *m_pVec = nullptr;
     };
 
     template <typename T>
     class Vector : public VectorView<T>
     {
     public:
-        B b;
         Vector() = default;
 
         Vector(std::vector<T> vec);
@@ -70,55 +56,74 @@ namespace sw
 
         Vector(std::initializer_list<T> initializerList);
 
-        // std::vector<T> &initialize(std::initializer_list<T> initializerList);
+        // Copy constructor
+        Vector(const Vector<T> &vec);
+
+        // Copy assignment operator
+        Vector<T> &operator=(const Vector<T> &other);
 
     private:
         std::vector<T> m_vecStorage{7, 8, 9};
     };
 
+    // CONSTRUCTOR:
+    // VectorView
     template <typename T>
-    VectorView<T>::VectorView(std::vector<T> vec) : a{}, m_vec{vec} {}
+    VectorView<T>::VectorView(std::vector<T> *pVec) : m_pVec{pVec} {}
+
+    // Vector
+    template <typename T>
+    Vector<T>::Vector(std::vector<T> vec) : m_vecStorage{vec}
+    {
+        this->m_pVec = &m_vecStorage;
+    }
 
     template <typename T>
-    Vector<T>::Vector(std::vector<T> vec) : m_vecStorage{vec}, VectorView<T>{m_vecStorage} {}
-
-    template <typename T>
-    Vector<T>::Vector(std::vector<T>::size_type sz) : m_vecStorage(sz), VectorView<T>{m_vecStorage} {}
-
-    template <typename T>
-    Vector<T>::Vector(std::initializer_list<T> initializerList) : /*m_vecStorage{initializerList},*/ VectorView<T>{m_vecStorage} {}
+    Vector<T>::Vector(std::vector<T>::size_type sz) : m_vecStorage(sz)
+    {
+        this->m_pVec = &m_vecStorage;
+    }
 
     // template <typename T>
-    // std::vector<T> &Vector<T>::initialize(std::initializer_list<T> initializerList)
-    // {
-    //     m_vecStorage{initializerList};
-    //     return m_vecStorage;
-    // }
+    // Vector<T>::Vector(std::initializer_list<T> initializerList) : m_vecStorage{initializerList}, VectorView<T>{m_vecStorage} {}
 
-    // template <typename T>
-    // Vector<T>::Vector(std::initializer_list<T> initializerList) : b{}, m_vecStorage{initializerList}, VectorView<T>{m_vecStorage} {}
+    template <typename T>
+    Vector<T>::Vector(std::initializer_list<T> initializerList) : m_vecStorage{initializerList}
+    {
+        this->m_pVec = &m_vecStorage;
+    }
 
-    // template <typename T>
-    // Vector<T>::Vector(std::initializer_list<T> initializerList) : b{}, m_vecStorage{initialize(initializerList)} {}
+    template <typename T>
+    Vector<T>::Vector(const Vector<T> &other) : m_vecStorage{other.m_vecStorage}
+    {
+        this->m_pVec = &m_vecStorage;
+    }
 
-    /*
-        template <typename T>
-        VectorView<T>::VectorView(std::vector<T>::size_type sz) : m_vec(sz) {}
+    template <typename T>
+    Vector<T> &Vector<T>::operator=(const Vector<T> &other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
 
-        template <typename T>
-        VectorView<T>::VectorView(std::initializer_list<T> initializerList) : m_vec{initializerList} {}
-    */
+        m_vecStorage = other.m_vecStorage;
+        this->m_pVec = &m_vecStorage;
 
+        return *this;
+    }
+
+    // NON-CONSTRUCTOR VectorView
     template <typename T>
     T &VectorView<T>::operator[](int i)
     {
-        return m_vec[i];
+        return (*m_pVec)[i];
     }
 
     template <typename T>
     const T &VectorView<T>::operator[](int i) const
     {
-        return m_vec[i];
+        return (*m_pVec)[i];
     }
 
     template <typename T>
@@ -127,9 +132,9 @@ namespace sw
     {
         typename std::common_type<T, U>::type result{}; // = 0;
 
-        for (int i = 0; i < m_vec.size(); ++i)
+        for (int i = 0; i < (*m_pVec).size(); ++i)
         {
-            result += m_vec[i] * rhs[i];
+            result += (*m_pVec)[i] * rhs[i];
         }
 
         return result;
@@ -137,13 +142,32 @@ namespace sw
 
     template <typename T>
     template <typename U>
-    VectorView<typename std::common_type<T, U>::type> VectorView<T>::point_mult(const VectorView<U> &rhs) const
+    std::enable_if_t<std::is_arithmetic_v<U>,
+                     sw::Vector<typename std::common_type<T, U>::type>>
+    VectorView<T>::operator*(const U &rhs) const
+    {
+        using CommonType = typename std::common_type<T, U>::type;
+
+        std::vector<CommonType> resultVec;
+        resultVec.reserve(size());
+
+        for (int i = 0; i < size(); ++i)
+        {
+            resultVec.push_back((*m_pVec)[i] * rhs);
+        }
+
+        return sw::Vector<CommonType>(resultVec);
+    }
+
+    template <typename T>
+    template <typename U>
+    Vector<typename std::common_type<T, U>::type> VectorView<T>::point_mult(const VectorView<U> &rhs) const
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (int i = 0; i < m_vec.size(); ++i)
+        for (int i = 0; i < (*m_pVec).size(); ++i)
         {
-            result[i] = m_vec[i] * rhs[i];
+            result[i] = (*m_pVec)[i] * rhs[i];
         }
         return result;
     }
@@ -151,7 +175,7 @@ namespace sw
     template <typename T>
     typename std::vector<T>::size_type VectorView<T>::size() const
     {
-        return m_vec.size();
+        return (*m_pVec).size();
     }
 
     template <typename T>
@@ -166,10 +190,22 @@ namespace sw
         {
             std::snprintf(buffer, 16, "%7.3f", num);
         }
+
+        // else if (std::is_base_of<VectorView<int>, T>::value || std::is_same<T, VectorView<int>>::value)
+        // {
+        //     // return "+";
+        //     return num.toString();
+        // }
+        // else
+        // {
+        //     return "-";
+        // }
+
         else
         {
-            return "-";
+            return num.toString();
         }
+
         return buffer;
     }
 
@@ -179,9 +215,9 @@ namespace sw
         std::string str = "(";
         for (int i = 0; i < size() - 1; ++i)
         {
-            str = str + num2string(m_vec[i]) + ", ";
+            str = str + num2string((*m_pVec)[i]) + ", ";
         }
-        str = str + num2string(m_vec[m_vec.size() - 1]);
+        str = str + num2string((*m_pVec)[(*m_pVec).size() - 1]);
         str += ")";
         return str;
     }
@@ -190,21 +226,28 @@ namespace sw
 
 // Note, we are outside the sw namespace here.
 // Overload operator* for float and sc::Vector
-template <typename T>
-sw::VectorView<T> operator*(float lhs, const sw::VectorView<T> &rhs);
+template <typename T, typename U>
+std::enable_if_t<std::is_arithmetic_v<T>,
+                 sw::Vector<typename std::common_type<T, U>::type>>
+operator*(T lhs, const sw::VectorView<U> &rhs);
 
 // Note, we are outside the sw namespace here.
 // Overload operator* for float and sc::Vector
-template <typename T>
-sw::VectorView<T> operator*(float lhs, const sw::VectorView<T> &rhs)
+template <typename T, typename U>
+std::enable_if_t<std::is_arithmetic_v<T>,
+                 sw::Vector<typename std::common_type<T, U>::type>>
+
+operator*(T lhs, const sw::VectorView<U> &rhs)
 {
-    std::vector<T> resultVec;
+    using CommonType = typename std::common_type<T, U>::type;
+
+    std::vector<CommonType> resultVec;
     resultVec.reserve(rhs.size());
 
     for (int i = 0; i < rhs.size(); ++i)
     {
         resultVec.push_back(lhs * rhs[i]);
     }
-
-    return sw::VectorView<T>(resultVec);
+    // }
+    return sw::Vector<CommonType>(resultVec);
 }

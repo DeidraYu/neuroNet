@@ -9,6 +9,6 @@ void Net::printInfo()
     printf("Number of nodes per layer:\n");
     for (size_t layerIndex = 0; layerIndex < m_layerSizes.size(); ++layerIndex)
     {
-        printf("    %2ld: %d\n", layerIndex, m_layerSizes[layerIndex]);
+        printf("    %2lld: %d\n", layerIndex, m_layerSizes[layerIndex]);
     }
 }
