@@ -228,3 +228,15 @@ TEST(VectorTest, nesting)
 
     printf("H: %s\n", H.toString().c_str());
 }
+
+TEST(VectorTest, add)
+{
+    Vector u{2, 4, 6};
+    Vector v{1, 2, 3};
+
+    Vector w = u + v;
+
+    EXPECT_EQ(w[0], 3);
+    EXPECT_EQ(w[1], 6);
+    EXPECT_EQ(w[2], 9);
+}

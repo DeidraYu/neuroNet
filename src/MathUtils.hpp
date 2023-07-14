@@ -40,6 +40,9 @@ namespace sw
         template <typename U>
         Vector<typename std::common_type<T, U>::type> point_mult(const VectorView<U> &rhs) const;
 
+        template <typename U>
+        Vector<typename std::common_type<T, U>::type> operator+(const VectorView<U> &rhs) const;
+
         typename std::vector<T>::size_type size() const;
 
         std::string toString() const;
@@ -174,6 +177,19 @@ namespace sw
         for (int i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] * rhs[i];
+        }
+        return result;
+    }
+
+    template <typename T>
+    template <typename U>
+    Vector<typename std::common_type<T, U>::type> VectorView<T>::operator+(const VectorView<U> &rhs) const
+    {
+        Vector<typename std::common_type<T, U>::type> result(size());
+
+        for (int i = 0; i < (*m_pVec).size(); ++i)
+        {
+            result[i] = (*m_pVec)[i] + rhs[i];
         }
         return result;
     }
