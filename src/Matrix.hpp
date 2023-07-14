@@ -10,7 +10,9 @@ namespace sw
     class Matrix
     {
     public:
-        Matrix(uint32_t nRows, uint32_t nCols) : m_nRows(nRows), m_nCols(nCols), m_rows(m_nRows), ref(nRows)
+        Matrix() = default;
+
+        Matrix(uint32_t nRows, uint32_t nCols) : m_nRows(nRows), m_nCols(nCols), m_rows(m_nRows)
         {
             for (std::vector<T> &row : m_rows)
             {
@@ -93,6 +95,16 @@ namespace sw
             return oss.str();
         }
 
+        uint32_t getNumRows()
+        {
+            return m_nRows;
+        }
+
+        uint32_t getNumCols()
+        {
+            return m_nCols;
+        }
+
     private:
         uint32_t m_nRows = 0;
         uint32_t m_nCols = 0;
@@ -100,8 +112,6 @@ namespace sw
         /// @brief The container of the the matrix data.
         /// The data is an std::vector of rows, where each row is an std::vector of the template type.
         std::vector<std::vector<T>> m_rows;
-
-        uint32_t &ref;
     };
 
 } // namespace sw

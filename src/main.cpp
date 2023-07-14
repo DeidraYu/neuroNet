@@ -9,6 +9,7 @@
 #include "mnist/mnist_reader.hpp"
 #include "Net.hpp"
 #include "Trainer.hpp"
+#include "Evaluator.hpp"
 #include "MathUtils.hpp"
 #include "Utils.hpp"
 
@@ -32,7 +33,7 @@ int main()
 
     std::cout << "Time reading mnist dataset from disk: " << duration1.count() << " milliseconds" << std::endl;
 
-    if (true)
+    if (false)
     {
         printNumber(dataset.training_images[0]);
         printNumber(dataset.training_images[1]);
@@ -57,6 +58,9 @@ int main()
         auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2);
         printf("Time permuting data set %d times: %lld milliseconds\n", nEpochs, duration2.count());
     }
+
+    Evaluator evaluator(dataset.test_images, dataset.test_labels);
+    evaluator.evaluate(net);
 
     return 0;
 }

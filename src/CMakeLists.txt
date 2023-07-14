@@ -1,4 +1,4 @@
-add_executable(neuronet main.cpp Net.cpp Trainer.cpp Utils.cpp)
+add_executable(neuronet main.cpp Net.cpp Trainer.cpp Evaluator.cpp Utils.cpp)
 
 target_link_libraries(neuronet)
 #target_compile_features(neuronet PRIVATE cxx_range_for)
