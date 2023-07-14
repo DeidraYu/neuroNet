@@ -11,6 +11,12 @@ namespace sw
     template <typename T>
     class Vector;
 
+    /**
+     * @brief Class to put a vector view on an std::vector.
+     *
+     * Let \f$v\f$ be a vector.
+     *
+     */
     template <typename T>
     class VectorView
     {
