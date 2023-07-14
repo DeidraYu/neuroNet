@@ -10,6 +10,8 @@ namespace sw
     class Matrix
     {
     public:
+        Matrix() = default;
+
         Matrix(uint32_t nRows, uint32_t nCols) : m_nRows(nRows), m_nCols(nCols), m_rows(m_nRows)
         {
             for (size_t r = 0; r < m_nRows; ++r)
@@ -88,6 +90,16 @@ namespace sw
             }
             oss << "]";
             return oss.str();
+        }
+
+        uint32_t getNumRows()
+        {
+            return m_nRows;
+        }
+
+        uint32_t getNumCols()
+        {
+            return m_nCols;
         }
 
     private:
