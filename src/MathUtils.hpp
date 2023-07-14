@@ -45,6 +45,11 @@ namespace sw
 
         typename std::vector<T>::size_type size() const;
 
+        void resize(size_t newSize)
+        {
+            (*m_pVec).resize(newSize);
+        }
+
         std::string toString() const;
 
         std::string num2string(T num) const;
@@ -72,7 +77,7 @@ namespace sw
         Vector<T> &operator=(const Vector<T> &other);
 
     private:
-        std::vector<T> m_vecStorage{7, 8, 9};
+        std::vector<T> m_vecStorage; //{7, 8, 9};
     };
 
     // CONSTRUCTOR:

@@ -10,20 +10,20 @@ namespace sw
     class Matrix
     {
     public:
-        Matrix(uint32_t nRows, uint32_t nCols) : m_nRows(nRows), m_nCols(nCols), m_rows(m_nRows), ref(nRows)
+        Matrix(uint32_t nRows, uint32_t nCols) : m_nRows(nRows), m_nCols(nCols), m_rows(m_nRows)
         {
-            for (std::vector<T> &row : m_rows)
+            for (size_t r = 0; r < m_nRows; ++r)
             {
-                row.resize(m_nCols);
+                m_rows[r] = std::move(Vector<T>(m_nCols));
             }
         }
 
-        std::vector<T> &operator[](int i)
+        Vector<T> &operator[](int i)
         {
             return m_rows[i];
         }
 
-        const std::vector<T> &operator[](int i) const
+        const Vector<T> &operator[](int i) const
         {
             return m_rows[i];
         }
@@ -37,10 +37,7 @@ namespace sw
 
             for (size_t r = 0; r < m_nRows; ++r)
             {
-                for (size_t c = 0; c < m_nCols; c++)
-                {
-                    result[static_cast<int>(r)] += m_rows[r][c] * rhs[static_cast<int>(c)];
-                }
+                result[static_cast<int>(r)] = m_rows[r] * rhs;
             }
 
             return result;
@@ -50,11 +47,11 @@ namespace sw
         {
             T sum{0};
 
-            for (const std::vector<T> &row : m_rows)
+            for (const Vector<T> &row : m_rows)
             {
-                for (const T &element : row)
+                for (int c = 0; c < row.size(); ++c)
                 {
-                    sum += element;
+                    sum += row[c];
                 }
             }
 
@@ -99,9 +96,9 @@ namespace sw
 
         /// @brief The container of the the matrix data.
         /// The data is an std::vector of rows, where each row is an std::vector of the template type.
-        std::vector<std::vector<T>> m_rows;
 
-        uint32_t &ref;
+        // std::vector<std::vector<T>> m_rows;
+        std::vector<Vector<T>> m_rows;
     };
 
 } // namespace sw
