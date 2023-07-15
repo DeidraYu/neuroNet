@@ -46,7 +46,6 @@ int main()
     Trainer trainer(dataset.training_images, dataset.training_labels);
 
     {
-        printf("Start training ...   ");
         auto start2 = std::chrono::steady_clock::now();
 
         int16_t nEpochs = 1;

@@ -37,6 +37,6 @@ private:
 
     sw::Vector<float> oneHotEncode(int value, int numClasses);
 
-    void trainEpoch(Net &net, uint16_t miniBatchSize, float learningRate);
+    void trainEpoch(Net &net, uint16_t miniBatchSize, float learningRate, std::string progressLabel);
     void trainMiniBatch(Net &net, size_t imageIndex, size_t miniBatchSize, float learningRate);
 };
