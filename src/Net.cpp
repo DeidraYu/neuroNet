@@ -65,6 +65,20 @@ sw::Vector<float> Net::sigmoid(sw::Vector<float> z)
     return activations;
 }
 
+sw::Vector<float> Net::sigmoid_prime(sw::Vector<float> z)
+{
+    sw::Vector<float> activations(z.size());
+    float sigmoid = 0;
+
+    for (int i = 0; i < z.size() - 1; ++i)
+    {
+        sigmoid = 1.0f / (1.0f + exp(-z[i]));
+        activations[i] = (1 - sigmoid) * sigmoid;
+    }
+
+    return activations;
+}
+
 std::vector<sw::Matrix<float>> &Net::getWeights()
 {
     // std::vector<sw::Matrix<float>> test{sw::Matrix<float>(1, 1)};

@@ -51,6 +51,9 @@ void Trainer::trainEpoch(Net &net, uint16_t miniBatchSize, float learningRate)
 
 void Trainer::trainMiniBatch(Net &net, size_t imageIndex, size_t miniBatchSize, float learningRate)
 {
+    std::vector<sw::Matrix<float>> weightGradient(net.getSizes().size());
+    std::vector<sw::Vector<float>> biasGradient(net.getSizes().size());
+
     for (size_t i = imageIndex; i < imageIndex + miniBatchSize; ++i)
     {
         sw::VectorView image(&m_images[i]);
@@ -58,6 +61,13 @@ void Trainer::trainMiniBatch(Net &net, size_t imageIndex, size_t miniBatchSize, 
         uint8_t label = m_labels[i];
 
         ResultPair results = feedforward(net, image2);
+        GradientPair gradients = backProp(net, results, label, miniBatchSize, learningRate);
+
+        for (int i = 0; i < net.getSizes().size() - 1; i++)
+        {
+            weightGradient[i] = weightGradient[i] + gradients.weightGradient[i];
+            biasGradient[i] = biasGradient[i] + gradients.biasGradient[i];
+        }
     }
 }
 
@@ -66,16 +76,17 @@ Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
     std::vector<uint16_t> layerSizes = net.getSizes();
     auto &weights = net.getWeights();
     auto &biases = net.getBiases();
-    sw::Vector<float> activation;
-    sw::Vector<float> z;
 
     std::vector<sw::Vector<float>> activations;
     std::vector<sw::Vector<float>> zs;
 
-    activation = sw::Vector<float>(layerSizes[0]);
-    z = sw::Vector<float>(layerSizes[0]);
+    sw::Vector<float> z = weights[0] * image + biases[0];
+    sw::Vector<float> activation = net.sigmoid(z);
 
-    for (int i = 0; i < layerSizes.size() - 1; ++i)
+    zs.push_back(z);
+    activations.push_back(activation);
+
+    for (int i = 1; i < layerSizes.size() - 1; ++i)
     {
         z = weights[i] * activation + biases[i];
         activation = net.sigmoid(z);
@@ -85,4 +96,43 @@ Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
     }
 
     return ResultPair(zs, activations);
+}
+
+Trainer::GradientPair Trainer::backProp(Net &net, ResultPair resultPair, uint8_t label, size_t miniBatchSize, float learningRate)
+{
+    sw::Vector<float> netWorkOutput = resultPair.activations[resultPair.activations.size() - 1];
+    sw::Vector<float> errorVector = netWorkOutput - oneHotEncode(label, 10);
+
+    auto weights = net.getWeights();
+    auto biases = net.getBiases();
+
+    size_t nLayers = net.getSizes().size();
+
+    std::vector<sw::Matrix<float>> weightGradient(net.getSizes().size());
+    std::vector<sw::Vector<float>> biasGradient(net.getSizes().size());
+
+    sw::Vector<float> sigmoidPrime;
+    sw::Vector<float> deltaZ = errorVector.point_mult(net.sigmoid_prime(resultPair.zs[nLayers - 1]));
+
+    for (int i = 1; i < nLayers - 1; ++i)
+    {
+
+        sigmoidPrime = net.sigmoid_prime(resultPair.zs[nLayers - i]);
+        deltaZ = sigmoidPrime.point_mult(weights[nLayers - i] * deltaZ);
+
+        weightGradient[nLayers - i] = deltaZ.outer(resultPair.activations[nLayers - 1 - i]);
+        biasGradient[nLayers - i] = deltaZ;
+    }
+
+    return GradientPair(weightGradient, biasGradient);
+}
+
+sw::Vector<float> Trainer::oneHotEncode(int value, int numClasses)
+{
+    sw::Vector<float> encodedVector(numClasses);
+    if (value >= 0 && value < numClasses)
+    {
+        encodedVector[value] = 1.0f;
+    }
+    return encodedVector;
 }

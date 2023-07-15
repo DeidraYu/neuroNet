@@ -16,6 +16,7 @@ public:
     std::vector<uint16_t> getSizes();
 
     sw::Vector<float> sigmoid(sw::Vector<float> z);
+    sw::Vector<float> sigmoid_prime(sw::Vector<float> z);
 
 private:
     std::vector<uint16_t> m_layerSizes;
