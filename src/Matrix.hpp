@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cinttypes>
+// #include <algorithm>
+#include <execution>
 
 #include "Vector.hpp"
 
@@ -37,11 +39,17 @@ namespace sw
 
             Vector<CommonType> result(m_nRows);
 
+#if 0
             for (size_t r = 0; r < m_nRows; ++r)
             {
                 result[static_cast<int>(r)] = m_rows[r] * rhs;
             }
-
+#else
+            std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
+                          {
+        size_t r = &row - &m_rows[0];
+        result[static_cast<int>(r)] = row * rhs; });
+#endif
             return result;
         }
 
@@ -59,22 +67,6 @@ namespace sw
 
             return sum;
         }
-
-        // std::string toString(const std::vector<T> &row)
-        // {
-        //     std::ostringstream oss;
-        //     oss << "[";
-        //     for (size_t i = 0; i < row.size(); ++i)
-        //     {
-        //         if (i > 0)
-        //         {
-        //             oss << ", ";
-        //         }
-        //         oss << row[i];
-        //     }
-        //     oss << "]";
-        //     return oss.str();
-        // }
 
         std::string toString()
         {

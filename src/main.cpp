@@ -40,12 +40,13 @@ int main()
         printNumber(dataset.training_images[2]);
     }
 
-    Net net({28 * 28, 196, 49, 10});
+    Net net({28 * 28, 30, 10});
     // net.printInfo();
 
     Trainer trainer(dataset.training_images, dataset.training_labels);
 
     {
+        printf("Start training ...   ");
         auto start2 = std::chrono::steady_clock::now();
 
         int16_t nEpochs = 10;

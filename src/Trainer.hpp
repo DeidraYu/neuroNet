@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "MathUtils.hpp"
+#include "Vector.hpp"
 #include "Matrix.hpp"
 #include "Net.hpp"
 
