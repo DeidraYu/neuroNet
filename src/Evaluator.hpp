@@ -12,6 +12,8 @@ public:
 
     int evaluate(Net &net);
 
+    long long duration = 0;
+
 private:
     sw::Vector<float> feedforward(sw::VectorView<float> &image, Net &net);
 

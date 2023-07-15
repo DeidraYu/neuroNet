@@ -4,11 +4,11 @@
 
 #include "Net.hpp"
 
-Net::Net(std::vector<uint16_t> layerSizes) : m_layerSizes(layerSizes), m_weights(layerSizes.size() - 1)
+Net::Net(std::vector<uint16_t> layerSizes) : m_layerSizes(layerSizes), m_weights(layerSizes.size() - 1), m_biases(layerSizes.size() - 1)
 {
     for (int layerIndex = 0; layerIndex < layerSizes.size() - 1; ++layerIndex)
     {
-        m_weights[layerIndex] = std::move(sw::Matrix<float>(layerSizes[layerIndex], layerSizes[layerIndex + 1]));
+        m_weights[layerIndex] = std::move(sw::Matrix<float>(layerSizes[layerIndex + 1], layerSizes[layerIndex]));
         m_biases[layerIndex] = std::move(sw::Vector<float>(layerSizes[layerIndex + 1]));
     }
 
@@ -57,7 +57,7 @@ sw::Vector<float> Net::sigmoid(sw::Vector<float> z)
 {
     sw::Vector<float> activations(z.size());
 
-    for (int i = 0; i < z.size(); ++i)
+    for (int i = 0; i < z.size() - 1; ++i)
     {
         activations[i] = 1.0f / (1.0f + exp(-z[i]));
     }
