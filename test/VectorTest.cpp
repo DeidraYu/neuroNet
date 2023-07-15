@@ -223,6 +223,18 @@ TEST(VectorTest, add)
     EXPECT_EQ(w[2], 9);
 }
 
+TEST(VectorTest, subtract)
+{
+    Vector u{2, 5, 8};
+    Vector v{1, 2, 3};
+
+    Vector w = u - v;
+
+    EXPECT_EQ(w[0], 1);
+    EXPECT_EQ(w[1], 3);
+    EXPECT_EQ(w[2], 5);
+}
+
 TEST(VectorTest, random)
 {
     Vector u = Vector<uint8_t>::rand(10, 0, std::numeric_limits<uint8_t>::max());
