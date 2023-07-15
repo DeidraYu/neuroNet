@@ -53,6 +53,34 @@ namespace sw
             return result;
         }
 
+        template <typename U>
+        Matrix<typename std::common_type<T, U>::type> operator+(const Matrix<U> &rhs) const
+        {
+            using CommonType = typename std::common_type<T, U>::type;
+
+            Matrix<CommonType> result(m_nRows, m_nCols);
+
+            std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
+                          {
+        size_t r = &row - &m_rows[0];
+        result[static_cast<int>(r)] = row + rhs[static_cast<int>(r)]; });
+            return result;
+        }
+
+        template <typename U>
+        Matrix<typename std::common_type<T, U>::type> operator-(const Matrix<U> &rhs) const
+        {
+            using CommonType = typename std::common_type<T, U>::type;
+
+            Matrix<CommonType> result(m_nRows, m_nCols);
+
+            std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
+                          {
+        size_t r = &row - &m_rows[0];
+        result[static_cast<int>(r)] = row - rhs[static_cast<int>(r)]; });
+            return result;
+        }
+
         T sum() const
         {
             T sum{0};
