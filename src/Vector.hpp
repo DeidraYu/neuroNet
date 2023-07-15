@@ -9,6 +9,9 @@
 
 namespace sw
 {
+    // forward declaration of the matrix class
+    template <typename T>
+    class Matrix;
 
     template <typename T>
     class Vector;
@@ -41,6 +44,9 @@ namespace sw
 
         template <typename U>
         Vector<typename std::common_type<T, U>::type> point_mult(const VectorView<U> &rhs) const;
+
+        template <typename U>
+        Matrix<typename std::common_type<T, U>::type> cross(const VectorView<U> &rhs) const;
 
         template <typename U>
         Vector<typename std::common_type<T, U>::type> operator+(const VectorView<U> &rhs) const;
@@ -234,6 +240,19 @@ namespace sw
             result[i] = (*m_pVec)[i] * rhs[i];
         }
         return result;
+    }
+
+    template <typename T>
+    template <typename U>
+    Matrix<typename std::common_type<T, U>::type> VectorView<T>::cross(const VectorView<U> &rhs) const
+    {
+        using CommonType = typename std::common_type<T, U>::type;
+        Matrix<CommonType> A(static_cast<uint32_t>(size()), static_cast<uint32_t>(size()));
+        for (int r = 0; r < size(); ++r)
+        {
+            A[r] = (*m_pVec)[r] * rhs;
+        }
+        return A;
     }
 
     template <typename T>

@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 
 #include "../src/Vector.hpp"
+#include "../src/Matrix.hpp"
+
 using namespace sw;
 
 TEST(VectorViewTest, initialize)
@@ -239,4 +241,24 @@ TEST(VectorTest, random)
 {
     Vector u = Vector<uint8_t>::rand(10, 0, std::numeric_limits<uint8_t>::max());
     std::cout << u.toString() << std::endl;
+}
+
+TEST(VectorTest, cross)
+{
+    Vector u{2, 5, 8};
+    Vector v{1, 2, 3};
+
+    Matrix w = u.cross(v);
+
+    EXPECT_EQ(w[0][0], 2);
+    EXPECT_EQ(w[0][1], 4);
+    EXPECT_EQ(w[0][2], 6);
+
+    EXPECT_EQ(w[1][0], 5);
+    EXPECT_EQ(w[1][1], 10);
+    EXPECT_EQ(w[1][2], 15);
+
+    EXPECT_EQ(w[2][0], 8);
+    EXPECT_EQ(w[2][1], 16);
+    EXPECT_EQ(w[2][2], 24);
 }
