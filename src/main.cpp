@@ -10,7 +10,7 @@
 #include "Net.hpp"
 #include "Trainer.hpp"
 #include "Evaluator.hpp"
-#include "MathUtils.hpp"
+#include "Vector.hpp"
 #include "Utils.hpp"
 
 int main()

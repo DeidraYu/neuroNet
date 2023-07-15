@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-#include "MathUtils.hpp"
+#include "Vector.hpp"
 #include "Matrix.hpp"
 
 class Net

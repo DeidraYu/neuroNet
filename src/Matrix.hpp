@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 
-#include "MathUtils.hpp"
+#include "Vector.hpp"
 
 namespace sw
 {

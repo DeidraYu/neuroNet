@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "../src/MathUtils.hpp"
+#include "../src/Vector.hpp"
 using namespace sw;
 
 TEST(VectorViewTest, initialize)
