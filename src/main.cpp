@@ -40,7 +40,7 @@ int main()
         printNumber(dataset.training_images[2]);
     }
 
-    Net net({28 * 28, 30, 10});
+    Net net({28 * 28, 196, 49, 10});
     // net.printInfo();
 
     Trainer trainer(dataset.training_images, dataset.training_labels);
@@ -52,7 +52,7 @@ int main()
         uint16_t miniBatchSize = 5;
         float learningRate = 2.0f;
 
-        trainer.train(nEpochs, miniBatchSize, learningRate);
+        trainer.train(net, nEpochs, miniBatchSize, learningRate);
 
         auto end2 = std::chrono::steady_clock::now();
         auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2);
@@ -60,7 +60,22 @@ int main()
     }
 
     Evaluator evaluator(dataset.test_images, dataset.test_labels);
-    evaluator.evaluate(net);
+
+    int score = 0;
+    int n = 1;
+
+    auto start3 = std::chrono::steady_clock::now();
+
+    for (int i = 0; i < n; ++i)
+    {
+        score += evaluator.evaluate(net);
+    }
+
+    auto end3 = std::chrono::steady_clock::now();
+    auto duration3 = std::chrono::duration_cast<std::chrono::milliseconds>(end3 - start3);
+    printf("Time evaluating %d times: %lld ms\n", n, duration3.count());
+    printf("Eval took: %lld ms\n", evaluator.duration / 1000);
+    printf("Score: %8.4f%%\n", (score * 100.0f) / dataset.test_images.size());
 
     return 0;
 }

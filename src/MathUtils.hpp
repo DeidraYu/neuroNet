@@ -54,6 +54,18 @@ namespace sw
 
         std::string num2string(T num) const;
 
+        std::vector<T> &getStdVector()
+        {
+            return (*m_pVec);
+        }
+
+        uint64_t argmax()
+        {
+            auto maxElement = std::max_element((*m_pVec).begin(), (*m_pVec).end());
+            uint64_t index = std::distance((*m_pVec).begin(), maxElement);
+            return index;
+        }
+
     public: // change to protected
         std::vector<T> *m_pVec = nullptr;
     };
