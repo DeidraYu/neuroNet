@@ -33,3 +33,21 @@ void printNumber(std::vector<uint8_t> &vec)
         printf("\n");
     }
 }
+
+void printProgress(int part, int total, std::string labelString)
+{
+    const int width = 80;
+    const int progressWidth = width - 2; // -2 because we don't count the [] symbols as progress
+    int nDone = progressWidth * part / total;
+    int nTodo = progressWidth - nDone;
+
+    char str[width + 1];
+    for (int i = 0; i < progressWidth; ++i)
+    {
+        i < nDone ? str[i + 1] = '#' : str[i + 1] = ' ';
+    }
+    str[0] = '[';
+    str[width - 1] = ']';
+    str[width] = '\0';
+    printf("\r%s %s", labelString.c_str(), str);
+}
