@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include "gtest/gtest.h"
 
 #include "../src/Matrix.hpp"
@@ -41,15 +43,37 @@ TEST(MatrixTest, matrixVectorMult)
 
     Vector y = A * x;
 
-    // std::cout << "A: " << A.toString() << std::endl;
-    // std::cout << "x: " << x.toString() << std::endl;
-    // std::cout << "y: " << y.toString() << std::endl;
-
     EXPECT_EQ(y[0], 20);
     EXPECT_EQ(y[1], 47);
 }
 
-TEST(MatrixTest, assignment)
+TEST(MatrixTest, copyConstructor)
+{
+    Matrix<int> A(2, 3);
+
+    A[0][0] = 1;
+    A[0][1] = 2;
+    A[0][2] = 3;
+
+    A[1][0] = 4;
+    A[1][1] = 5;
+    A[1][2] = 6;
+
+    Matrix<int> B(A);
+
+    // Check all entries in B are correct
+    EXPECT_EQ(B[0][0], 1);
+    EXPECT_EQ(B[0][1], 2);
+    EXPECT_EQ(B[0][2], 3);
+
+    EXPECT_EQ(B[1][0], 4);
+    EXPECT_EQ(B[1][1], 5);
+    EXPECT_EQ(B[1][2], 6);
+
+    // Check that changes
+}
+
+TEST(MatrixTest, copyAssignment)
 {
     Matrix<int> A(2, 3);
 
@@ -74,4 +98,10 @@ TEST(MatrixTest, assignment)
 
     EXPECT_EQ(y[0], 20);
     EXPECT_EQ(y[1], 47);
+}
+
+TEST(MatrixTest, random)
+{
+    Matrix A = Matrix<float>::rand(2, 3, 0.0f, 1.0f);
+    std::cout << A.toString() << std::endl;
 }

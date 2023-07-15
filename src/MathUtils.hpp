@@ -1,6 +1,8 @@
 #pragma once
 
+#include <random>
 #include <vector>
+
 #include <type_traits>
 #include <string>
 #include <initializer_list>
@@ -75,6 +77,39 @@ namespace sw
 
         // Copy assignment operator
         Vector<T> &operator=(const Vector<T> &other);
+
+        /**
+         * @brief Create a random matrix with values uniformly distributed between min and max (inclusive).
+         */
+        static Vector<T> rand(std::vector<T>::size_type sz, T min, T max)
+        {
+            std::random_device rd;  // Will be used to obtain a seed for the random number engine
+            std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+
+            Vector<T> randVector(sz);
+
+            if constexpr (std::is_integral_v<T>)
+            {
+                // For some reason the std does not define the std::uniform_int_distribution<> for the uint8_t type.
+                using CommonType = typename std::common_type<T, uint16_t>::type;
+                std::uniform_int_distribution<CommonType> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+
+                for (int i = 0; i < sz; ++i)
+                {
+                    randVector[i] = dis(gen);
+                }
+            }
+            else if constexpr (std::is_floating_point_v<T>)
+            {
+                // std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+                std::uniform_real_distribution<T> dis(min, max);
+                for (int i = 0; i < sz; ++i)
+                {
+                    randVector[i] = dis(gen);
+                }
+            }
+            return randVector;
+        }
 
     private:
         std::vector<T> m_vecStorage; //{7, 8, 9};

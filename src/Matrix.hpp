@@ -60,21 +60,21 @@ namespace sw
             return sum;
         }
 
-        std::string toString(const std::vector<T> &row)
-        {
-            std::ostringstream oss;
-            oss << "[";
-            for (size_t i = 0; i < row.size(); ++i)
-            {
-                if (i > 0)
-                {
-                    oss << ", ";
-                }
-                oss << row[i];
-            }
-            oss << "]";
-            return oss.str();
-        }
+        // std::string toString(const std::vector<T> &row)
+        // {
+        //     std::ostringstream oss;
+        //     oss << "[";
+        //     for (size_t i = 0; i < row.size(); ++i)
+        //     {
+        //         if (i > 0)
+        //         {
+        //             oss << ", ";
+        //         }
+        //         oss << row[i];
+        //     }
+        //     oss << "]";
+        //     return oss.str();
+        // }
 
         std::string toString()
         {
@@ -86,7 +86,8 @@ namespace sw
                 {
                     oss << ", ";
                 }
-                oss << toString(m_rows[i]);
+                // oss << toString(m_rows[i]);
+                oss << m_rows[i].toString();
             }
             oss << "]";
             return oss.str();
@@ -100,6 +101,19 @@ namespace sw
         uint32_t getNumCols()
         {
             return m_nCols;
+        }
+
+        /**
+         * @brief Create a random matrix with values uniformly distributed between min and max (inclusive).
+         */
+        static Matrix<T> rand(uint32_t nRows, uint32_t nCols, T min, T max)
+        {
+            Matrix<T> randomMatrix(nRows, nCols);
+            for (uint32_t r = 0; r < nRows; ++r)
+            {
+                randomMatrix[r] = Vector<T>::rand(nCols, min, max);
+            }
+            return randomMatrix;
         }
 
     private:

@@ -222,3 +222,9 @@ TEST(VectorTest, add)
     EXPECT_EQ(w[1], 6);
     EXPECT_EQ(w[2], 9);
 }
+
+TEST(VectorTest, random)
+{
+    Vector u = Vector<uint8_t>::rand(10, 0, std::numeric_limits<uint8_t>::max());
+    std::cout << u.toString() << std::endl;
+}
