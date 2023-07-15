@@ -243,12 +243,12 @@ TEST(VectorTest, random)
     std::cout << u.toString() << std::endl;
 }
 
-TEST(VectorTest, cross)
+TEST(VectorTest, outerProduct)
 {
     Vector u{2, 5, 8};
     Vector v{1, 2, 3};
 
-    Matrix w = u.cross(v);
+    Matrix w = u.outer(v);
 
     EXPECT_EQ(w[0][0], 2);
     EXPECT_EQ(w[0][1], 4);

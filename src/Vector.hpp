@@ -46,7 +46,7 @@ namespace sw
         Vector<typename std::common_type<T, U>::type> point_mult(const VectorView<U> &rhs) const;
 
         template <typename U>
-        Matrix<typename std::common_type<T, U>::type> cross(const VectorView<U> &rhs) const;
+        Matrix<typename std::common_type<T, U>::type> outer(const VectorView<U> &rhs) const;
 
         template <typename U>
         Vector<typename std::common_type<T, U>::type> operator+(const VectorView<U> &rhs) const;
@@ -244,7 +244,7 @@ namespace sw
 
     template <typename T>
     template <typename U>
-    Matrix<typename std::common_type<T, U>::type> VectorView<T>::cross(const VectorView<U> &rhs) const
+    Matrix<typename std::common_type<T, U>::type> VectorView<T>::outer(const VectorView<U> &rhs) const
     {
         using CommonType = typename std::common_type<T, U>::type;
         Matrix<CommonType> A(static_cast<uint32_t>(size()), static_cast<uint32_t>(size()));
