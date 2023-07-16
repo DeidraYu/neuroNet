@@ -48,7 +48,7 @@ int main()
     {
         auto start2 = std::chrono::steady_clock::now();
 
-        int16_t nEpochs = 1;
+        int16_t nEpochs = 3;
         uint16_t miniBatchSize = 5;
         float learningRate = 2.0f;
 
