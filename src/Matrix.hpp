@@ -22,6 +22,26 @@ namespace sw
             }
         }
 
+        Matrix(uint32_t nRows, uint32_t nCols, T initialValue) : m_nRows(nRows), m_nCols(nCols), m_rows(m_nRows)
+        {
+            for (size_t r = 0; r < m_nRows; ++r)
+            {
+                m_rows[r] = std::move(Vector<T>(m_nCols, initialValue));
+            }
+        }
+
+        Matrix(std::initializer_list<std::initializer_list<T>> initializerList)
+        {
+            m_nRows = static_cast<uint32_t>(initializerList.size());
+            m_nCols = static_cast<uint32_t>(initializerList.begin()->size());
+
+            m_rows.reserve(m_nRows);
+            for (const auto &row : initializerList)
+            {
+                m_rows.emplace_back(std::move(Vector<T>(row)));
+            }
+        }
+
         Vector<T> &operator[](int i)
         {
             return m_rows[i];

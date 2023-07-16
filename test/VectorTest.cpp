@@ -246,8 +246,11 @@ TEST(VectorTest, subtract)
 
 TEST(VectorTest, random)
 {
-    Vector u = Vector<uint8_t>::rand(10, 0, std::numeric_limits<uint8_t>::max());
-    std::cout << u.toString() << std::endl;
+    Vector u = Vector<float>::rand(10, 0, std::numeric_limits<float>::max());
+
+    bool isRandom = u[0] != u[2];
+
+    EXPECT_EQ(isRandom, true);
 }
 
 TEST(VectorTest, outerProduct)
