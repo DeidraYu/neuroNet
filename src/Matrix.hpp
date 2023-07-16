@@ -39,17 +39,27 @@ namespace sw
 
             Vector<CommonType> result(m_nRows);
 
-#if 0
-            for (size_t r = 0; r < m_nRows; ++r)
-            {
-                result[static_cast<int>(r)] = m_rows[r] * rhs;
-            }
-#else
             std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
                           {
         size_t r = &row - &m_rows[0];
         result[static_cast<int>(r)] = row * rhs; });
-#endif
+            return result;
+        }
+
+        template <typename U>
+        Vector<typename std::common_type<T, U>::type> transposeMult(const Vector<U> &rhs) const
+        {
+            using CommonType = typename std::common_type<T, U>::type;
+
+            Vector<CommonType> result(m_nCols, T{0});
+
+            // TODO: Implement a parallezed version for the multiplication
+            // Take the linear combination of the columns of the transpose matrix.
+            for (uint32_t i = 0; i < m_nRows; ++i)
+            {
+                // Note that m_rows[i] is the i-th column of the transposed matrix.
+                result = result + m_rows[i] * rhs[i];
+            }
             return result;
         }
 

@@ -103,6 +103,8 @@ namespace sw
 
         Vector(std::vector<T>::size_type sz);
 
+        Vector(std::vector<T>::size_type sz, T initialValue);
+
         Vector(std::initializer_list<T> initializerList);
 
         // Copy constructor
@@ -162,6 +164,12 @@ namespace sw
 
     template <typename T>
     Vector<T>::Vector(std::vector<T>::size_type sz) : m_vecStorage(sz)
+    {
+        this->m_pVec = &m_vecStorage;
+    }
+
+    template <typename T>
+    Vector<T>::Vector(std::vector<T>::size_type sz, T initialValue) : m_vecStorage(sz, initialValue)
     {
         this->m_pVec = &m_vecStorage;
     }

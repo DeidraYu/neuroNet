@@ -68,8 +68,6 @@ TEST(VectorViewTest, pointWiseMultiplication)
 
 TEST(VectorTest, createWithStdVector)
 {
-    int dummy = 3;
-
     std::vector<int> std_vector_u{1, 2, 3};
 
     Vector u(std_vector_u);
@@ -153,6 +151,15 @@ TEST(VectorTest, createWithSize)
     EXPECT_EQ(u[0], 0.0);
     EXPECT_EQ(u[1], 1.0);
     EXPECT_EQ(u[2], 2.0);
+}
+
+TEST(VectorTest, createWithSizeAndInitialValue)
+{
+    Vector<int> u(3, 1);
+
+    EXPECT_EQ(u[0], 1);
+    EXPECT_EQ(u[1], 1);
+    EXPECT_EQ(u[2], 1);
 }
 
 TEST(VectorTest, dotProduct)

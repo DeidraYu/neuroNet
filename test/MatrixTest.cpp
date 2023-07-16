@@ -109,6 +109,27 @@ TEST(MatrixTest, matrixVectorMult)
     EXPECT_EQ(y[1], 47);
 }
 
+TEST(MatrixTest, matrixTransposeMult)
+{
+    Matrix<int> A(3, 2);
+
+    A[0][0] = 1;
+    A[0][1] = 4;
+
+    A[1][0] = 2;
+    A[1][1] = 5;
+
+    A[2][0] = 3;
+    A[2][1] = 6;
+
+    Vector<float> x{2.0, 3.0, 4.0};
+
+    Vector y = A.transposeMult(x);
+
+    EXPECT_EQ(y[0], 20);
+    EXPECT_EQ(y[1], 47);
+}
+
 TEST(MatrixTest, copyConstructor)
 {
     Matrix<int> A(2, 3);
