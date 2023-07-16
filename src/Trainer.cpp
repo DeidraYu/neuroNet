@@ -59,6 +59,9 @@ void Trainer::trainEpoch(Net &net, uint16_t miniBatchSize, float learningRate, s
 
 void Trainer::trainMiniBatch(Net &net, size_t imageIndex, size_t miniBatchSize, float learningRate)
 {
+    std::vector<sw::Matrix<float>> weightGradient(net.getSizes().size() - 1);
+    std::vector<sw::Vector<float>> biasGradient(net.getSizes().size() - 1);
+
     for (size_t i = imageIndex; i < imageIndex + miniBatchSize; ++i)
     {
         sw::VectorView image(&m_images[i]);
@@ -66,6 +69,17 @@ void Trainer::trainMiniBatch(Net &net, size_t imageIndex, size_t miniBatchSize, 
         uint8_t label = m_labels[i];
 
         ResultPair results = feedforward(net, image2);
+        GradientPair gradients = backProp(net, results, label, miniBatchSize, learningRate);
+
+        weightGradient[0] = gradients.weightGradient[0];
+        biasGradient[0] = gradients.biasGradient[0];
+
+        for (int i = 1; i < net.getSizes().size() - 1; i++)
+        {
+            // !!!!!!!!!!!!!!!!!!! make it += this is a temporary fix !!!!!!!!!!!!!!!!!!!!!!!!!!
+            weightGradient[i] = gradients.weightGradient[i];
+            biasGradient[i] = gradients.biasGradient[i];
+        }
     }
 }
 
@@ -74,16 +88,19 @@ Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
     std::vector<uint16_t> layerSizes = net.getSizes();
     auto &weights = net.getWeights();
     auto &biases = net.getBiases();
-    sw::Vector<float> activation;
-    sw::Vector<float> z;
 
     std::vector<sw::Vector<float>> activations;
     std::vector<sw::Vector<float>> zs;
 
-    activation = sw::Vector<float>(layerSizes[0]);
-    z = sw::Vector<float>(layerSizes[0]);
+    activations.push_back(sw::Vector(image.getStdVector()));
 
-    for (int i = 0; i < layerSizes.size() - 1; ++i)
+    sw::Vector<float> z = weights[0] * image + biases[0];
+    sw::Vector<float> activation = net.sigmoid(z);
+
+    zs.push_back(z);
+    activations.push_back(activation);
+
+    for (int i = 1; i < layerSizes.size() - 1; ++i)
     {
         z = weights[i] * activation + biases[i];
         activation = net.sigmoid(z);
@@ -93,4 +110,66 @@ Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
     }
 
     return ResultPair(zs, activations);
+}
+
+Trainer::GradientPair Trainer::backProp(Net &net, ResultPair resultPair, uint8_t label, size_t miniBatchSize, float learningRate)
+{
+    sw::Vector<float> netWorkOutput = resultPair.activations[resultPair.activations.size() - 1];
+    sw::Vector<float> errorVector = netWorkOutput - oneHotEncode(label, 10);
+
+    auto weights = net.getWeights();
+    auto biases = net.getBiases();
+
+    size_t nInBetweenLayers = net.getSizes().size() - 1;
+
+    std::vector<sw::Matrix<float>> weightGradient(nInBetweenLayers);
+    std::vector<sw::Vector<float>> biasGradient(nInBetweenLayers);
+
+    // example for: (net: (784, 30, 10), layerIndexes: (0, 1, 2). nLayers = 3).
+
+    sw::Vector<float> sigmoidPrime;
+
+    // Wanted change of z of the last layer resultPair.zs and .activations are both of length nLayers - 1 because it excludes the input layer
+    //(so the last index is nLayers - 2).  sigmoid_prime(z) is the rate of change of the output, multiply this with your error
+    //(wanted change in the output to get rid of this error) to calculate how much to change z. So for the last layer deltaZ has length 10.
+    sw::Vector<float> deltaZ = errorVector.point_mult(net.sigmoid_prime(resultPair.zs[nInBetweenLayers - 1]));
+    weightGradient[nInBetweenLayers - 1] = deltaZ.outer(resultPair.activations[nInBetweenLayers - 1]);
+    biasGradient[nInBetweenLayers - 1] = deltaZ;
+
+    for (int i = 1; i < nInBetweenLayers; ++i)
+    {
+        sigmoidPrime = net.sigmoid_prime(resultPair.zs[nInBetweenLayers - i - 1]);
+        // auto x = weights[nInBetweenLayers - i] * deltaZ;
+
+        sw::Vector<float> multTranspose(weights[nInBetweenLayers - i].getNumCols());
+
+        for (int n = 0; n < weights[nInBetweenLayers - i].getNumCols(); n++)
+        {
+            float dot = 0;
+
+            for (int j = 0; j < weights[nInBetweenLayers - i].getNumRows(); j++)
+            {
+                dot += deltaZ[j] * weights[nInBetweenLayers - i][j][n];
+            }
+
+            multTranspose[n] = dot;
+        }
+
+        deltaZ = sigmoidPrime.point_mult(multTranspose);
+
+        weightGradient[nInBetweenLayers - i - 1] = deltaZ.outer(resultPair.activations[nInBetweenLayers - i - 1]);
+        biasGradient[nInBetweenLayers - i - 1] = deltaZ;
+    }
+
+    return GradientPair(weightGradient, biasGradient);
+}
+
+sw::Vector<float> Trainer::oneHotEncode(int value, int numClasses)
+{
+    sw::Vector<float> encodedVector(numClasses);
+    if (value >= 0 && value < numClasses)
+    {
+        encodedVector[value] = 1.0f;
+    }
+    return encodedVector;
 }
