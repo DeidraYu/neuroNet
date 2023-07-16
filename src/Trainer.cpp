@@ -1,12 +1,13 @@
 #include <random>
 #include <utility>
+#include <chrono>
 
 #include "Trainer.hpp"
 #include "Utils.hpp"
 
 Trainer::Trainer(std::vector<std::vector<uint8_t>> &images, std::vector<uint8_t> &labels) : m_images(images), m_labels(labels) {}
 
-void Trainer::train(Net &net, uint16_t nEpochs, uint16_t miniBatchSize, float learningRate)
+void Trainer::train(Net &net, uint16_t nEpochs, uint16_t miniBatchSize, float learningRate, Evaluator evaluator)
 {
     // Setup random generator to permute the vector of images.
     std::random_device rd;
@@ -19,12 +20,15 @@ void Trainer::train(Net &net, uint16_t nEpochs, uint16_t miniBatchSize, float le
         std::shuffle(m_labels.begin(), m_labels.end(), gen);
         snprintf(progressLabel, 16, "%d / %d", j + 1, nEpochs);
         trainEpoch(net, miniBatchSize, learningRate, progressLabel);
+
+        printf("\n Score after %d epochs: %d / %d", j + 1, evaluator.evaluate(net), 10000);
     }
     printf("\n"); // because the progress bar has no newline.
 }
 
 void Trainer::trainEpoch(Net &net, uint16_t miniBatchSize, float learningRate, std::string progressLabel)
 {
+    printf(net.getBiases()[0].toString().c_str());
     int numMiniBatches = static_cast<int>((m_images.size() - 1) / miniBatchSize + 1);
     // for (uint16_t miniBatchIndex = 0; miniBatchIndex < numMiniBatches; ++miniBatchIndex)
     // {
@@ -59,6 +63,8 @@ void Trainer::trainEpoch(Net &net, uint16_t miniBatchSize, float learningRate, s
 
 void Trainer::trainMiniBatch(Net &net, size_t imageIndex, size_t miniBatchSize, float learningRate)
 {
+    // auto start = std::chrono::steady_clock::now();
+
     std::vector<sw::Matrix<float>> weightGradient(net.getSizes().size() - 1);
     std::vector<sw::Vector<float>> biasGradient(net.getSizes().size() - 1);
 
@@ -80,7 +86,27 @@ void Trainer::trainMiniBatch(Net &net, size_t imageIndex, size_t miniBatchSize, 
             weightGradient[i] = gradients.weightGradient[i];
             biasGradient[i] = gradients.biasGradient[i];
         }
+
+        for (int i = 1; i < net.getSizes().size() - 1; i++)
+        {
+            sw::Matrix<float> weightMatrix = net.getWeights()[i];
+            sw::Vector<float> biasVector = net.getBiases()[i];
+
+            // !!!!!!!!!!!!!!!!!!!!!!! remove when matrix-scalar product exists!!!!!!!!!!!!!!!
+            sw::Matrix<float> scaledWeightGradient = weightGradient[i];
+            for (int i = 0; i < scaledWeightGradient.getNumRows(); ++i)
+            {
+                scaledWeightGradient[i] = scaledWeightGradient[i] * (learningRate / miniBatchSize);
+            }
+
+            weightMatrix = weightMatrix + scaledWeightGradient;
+            biasVector = biasVector + (biasGradient[i] * (learningRate / miniBatchSize));
+        }
     }
+
+    // auto end = std::chrono::steady_clock::now();
+    // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    // printf("One minibatch took: %lld us\n", duration.count());
 }
 
 Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
@@ -143,6 +169,7 @@ Trainer::GradientPair Trainer::backProp(Net &net, ResultPair resultPair, uint8_t
 
         sw::Vector<float> multTranspose(weights[nInBetweenLayers - i].getNumCols());
 
+        // !!!!!!!!!!!!!!!!!!! remove when transposeMult exists this is a temporary fix !!!!!!!!!!!!!!!!!!!!!!!!!!
         for (int n = 0; n < weights[nInBetweenLayers - i].getNumCols(); n++)
         {
             float dot = 0;
@@ -154,6 +181,7 @@ Trainer::GradientPair Trainer::backProp(Net &net, ResultPair resultPair, uint8_t
 
             multTranspose[n] = dot;
         }
+        // !!!!!!!!! end !!!!!!!!!!!!!!!!
 
         deltaZ = sigmoidPrime.point_mult(multTranspose);
 

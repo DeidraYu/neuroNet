@@ -4,13 +4,14 @@
 #include "Vector.hpp"
 #include "Matrix.hpp"
 #include "Net.hpp"
+#include "Evaluator.hpp"
 
 class Trainer
 {
 public:
     Trainer(std::vector<std::vector<uint8_t>> &images, std::vector<uint8_t> &labels);
 
-    void train(Net &net, uint16_t nEpochs, uint16_t miniBatchSize, float learningRate);
+    void train(Net &net, uint16_t nEpochs, uint16_t miniBatchSize, float learningRate, Evaluator evaluator);
 
 private:
     struct ResultPair

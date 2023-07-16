@@ -95,3 +95,8 @@ std::vector<uint16_t> Net::getSizes()
 {
     return m_layerSizes;
 }
+
+void Net::updateWeights(std::vector<sw::Matrix<float>>)
+{
+}
+void Net::updateBiases(std::vector<sw::Vector<float>>) {}

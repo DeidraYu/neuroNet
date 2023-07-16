@@ -13,6 +13,9 @@ public:
     void printInfo();
     std::vector<sw::Matrix<float>> &getWeights();
     std::vector<sw::Vector<float>> &getBiases();
+
+    void updateWeights(std::vector<sw::Matrix<float>>);
+    void updateBiases(std::vector<sw::Vector<float>>);
     std::vector<uint16_t> getSizes();
 
     sw::Vector<float> sigmoid(sw::Vector<float> z);

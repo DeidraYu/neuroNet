@@ -43,6 +43,7 @@ int main()
     Net net({28 * 28, 30, 10});
     // net.printInfo();
 
+    Evaluator evaluator(dataset.test_images, dataset.test_labels);
     Trainer trainer(dataset.training_images, dataset.training_labels);
 
     {
@@ -52,14 +53,12 @@ int main()
         uint16_t miniBatchSize = 5;
         float learningRate = 2.0f;
 
-        trainer.train(net, nEpochs, miniBatchSize, learningRate);
+        trainer.train(net, nEpochs, miniBatchSize, learningRate, evaluator);
 
         auto end2 = std::chrono::steady_clock::now();
         auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2);
         printf("Time permuting data set %d times: %lld milliseconds\n", nEpochs, duration2.count());
     }
-
-    Evaluator evaluator(dataset.test_images, dataset.test_labels);
 
     int score = 0;
     int n = 1;
