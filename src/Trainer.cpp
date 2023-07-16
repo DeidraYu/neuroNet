@@ -25,7 +25,7 @@ void Trainer::train(Net &net, uint16_t nEpochs, uint16_t miniBatchSize, float le
 
 void Trainer::trainEpoch(Net &net, uint16_t miniBatchSize, float learningRate, std::string progressLabel)
 {
-    size_t numMiniBatches = (m_images.size() - 1) / miniBatchSize + 1;
+    int numMiniBatches = static_cast<int>((m_images.size() - 1) / miniBatchSize + 1);
     // for (uint16_t miniBatchIndex = 0; miniBatchIndex < numMiniBatches; ++miniBatchIndex)
     // {
     //     trainMiniBatch(net, miniBatchIndex, miniBatchSize, learningRate);

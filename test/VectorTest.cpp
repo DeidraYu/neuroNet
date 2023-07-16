@@ -262,3 +262,34 @@ TEST(VectorTest, outerProduct)
     EXPECT_EQ(w[2][1], 16);
     EXPECT_EQ(w[2][2], 24);
 }
+
+TEST(VectorTest, outerProductDifferentSizes)
+{
+    Vector u{2, 5, 8};
+    Vector v{1, 2};
+
+    Matrix w = u.outer(v);
+
+    EXPECT_EQ(w[0][0], 2);
+    EXPECT_EQ(w[0][1], 4);
+
+    EXPECT_EQ(w[1][0], 5);
+    EXPECT_EQ(w[1][1], 10);
+
+    EXPECT_EQ(w[2][0], 8);
+    EXPECT_EQ(w[2][1], 16);
+
+    EXPECT_EQ(w.getNumRows(), 3);
+    EXPECT_EQ(w.getNumCols(), 2);
+}
+
+TEST(VectorTest, iterators)
+{
+    Vector u{2, 5, 8};
+
+    int sum = 0;
+    for_each(u.begin(), u.end(), [&sum](int num)
+             { sum += num; });
+
+    EXPECT_EQ(sum, 15);
+}

@@ -58,7 +58,19 @@ namespace sw
 
         void resize(size_t newSize)
         {
-            (*m_pVec).resize(newSize);
+            m_pVec->resize(newSize);
+        }
+
+        // Begin iterator
+        typename std::vector<T>::iterator begin()
+        {
+            return m_pVec->begin();
+        }
+
+        // End iterator
+        typename std::vector<T>::iterator end()
+        {
+            return m_pVec->end();
         }
 
         std::string toString() const;
@@ -247,7 +259,7 @@ namespace sw
     Matrix<typename std::common_type<T, U>::type> VectorView<T>::outer(const VectorView<U> &rhs) const
     {
         using CommonType = typename std::common_type<T, U>::type;
-        Matrix<CommonType> A(static_cast<uint32_t>(size()), static_cast<uint32_t>(size()));
+        Matrix<CommonType> A(static_cast<uint32_t>(size()), static_cast<uint32_t>(rhs.size()));
         for (int r = 0; r < size(); ++r)
         {
             A[r] = (*m_pVec)[r] * rhs;
