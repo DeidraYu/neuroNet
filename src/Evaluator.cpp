@@ -12,9 +12,9 @@ int Evaluator::evaluate(Net &net)
     int score = 0;
 
     // printNumber(m_images[0]);
-    sw::VectorView image(&m_images[0]);
+    /*sw::VectorView image(&m_images[0]);
     sw::Vector<float> image2 = image * (1.0f / 256.0f);
-    sw::Vector<float> a = feedforward(image2, net);
+    sw::Vector<float> a = feedforward(image2, net);*/
 
     // printf("%s\n", a.toString().c_str());
     // printf("%d\n", a.argmax());

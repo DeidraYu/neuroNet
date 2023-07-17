@@ -145,8 +145,8 @@ Trainer::GradientPair Trainer::backProp(Net &net, ResultPair resultPair, uint8_t
     sw::Vector<float> netWorkOutput = resultPair.activations[resultPair.activations.size() - 1];
     sw::Vector<float> errorVector = netWorkOutput - oneHotEncode(label, 10);
 
-    auto weights = net.getWeights();
-    auto biases = net.getBiases();
+    auto &weights = net.getWeights();
+    auto &biases = net.getBiases();
 
     size_t nInBetweenLayers = net.getSizes().size() - 1;
 
@@ -173,6 +173,9 @@ Trainer::GradientPair Trainer::backProp(Net &net, ResultPair resultPair, uint8_t
         deltaZ = sigmoidPrime.point_mult(weights[nInBetweenLayers - i].transposeMult(deltaZ));
 
         weightGradient[nInBetweenLayers - i - 1] = deltaZ.outer(resultPair.activations[nInBetweenLayers - i - 1]);
+        // printf(weightGradient[nInBetweenLayers - i - 1].toString().c_str());
+        auto printVec = (0.5f * (weightGradient[nInBetweenLayers - i - 1][1] + sw::Vector(784, 1.0f)));
+        printSW(printVec);
         biasGradient[nInBetweenLayers - i - 1] = deltaZ;
     }
 
