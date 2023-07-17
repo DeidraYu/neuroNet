@@ -9,6 +9,10 @@
 
 namespace sw
 {
+    template <class T>
+    concept arithmetic = std::is_arithmetic_v<T>;
+    // concept arithmetic = std::integral<T> || std::floating_point<T>;
+
     // forward declaration of the matrix class
     template <typename T>
     class Matrix;
@@ -52,7 +56,15 @@ namespace sw
         Vector<typename std::common_type<T, U>::type> operator+(const VectorView<U> &rhs) const;
 
         template <typename U>
+            requires arithmetic<U>
+        Vector<typename std::common_type<T, U>::type> operator+(const U &rhs) const;
+
+        template <typename U>
         Vector<typename std::common_type<T, U>::type> operator-(const VectorView<U> &rhs) const;
+
+        template <typename U>
+            requires arithmetic<U>
+        auto operator-(const U &rhs) const;
 
         typename std::vector<T>::size_type size() const;
 
@@ -290,6 +302,34 @@ namespace sw
 
     template <typename T>
     template <typename U>
+        requires arithmetic<U>
+    Vector<typename std::common_type<T, U>::type> VectorView<T>::operator+(const U &rhs) const
+    {
+        Vector<typename std::common_type<T, U>::type> result(size());
+
+        for (int i = 0; i < (*m_pVec).size(); ++i)
+        {
+            result[i] = (*m_pVec)[i] + rhs;
+        }
+        return result;
+    }
+
+    template <typename T>
+    template <typename U>
+        requires arithmetic<U>
+    auto VectorView<T>::operator-(const U &rhs) const
+    {
+        Vector<typename std::common_type<T, U>::type> result(size());
+
+        for (int i = 0; i < (*m_pVec).size(); ++i)
+        {
+            result[i] = (*m_pVec)[i] - rhs;
+        }
+        return result;
+    }
+
+    template <typename T>
+    template <typename U>
     Vector<typename std::common_type<T, U>::type> VectorView<T>::operator-(const VectorView<U> &rhs) const
     {
         Vector<typename std::common_type<T, U>::type> result(size());
@@ -353,30 +393,32 @@ namespace sw
 
 } // namespace sw
 
-// Note, we are outside the sw namespace here.
-// Overload operator* for float and sc::Vector
-template <typename T, typename U>
-std::enable_if_t<std::is_arithmetic_v<T>,
-                 sw::Vector<typename std::common_type<T, U>::type>>
-operator*(T lhs, const sw::VectorView<U> &rhs);
+/*****************************************************************
+ * Vector operations where the left hand side (lhs) is a scalar. *
+ ****************************************************************/
+template <sw::arithmetic T, typename U>
+auto operator*(T lhs, const sw::VectorView<U> &rhs)
+{
+    return rhs * lhs;
+}
 
-// Note, we are outside the sw namespace here.
-// Overload operator* for float and sc::Vector
-template <typename T, typename U>
-std::enable_if_t<std::is_arithmetic_v<T>,
-                 sw::Vector<typename std::common_type<T, U>::type>>
+template <sw::arithmetic T, typename U>
+auto operator+(const T lhs, sw::VectorView<U> &rhs)
+{
+    return rhs + lhs;
+}
 
-operator*(T lhs, const sw::VectorView<U> &rhs)
+template <sw::arithmetic T, typename U>
+auto operator-(const T lhs, sw::VectorView<U> &rhs)
 {
     using CommonType = typename std::common_type<T, U>::type;
 
-    std::vector<CommonType> resultVec;
-    resultVec.reserve(rhs.size());
+    sw::Vector<CommonType> resultVec(rhs.size());
 
     for (int i = 0; i < rhs.size(); ++i)
     {
-        resultVec.push_back(lhs * rhs[i]);
+        resultVec[i] = lhs - rhs[i];
     }
-    // }
-    return sw::Vector<CommonType>(resultVec);
+
+    return resultVec;
 }

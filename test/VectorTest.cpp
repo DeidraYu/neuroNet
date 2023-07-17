@@ -303,3 +303,47 @@ TEST(VectorTest, iterators)
 
     EXPECT_EQ(sum, 15);
 }
+
+TEST(VectorTest, post_add_with_scalar)
+{
+    Vector u{2, 5, 8};
+
+    auto w = u + 3;
+
+    EXPECT_EQ(w[0], 5);
+    EXPECT_EQ(w[1], 8);
+    EXPECT_EQ(w[2], 11);
+}
+
+TEST(VectorTest, pre_add_with_scalar)
+{
+    Vector u{2, 5, 8};
+
+    auto w = 3 + u;
+
+    EXPECT_EQ(w[0], 5);
+    EXPECT_EQ(w[1], 8);
+    EXPECT_EQ(w[2], 11);
+}
+
+TEST(VectorTest, post_subtract_with_scalar)
+{
+    Vector<int16_t> u{2, 5, 8};
+
+    auto w = u - 3;
+
+    EXPECT_EQ(w[0], -1);
+    EXPECT_EQ(w[1], 2);
+    EXPECT_EQ(w[2], 5);
+}
+
+TEST(VectorTest, pre_subtract_with_scalar)
+{
+    Vector<int16_t> u{2, 5, 8};
+
+    auto w = 3 - u;
+
+    EXPECT_EQ(w[0], 1);
+    EXPECT_EQ(w[1], -2);
+    EXPECT_EQ(w[2], -5);
+}
