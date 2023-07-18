@@ -1,4 +1,5 @@
 #include "Utils.hpp"
+#include "Matrix.hpp"
 
 void printNumber(std::vector<uint8_t> &vec)
 {
@@ -50,4 +51,38 @@ void printProgress(int part, int total, std::string labelString)
     str[width - 1] = ']';
     str[width] = '\0';
     printf("\r%s %s", labelString.c_str(), str);
+}
+
+void printSW(sw::Vector<float> &vec)
+{
+    for (int y = 0; y < 28; y += 2)
+    {
+        for (int x = 0; x < 28; ++x)
+        {
+            // uint8_t pixelValue = dataset.training_images[++index];
+            float pix_top = vec[x + 28 * y];
+            float pix_bot = vec[x + 28 * (y + 1)];
+
+            if ((pix_top < 0.5f) && (pix_bot < 0.5f))
+            {
+                printf(" ");
+            }
+
+            if ((pix_top < 0.5f) && (pix_bot >= 0.5f))
+            {
+                printf("%c", 0xDC);
+            }
+
+            if ((pix_top >= 0.5f) && (pix_bot < 0.5f))
+            {
+                printf("%c", 0xDF);
+            }
+
+            if ((pix_top >= 0.5f) && (pix_bot >= 0.5f))
+            {
+                printf("%c", 0xDB);
+            }
+        }
+        printf("\n");
+    }
 }
