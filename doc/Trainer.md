@@ -3,7 +3,7 @@ This page describes the link between the software implementation and the mathema
 
 ## Feed forward
 
-Let $\ell$ be the index of the layer in the network, $\ell \in \{0, 1, \cdots, L-1\}$. Each layer $\ell \in \{0, 2, \cdots, L-1\}$ has as input the ${\bf x}_\ell$ that is produced by the previous layer (or the input vector ${\bf x}_0 for the first layer). The layer produces the output, also called $activation$, ${\bf x}_{\ell+1}$ which is the input of the next layer, or is the output of the network in case for the last layer (possibly after some processing). For its operation, each layer $\ell$ a weight matrix $W_\ell$ and a bias vector ${\bf b}_\ell$.
+Let $\ell$ be the index of the layer in the network, $\ell \in \{0, 1, \cdots, L-1\}$. Each layer $\ell \in \{0, 1, \cdots, L-1\}$ has as input the ${\bf x}_\ell$ that is produced by the previous layer (or the input vector ${\bf x}_0 for the first layer). The layer produces the output, also called $activation$, ${\bf x}_{\ell+1}$ which is the input of the next layer, or is the output of the network in case for the last layer (possibly after some processing). For its operation, each layer $\ell$ a weight matrix $W_\ell$ and a bias vector ${\bf b}_\ell$.
 
 Layer $\ell$ performs the following two operations:
 
@@ -218,11 +218,18 @@ $$
 {\pmb\delta}_{\ell-1} = (W^T {\pmb \delta}_\ell) \odot \sigma^\prime({\bf z}_{\ell-1})
 $$
 
-The resulting system of equation then is similar to that is used in the python code
+The resulting system of equations of layer $\ell \in \{0, 1, \cdots, L-1\}$ then is similar to that is used in the python code
 
 $$
 \begin{cases}
-{\pmb\delta}_{\ell-1} &= (W^T {\pmb \delta}_\ell) \odot \sigma^\prime({\bf z}_{\ell-1})\\\\
+{\pmb\delta}_{\ell-1} &=
+
+\begin{cases}
+{\bf u}_{L} \odot \sigma^\prime({\bf z}_{L-1}) & \ell = L-1\\\\
+(W^T {\pmb \delta}_\ell) \odot \sigma^\prime({\bf z}_{\ell-1}) & \text{otherwise}
+
+\end{cases}\\\\
+
 \dfrac{\partial C}{\partial {\bf b}_\ell} &= {\pmb\delta}_\ell\\\\
 \dfrac{\partial C}{\partial W_\ell} &= {\pmb\delta}_\ell {\bf x}^T_\ell
 \end{cases}
