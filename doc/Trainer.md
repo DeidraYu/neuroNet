@@ -175,20 +175,34 @@ $${\bf u} = W^T({\bf v} \odot \sigma^\prime({\bf z}))$$
 
 $$
 \begin{cases}
-\dfrac{\partial C}{\partial W} &= \left({\bf v} \odot \sigma^\prime({\bf z})\right) {\bf x}^T\\\\
-
-\dfrac{\partial C}{\partial {\bf b}} &= {\bf v} \odot \sigma^\prime({\bf z})\\\\
-
-
-{\bf u} &= W^T({\bf v} \odot \sigma^\prime({\bf z}))
+    \dfrac{\partial C}{\partial W} &= \left({\bf v} \odot \sigma^\prime({\bf z})\right) {\bf x}^T\\\\
+    \dfrac{\partial C}{\partial {\bf b}} &= {\bf v} \odot \sigma^\prime({\bf z})\\\\
+    {\bf u} &= W^T({\bf v} \odot \sigma^\prime({\bf z}))
 \end{cases}
 \quad \Rightarrow \quad 
 \begin{cases}
-\dfrac{\partial C}{\partial W_\ell} &= \left({\bf u}_{\ell+1} \odot \sigma^\prime({\bf z}_\ell)\right) {\bf x}^T_\ell\\\\
-\dfrac{\partial C}{\partial {\bf b}_\ell} &= {\bf u}_{\ell+1} \odot \sigma^\prime({\bf z}_\ell)\\\\
-{\bf u}_\ell &= W^T({\bf u}_{\ell+1} \odot \sigma^\prime({\bf z}_\ell))
+    \dfrac{\partial C}{\partial W_\ell} &= \left({\bf u}_{\ell+1} \odot \sigma^\prime({\bf z}_\ell)\right) {\bf x}^T_\ell\\\\
+    \dfrac{\partial C}{\partial {\bf b}_\ell} &= {\bf u}_{\ell+1} \odot \sigma^\prime({\bf z}_\ell)\\\\
+    {\bf u}_\ell &= W^T({\bf u}_{\ell+1} \odot \sigma^\prime({\bf z}_\ell))
 \end{cases}
 $$
+
+Which can be written into
+
+$$
+\begin{cases}
+    \pmb\gamma = \dfrac{\partial C}{\partial {\bf b}}&= {\bf v} \odot \sigma^\prime({\bf z})\\\\
+    \dfrac{\partial C}{\partial W} &= \pmb\gamma {\bf x}^T\\\\
+    {\bf u} &= W^T\pmb\gamma
+\end{cases}
+\quad \Rightarrow \quad 
+\begin{cases}
+    \pmb\gamma_\ell = \dfrac{\partial C}{\partial {\bf b}_\ell}&= {\bf u}_{\ell+1} \odot \sigma^\prime({\bf z}_\ell)\\\\
+    \dfrac{\partial C}{\partial W_\ell} &= \pmb\gamma_\ell {\bf x}^T_\ell\\\\
+    {\bf u}_\ell &= W^T\pmb\gamma_\ell
+\end{cases}
+$$
+
 
 ## How does this relate to the Python code
 
@@ -225,8 +239,8 @@ $$
 {\pmb\delta}_{\ell-1} &=
 
 \begin{cases}
-{\bf u}_{L} \odot \sigma^\prime({\bf z}_{L-1}) & \ell = L-1\\\\
-(W^T {\pmb \delta}_\ell) \odot \sigma^\prime({\bf z}_{\ell-1}) & \text{otherwise}
+{\bf u}_{L} \odot \sigma^\prime({\bf z}_{L-1}) & ,\text{when} \quad \ell = L-1\\\\
+(W^T {\pmb \delta}_\ell) \odot \sigma^\prime({\bf z}_{\ell-1}) & ,\text{otherwise}
 
 \end{cases}\\\\
 
@@ -235,6 +249,7 @@ $$
 \end{cases}
 $$
 
+What I dislike from the Python version of the equations is that the last layer has a slightly different functionaly from the lower layers. Note that the definition of $\pmb\gamma$ is the same as for $\pmb\delta$.
 
 
 
