@@ -158,6 +158,21 @@ TEST(MatrixTest, matrixTransposeMult)
     EXPECT_EQ(y[1], 47);
 }
 
+TEST(MatrixTest, matrixTransposeMultVectorView)
+{
+    Matrix<int> A{{1, 4},
+                  {2, 5},
+                  {3, 6}};
+
+    std::vector<float> std_vector_x{2.0, 3.0, 4.0};
+    Vector<float> x(std_vector_x);
+
+    Vector y = A.transposeMult(x);
+
+    EXPECT_EQ(y[0], 20);
+    EXPECT_EQ(y[1], 47);
+}
+
 TEST(MatrixTest, random)
 {
     Matrix A = Matrix<float>::rand(2, 3, 0.0f, 1.0f);
