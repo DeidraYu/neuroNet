@@ -181,3 +181,14 @@ TEST(MatrixTest, random)
 
     EXPECT_EQ(isRandom, true);
 }
+
+TEST(MatrixTest, fill)
+{
+    Matrix A = Matrix<float>::rand(2, 3, 0.0f, 1.0f);
+
+    A.fill(9);
+
+    EXPECT_EQ(A[0][0], 9);
+    EXPECT_EQ(A[0][1], 9);
+    EXPECT_EQ(A[0][2], 9);
+}

@@ -58,16 +58,24 @@ public:
     // call the backProp for miniBatchSize
     void backProp(const Vector<float> &x, const Vector<float> &v, float learningRate = 1.0f)
     {
-        m_nablaC_b = v.point_mult(sigmoid_prime(m_z));
-        m_nablaC_W = m_nablaC_b.outer(x); // (u .* sigma'(z)) x^T
-        m_u = m_W.transposeMult(m_nablaC_b);
+        Vector gamma = v.point_mult(sigmoid_prime(m_z));
+        m_nablaC_b = m_nablaC_b + gamma;
+        m_nablaC_W = m_nablaC_W + gamma.outer(x); // (u .* sigma'(z)) x^T
+        m_u = m_W.transposeMult(gamma);
+
+        m_miniBatchSize++;
     }
 
     // update the Weight matrix and bias vector
-    void update()
+    void update(float eta)
     {
-        m_W = m_W - m_nablaC_W; // TODO, implement eta
-        m_b = m_b - m_nablaC_b; // TODO, implement eta
+        float scaleFactor = eta / m_miniBatchSize;
+        m_W = m_W - m_nablaC_W * scaleFactor; // TODO, implement eta
+        m_b = m_b - m_nablaC_b * scaleFactor; // TODO, implement eta
+
+        m_nablaC_b.fill(0.0f);
+        m_nablaC_W.fill(0.0f);
+        m_miniBatchSize = 0;
     }
 
     constexpr uint16_t size() const { return m_numOutputs; }
@@ -133,4 +141,6 @@ private:
 
     uint16_t m_numInputs;
     uint16_t m_numOutputs;
+
+    uint16_t m_miniBatchSize{0};
 };

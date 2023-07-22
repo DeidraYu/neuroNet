@@ -48,7 +48,8 @@ public:
         // update
         for (int k = 0; k < m_layers.size(); ++k)
         {
-            m_layers[k].update();
+            float eta = 1.0f;
+            m_layers[k].update(eta);
         }
     }
 

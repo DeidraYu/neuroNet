@@ -67,6 +67,24 @@ namespace sw
         }
 
         template <typename U>
+            requires arithmetic<U>
+        auto operator*(U &rhs) const
+        {
+            using CommonType = typename std::common_type<T, U>::type;
+
+            Matrix<CommonType> result(m_nCols, m_nRows);
+
+            // TODO: Implement a parallezed version for the multiplication
+            // Take the linear combination of the columns of the transpose matrix.
+            for (uint32_t i = 0; i < m_nRows; ++i)
+            {
+                // Note that m_rows[i] is the i-th column of the transposed matrix.
+                result[i] = m_rows[i] * rhs;
+            }
+            return result;
+        }
+
+        template <typename U>
         Vector<typename std::common_type<T, U>::type> transposeMult(const Vector<U> &rhs) const
         {
             using CommonType = typename std::common_type<T, U>::type;
@@ -124,6 +142,14 @@ namespace sw
             }
 
             return sum;
+        }
+
+        void fill(T value)
+        {
+            for (Vector row : m_rows)
+            {
+                row.fill(value);
+            }
         }
 
         std::string toString() const

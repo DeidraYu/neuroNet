@@ -358,3 +358,14 @@ TEST(VectorTest, pre_subtract_with_scalar)
     EXPECT_EQ(w[1], -2);
     EXPECT_EQ(w[2], -5);
 }
+
+TEST(VectorTest, fill)
+{
+    Vector<int16_t> u{2, 5, 8};
+
+    u.fill(1);
+
+    EXPECT_EQ(u[0], 1);
+    EXPECT_EQ(u[1], 1);
+    EXPECT_EQ(u[2], 1);
+}

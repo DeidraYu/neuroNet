@@ -62,6 +62,8 @@ namespace sw
         template <typename U>
         Vector<typename std::common_type<T, U>::type> operator-(const VectorView<U> &rhs) const;
 
+        void fill(T value) { std::fill(begin(), end(), value); }
+
         template <typename U>
             requires arithmetic<U>
         auto operator-(const U &rhs) const;

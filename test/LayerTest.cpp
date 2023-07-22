@@ -74,7 +74,7 @@ TEST(LayerTest, update)
         layer.feedForward(x);
         v = layer.getY() - x; // u = dC / dx
         layer.backProp(x, v);
-        layer.update();
+        layer.update(1.0f);
 
         std::cout << "W:    " << layer.getW().toString() << std::endl;
         std::cout << "b:    " << layer.getB().toString() << std::endl;
@@ -146,12 +146,12 @@ TEST(LayerTest, update2)
         layer.feedForward(x1);
         v = layer.getY() - x1; // u = dC / dx
         layer.backProp(x1, v);
-        layer.update();
+        layer.update(1.0f);
 
         layer.feedForward(x2);
         v = layer.getY() - x2; // u = dC / dx
         layer.backProp(x2, v);
-        layer.update();
+        layer.update(1.0f);
     }
 
     std::cout << "W:    " << layer.getW().toString() << std::endl;
@@ -180,7 +180,7 @@ TEST(LayerTest, 3to2Layer)
     layer.feedForward(x);
     v = layer.getY() - x; // u = dC / dx
     layer.backProp(x, v);
-    layer.update();
+    layer.update(1.0f);
 
     std::cout << "W:    " << layer.getW().toString() << std::endl;
     std::cout << "b:    " << layer.getB().toString() << std::endl;
