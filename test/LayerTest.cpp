@@ -75,14 +75,14 @@ TEST(LayerTest, update)
         v = layer.getY() - x; // u = dC / dx
         layer.backProp(x, v);
         layer.update(1.0f);
-
-        std::cout << "W:    " << layer.getW().toString() << std::endl;
-        std::cout << "b:    " << layer.getB().toString() << std::endl;
-        std::cout << "Cost: " << 0.5f * v * v << std::endl;
-        std::cout << "y:    " << layer.getY().toString() << std::endl;
-
-        std::cout << std::endl;
     }
+
+    std::cout << "W:    " << layer.getW().toString() << std::endl;
+    std::cout << "b:    " << layer.getB().toString() << std::endl;
+    std::cout << "Cost: " << 0.5f * v * v << std::endl;
+    std::cout << "y:    " << layer.getY().toString() << std::endl;
+
+    std::cout << std::endl;
 }
 
 float sigmoid(float z)
@@ -251,4 +251,39 @@ TEST(NetworkTest, multiLayeredNetwork)
     std::cout << network.getOutput().toString() << std::endl;
 
     // TODO: make network return cost
+}
+
+TEST(NetworkTest, trainNet)
+{
+    uint16_t nEpochs = 1000;
+    uint16_t miniBatchSize = 1;
+    float learningRate = 1.0f;
+    std::vector<uint16_t> layersizes{2, 50, 5, 2};
+
+    std::vector<Vector<float>> train_data{{2.0f, 0.0f}, {1.6f, 0.4f}, {1.2f, 0.8f}, {0.8f, 1.2f}, {0.4f, 1.6f}};
+    std::vector<Vector<float>> train_labels{{1.0f, 0.0f}, {0.8f, 0.2f}, {0.6f, 0.4f}, {0.4f, 0.6f}, {0.2f, 0.8f}};
+
+    Network network(layersizes);
+
+    for (int i = 0; i < nEpochs; ++i)
+    {
+        network.trainMiniBatches(2, learningRate, train_data, train_labels);
+    }
+
+    network.feedforward(train_data[0]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[1]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[2]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[3]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[4]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    // TODO: replace with evaluator
 }

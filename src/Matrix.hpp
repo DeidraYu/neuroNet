@@ -72,7 +72,7 @@ namespace sw
         {
             using CommonType = typename std::common_type<T, U>::type;
 
-            Matrix<CommonType> result(m_nCols, m_nRows);
+            Matrix<CommonType> result(m_nRows, m_nCols);
 
             // TODO: Implement a parallezed version for the multiplication
             // Take the linear combination of the columns of the transpose matrix.
@@ -146,7 +146,7 @@ namespace sw
 
         void fill(T value)
         {
-            for (Vector row : m_rows)
+            for (Vector<T> &row : m_rows)
             {
                 row.fill(value);
             }

@@ -18,6 +18,27 @@ public:
         }
     }
 
+    void trainMiniBatches(uint16_t miniBatchSize, float learningRate, std::vector<sw::Vector<float>> &train_data, std::vector<sw::Vector<float>> &train_labels)
+    {
+        uint16_t mbIndex = 0;
+        m_eta = learningRate;
+
+        for (uint16_t i = 0; i < train_data.size(); ++i)
+        {
+            train(train_data[i], train_labels[i]);
+
+            if (mbIndex == miniBatchSize - 1)
+            {
+                mbIndex = 0;
+                updateLayers();
+            }
+            else
+            {
+                ++mbIndex;
+            }
+        }
+    }
+
     void train(const Vector<float> &x, sw::Vector<float> label)
     {
         // Feed forward run
@@ -44,13 +65,6 @@ public:
             }
             m_layers[0].backProp(x, m_layers[1].getU());
         }
-
-        // update
-        for (int k = 0; k < m_layers.size(); ++k)
-        {
-            float eta = 1.0f;
-            m_layers[k].update(eta);
-        }
     }
 
     void feedforward(sw::Vector<float> x)
@@ -62,12 +76,23 @@ public:
         }
     }
 
+    void updateLayers()
+    {
+        // update
+        for (int k = 0; k < m_layers.size(); ++k)
+        {
+            m_layers[k].update(m_eta);
+        }
+    }
+
     sw::Vector<float> getOutput()
     {
         return m_layers.back().getY();
     }
 
 private:
+    float m_eta = 1.0f;
+
     std::vector<Layer> m_layers;
     std::vector<uint16_t> m_layerSizes;
 };
