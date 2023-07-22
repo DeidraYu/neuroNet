@@ -293,6 +293,17 @@ TEST(VectorTest, outerProductDifferentSizes)
     EXPECT_EQ(w.getNumCols(), 2);
 }
 
+TEST(VectorTest, outerProductDifferentSizes2)
+{
+    Vector u{2, 5, 8};
+    Vector v{1, 2};
+
+    Matrix w = v.outer(u);
+
+    EXPECT_EQ(w.getNumRows(), 2);
+    EXPECT_EQ(w.getNumCols(), 3);
+}
+
 TEST(VectorTest, iterators)
 {
     Vector u{2, 5, 8};

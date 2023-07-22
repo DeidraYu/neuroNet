@@ -86,3 +86,13 @@ void printSW(sw::Vector<float> &vec)
         printf("\n");
     }
 }
+
+sw::Vector<float> oneHotEncode(int value, int numClasses)
+{
+    sw::Vector<float> encodedVector(numClasses);
+    if (value >= 0 && value < numClasses)
+    {
+        encodedVector[value] = 1.0f;
+    }
+    return encodedVector;
+}

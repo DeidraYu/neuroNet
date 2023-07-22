@@ -126,7 +126,7 @@ namespace sw
             return sum;
         }
 
-        std::string toString()
+        std::string toString() const
         {
             std::ostringstream oss;
             oss << "[";
