@@ -36,6 +36,46 @@ TEST(VectorViewTest, changeTheOtherChangesTheOne)
     EXPECT_EQ(std_vector[2], 9);
 }
 
+TEST(VectorTest, operatorEquals_false)
+{
+    Vector<int16_t> u{1, 2, 3};
+    Vector<int16_t> v{2, 3, 4};
+
+    bool isEqual = (u == v);
+
+    EXPECT_EQ(isEqual, false);
+}
+
+TEST(VectorTest, operatorEquals_true)
+{
+    Vector<int16_t> u{1, 2, 3};
+    Vector<int16_t> v{1, 2, 3};
+
+    bool isEqual = (u == v);
+
+    EXPECT_EQ(isEqual, true);
+}
+
+TEST(VectorTest, operatorNotEquals_false)
+{
+    Vector<int16_t> u{1, 2, 3};
+    Vector<int16_t> v{1, 2, 3};
+
+    bool isNotEqual = (u != v);
+
+    EXPECT_EQ(isNotEqual, false);
+}
+
+TEST(VectorTest, operatorNotEquals_true)
+{
+    Vector<int16_t> u{1, 2, 3};
+    Vector<int16_t> v{2, 3, 4};
+
+    bool isNotEqual = (u != v);
+
+    EXPECT_EQ(isNotEqual, true);
+}
+
 TEST(VectorViewTest, dotProduct)
 {
     std::vector<int> std_vector_u{1, 2, 3};
@@ -61,9 +101,9 @@ TEST(VectorViewTest, pointWiseMultiplication)
 
     Vector w = u.point_mult(v);
 
-    EXPECT_EQ(w[0], 2);
-    EXPECT_EQ(w[1], 6);
-    EXPECT_EQ(w[2], 12);
+    Vector<int> expected{2, 6, 12};
+
+    EXPECT_EQ(w, Vector<int>({2, 6, 12}));
 }
 
 TEST(VectorTest, createWithStdVector)
@@ -72,9 +112,7 @@ TEST(VectorTest, createWithStdVector)
 
     Vector u(std_vector_u);
 
-    EXPECT_EQ(u[0], 1);
-    EXPECT_EQ(u[1], 2);
-    EXPECT_EQ(u[2], 3);
+    EXPECT_EQ(u, Vector<int>({1, 2, 3}));
 }
 
 TEST(VectorTest, copyConstructor)
@@ -86,9 +124,7 @@ TEST(VectorTest, copyConstructor)
     Vector v{u};
 
     // Check correctness of the copy
-    EXPECT_EQ(v[0], 1);
-    EXPECT_EQ(v[1], 2);
-    EXPECT_EQ(v[2], 3);
+    EXPECT_EQ(v, Vector<int>({1, 2, 3}));
 
     // Check that all references are updated correctly
     u[0] = 4;
@@ -99,13 +135,8 @@ TEST(VectorTest, copyConstructor)
     v[1] = 8;
     v[2] = 9;
 
-    EXPECT_EQ(u[0], 4);
-    EXPECT_EQ(u[1], 5);
-    EXPECT_EQ(u[2], 6);
-
-    EXPECT_EQ(v[0], 7);
-    EXPECT_EQ(v[1], 8);
-    EXPECT_EQ(v[2], 9);
+    EXPECT_EQ(u, Vector<int>({4, 5, 6}));
+    EXPECT_EQ(v, Vector<int>({7, 8, 9}));
 }
 
 TEST(VectorTest, copyAssignmentOperator)
@@ -118,9 +149,7 @@ TEST(VectorTest, copyAssignmentOperator)
     v = u;
 
     // Check correctness of the copy
-    EXPECT_EQ(v[0], 1);
-    EXPECT_EQ(v[1], 2);
-    EXPECT_EQ(v[2], 3);
+    EXPECT_EQ(v, Vector<int>({1, 2, 3}));
 
     // Check that all references are updated correctly
     u[0] = 4;
@@ -131,13 +160,8 @@ TEST(VectorTest, copyAssignmentOperator)
     v[1] = 8;
     v[2] = 9;
 
-    EXPECT_EQ(u[0], 4);
-    EXPECT_EQ(u[1], 5);
-    EXPECT_EQ(u[2], 6);
-
-    EXPECT_EQ(v[0], 7);
-    EXPECT_EQ(v[1], 8);
-    EXPECT_EQ(v[2], 9);
+    EXPECT_EQ(u, Vector<int>({4, 5, 6}));
+    EXPECT_EQ(v, Vector<int>({7, 8, 9}));
 }
 
 TEST(VectorTest, createWithSize)
@@ -148,18 +172,14 @@ TEST(VectorTest, createWithSize)
     u[1] = 1.0;
     u[2] = 2.0;
 
-    EXPECT_EQ(u[0], 0.0);
-    EXPECT_EQ(u[1], 1.0);
-    EXPECT_EQ(u[2], 2.0);
+    EXPECT_EQ(u, Vector<double>({0.0, 1.0, 2.0}));
 }
 
 TEST(VectorTest, createWithSizeAndInitialValue)
 {
     Vector<int> u(3, 1);
 
-    EXPECT_EQ(u[0], 1);
-    EXPECT_EQ(u[1], 1);
-    EXPECT_EQ(u[2], 1);
+    EXPECT_EQ(u, Vector<int>({1, 1, 1}));
 }
 
 TEST(VectorTest, dotProduct)
@@ -179,9 +199,7 @@ TEST(VectorTest, pointWiseMultiplication)
 
     Vector w = u.point_mult(v);
 
-    EXPECT_EQ(w[0], 2);
-    EXPECT_EQ(w[1], 6);
-    EXPECT_EQ(w[2], 12);
+    EXPECT_EQ(w, Vector<int>({2, 6, 12}));
 }
 
 TEST(VectorTest, leftScalarMultiplication)
@@ -190,9 +208,7 @@ TEST(VectorTest, leftScalarMultiplication)
 
     Vector w = 2 * u;
 
-    EXPECT_EQ(w[0], 2);
-    EXPECT_EQ(w[1], 4);
-    EXPECT_EQ(w[2], 6);
+    EXPECT_EQ(w, Vector<int>({2, 4, 6}));
 }
 
 TEST(VectorTest, rightScalarMultiplication)
@@ -201,9 +217,7 @@ TEST(VectorTest, rightScalarMultiplication)
 
     Vector w = u * 2;
 
-    EXPECT_EQ(w[0], 2);
-    EXPECT_EQ(w[1], 4);
-    EXPECT_EQ(w[2], 6);
+    EXPECT_EQ(w, Vector<int>({2, 4, 6}));
 }
 
 TEST(VectorTest, combined)
@@ -215,9 +229,7 @@ TEST(VectorTest, combined)
 
     Vector w = (2 * u).point_mult(v * 2);
 
-    EXPECT_EQ(w[0], 4.0);
-    EXPECT_EQ(w[1], 16.0);
-    EXPECT_EQ(w[2], 36.0);
+    EXPECT_EQ(w, Vector<float>({4.0, 16.0, 36.0}));
 }
 
 TEST(VectorTest, add)
@@ -227,9 +239,7 @@ TEST(VectorTest, add)
 
     Vector w = u + v;
 
-    EXPECT_EQ(w[0], 3);
-    EXPECT_EQ(w[1], 6);
-    EXPECT_EQ(w[2], 9);
+    EXPECT_EQ(w, Vector<int>({3, 6, 9}));
 }
 
 TEST(VectorTest, subtract)
@@ -239,9 +249,7 @@ TEST(VectorTest, subtract)
 
     Vector w = u - v;
 
-    EXPECT_EQ(w[0], 1);
-    EXPECT_EQ(w[1], 3);
-    EXPECT_EQ(w[2], 5);
+    EXPECT_EQ(w, Vector<int>({1, 3, 5}));
 }
 
 TEST(VectorTest, random)
@@ -321,9 +329,7 @@ TEST(VectorTest, post_add_with_scalar)
 
     auto w = u + 3;
 
-    EXPECT_EQ(w[0], 5);
-    EXPECT_EQ(w[1], 8);
-    EXPECT_EQ(w[2], 11);
+    EXPECT_EQ(w, Vector<int>({5, 8, 11}));
 }
 
 TEST(VectorTest, pre_add_with_scalar)
@@ -332,9 +338,7 @@ TEST(VectorTest, pre_add_with_scalar)
 
     auto w = 3 + u;
 
-    EXPECT_EQ(w[0], 5);
-    EXPECT_EQ(w[1], 8);
-    EXPECT_EQ(w[2], 11);
+    EXPECT_EQ(w, Vector<int>({5, 8, 11}));
 }
 
 TEST(VectorTest, post_subtract_with_scalar)
@@ -343,20 +347,16 @@ TEST(VectorTest, post_subtract_with_scalar)
 
     auto w = u - 3;
 
-    EXPECT_EQ(w[0], -1);
-    EXPECT_EQ(w[1], 2);
-    EXPECT_EQ(w[2], 5);
+    EXPECT_EQ(w, Vector<int>({-1, 2, 5}));
 }
 
 TEST(VectorTest, pre_subtract_with_scalar)
 {
     Vector<int16_t> u{2, 5, 8};
 
-    auto w = 3 - u;
+    auto w = int16_t(3) - u;
 
-    EXPECT_EQ(w[0], 1);
-    EXPECT_EQ(w[1], -2);
-    EXPECT_EQ(w[2], -5);
+    EXPECT_EQ(w, Vector<int16_t>({1, -2, -5}));
 }
 
 TEST(VectorTest, fill)
@@ -365,7 +365,66 @@ TEST(VectorTest, fill)
 
     u.fill(1);
 
-    EXPECT_EQ(u[0], 1);
+    EXPECT_EQ(u, Vector<int16_t>({1, 1, 1}));
+}
+
+TEST(VectorTest, selfMultiplyWithScalar)
+{
+    Vector<int16_t> u{2, 5, 8};
+
+    u *= 2;
+
+    EXPECT_EQ(u, Vector<int16_t>({4, 10, 16}));
+}
+
+TEST(VectorTest, selfMultiplyWithVector)
+{
+    Vector u{1, 2, 3};
+    Vector v{2, 3, 4};
+
+    u *= v;
+
+    EXPECT_EQ(u, Vector<int>({2, 6, 12}));
+}
+
+TEST(VectorTest, operatorPlusIsScalar)
+{
+    Vector u{1, 2, 3};
+
+    u += 1;
+
+    EXPECT_EQ(u, Vector<int>({2, 3, 4}));
+}
+
+TEST(VectorTest, operatorPlusIsVector)
+{
+    Vector u{1, 2, 3};
+    Vector v{2, 3, 4};
+
+    u += v;
+
+    EXPECT_EQ(u, Vector<int>({3, 5, 7}));
+}
+
+TEST(VectorTest, operatorMinusIsScalar)
+{
+    Vector u{1, 2, 3};
+
+    u -= 1;
+
+    EXPECT_EQ(u, Vector<int>({0, 1, 2}));
+
+    EXPECT_EQ(u[0], 0);
     EXPECT_EQ(u[1], 1);
-    EXPECT_EQ(u[2], 1);
+    EXPECT_EQ(u[2], 2);
+}
+
+TEST(VectorTest, operatorMinusIsVector)
+{
+    Vector<int16_t> u{1, 2, 3};
+    Vector<int16_t> v{2, 3, 4};
+
+    u -= v;
+
+    EXPECT_EQ(u, Vector<int16_t>({-1, -1, -1}));
 }

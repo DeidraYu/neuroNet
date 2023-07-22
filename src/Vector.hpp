@@ -46,6 +46,61 @@ namespace sw
                          sw::Vector<typename std::common_type<T, U>::type>>
         operator*(const U &rhs) const;
 
+        void operator+=(const T rhs)
+        {
+            std::transform(begin(), end(), begin(), [rhs](const T &element)
+                           { return element + rhs; });
+        }
+
+        void operator-=(const T rhs)
+        {
+            std::transform(begin(), end(), begin(), [rhs](const T &element)
+                           { return element - rhs; });
+        }
+
+        // We require the right hand side to be of the same type as the vector entries already are.
+        void operator*=(const T rhs)
+        {
+            std::transform(begin(), end(), begin(), [rhs](const T &element)
+                           { return element * rhs; });
+        }
+
+        void operator+=(const VectorView<T> &rhs)
+        {
+            std::transform(begin(), end(), rhs.cbegin(), begin(), std::plus<T>());
+        }
+
+        void operator-=(const VectorView<T> &rhs)
+        {
+            std::transform(begin(), end(), rhs.cbegin(), begin(), std::minus<T>());
+        }
+
+        // We require the right hand side to be of the same type as the vector entries already are.
+        // Warning: Note that *= is performing an element-wise / point-wise multiplication. This might
+        //          not be what is expected because the typical * performs a standard vector multiplication.
+        void operator*=(const VectorView<T> &rhs)
+        {
+            std::transform(begin(), end(), rhs.cbegin(), begin(), std::multiplies<T>());
+        }
+
+        // Comparison operator ==
+        bool operator==(const VectorView<T> &other) const
+        {
+            return (*m_pVec) == (*other.m_pVec);
+        }
+
+        bool operator!=(const VectorView<T> &other) const
+        {
+            return (*m_pVec) != (*other.m_pVec);
+        }
+
+        // Overload the << operator for output
+        friend std::ostream &operator<<(std::ostream &os, const Vector<T> &vec)
+        {
+            os << vec.toString();
+            return os;
+        }
+
         template <typename U>
         Vector<typename std::common_type<T, U>::type> point_mult(const VectorView<U> &rhs) const;
 
@@ -75,17 +130,13 @@ namespace sw
             m_pVec->resize(newSize);
         }
 
-        // Begin iterator
-        typename std::vector<T>::iterator begin()
-        {
-            return m_pVec->begin();
-        }
+        // Iterators
+        typename std::vector<T>::iterator begin() { return m_pVec->begin(); }
+        typename std::vector<T>::iterator end() { return m_pVec->end(); }
 
-        // End iterator
-        typename std::vector<T>::iterator end()
-        {
-            return m_pVec->end();
-        }
+        // Constant iterators
+        auto cbegin() const { return m_pVec->cbegin(); }
+        auto cend() const { return m_pVec->cend(); }
 
         std::string toString() const;
 

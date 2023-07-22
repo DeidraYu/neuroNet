@@ -68,7 +68,7 @@ namespace sw
 
         template <typename U>
             requires arithmetic<U>
-        auto operator*(U &rhs) const
+        auto operator*(U rhs) const
         {
             using CommonType = typename std::common_type<T, U>::type;
 
@@ -82,6 +82,42 @@ namespace sw
                 result[i] = m_rows[i] * rhs;
             }
             return result;
+        }
+
+        void operator+=(T rhs)
+        {
+            std::for_each(m_rows.begin(), m_rows.end(), [rhs](auto &row)
+                          { row += rhs; });
+        }
+
+        void operator-=(T rhs)
+        {
+            std::for_each(m_rows.begin(), m_rows.end(), [rhs](auto &row)
+                          { row -= rhs; });
+        }
+
+        void operator*=(T rhs)
+        {
+            std::for_each(m_rows.begin(), m_rows.end(), [rhs](auto &row)
+                          { row *= rhs; });
+        }
+
+        // Comparison operator ==
+        bool operator==(const Matrix<T> &other) const
+        {
+            return m_rows == other.m_rows;
+        }
+
+        bool operator!=(const VectorView<T> &other) const
+        {
+            return m_rows != other.m_rows;
+        }
+
+        // Overload the << operator for output
+        friend std::ostream &operator<<(std::ostream &os, const Matrix<T> &mat)
+        {
+            os << mat.toString();
+            return os;
         }
 
         template <typename U>
