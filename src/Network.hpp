@@ -18,10 +18,23 @@ public:
         }
     }
 
+    void trainEpochs(uint16_t nEpochs, uint16_t miniBatchSize, float learningRate, std::vector<sw::Vector<float>> &train_data, std::vector<sw::Vector<float>> &train_labels)
+    {
+        char progressLabel[16];
+        for (int i = 0; i < nEpochs; ++i)
+        {
+            snprintf(progressLabel, 16, "%d / %d", i + 1, nEpochs);
+            trainMiniBatches(2, learningRate, train_data, train_labels);
+        }
+        printf("\n"); // because the progress bar has no newline.
+    }
+
     void trainMiniBatches(uint16_t miniBatchSize, float learningRate, std::vector<sw::Vector<float>> &train_data, std::vector<sw::Vector<float>> &train_labels)
     {
         uint16_t mbIndex = 0;
         m_eta = learningRate;
+        int numMiniBatches = static_cast<int>((train_data.size() - 1) / miniBatchSize + 1);
+        int miniBatchCounter = 0;
 
         for (uint16_t i = 0; i < train_data.size(); ++i)
         {
@@ -31,11 +44,19 @@ public:
             {
                 mbIndex = 0;
                 updateLayers();
+                printProgress(miniBatchCounter, numMiniBatches, progressLabel);
+                ++miniBatchCounter;
             }
             else
             {
                 ++mbIndex;
             }
+        }
+
+        if (miniBatchCounter != numMiniBatches)
+        {
+            updateLayers();
+            printProgress(miniBatchCounter, numMiniBatches, progressLabel);
         }
     }
 
@@ -46,8 +67,6 @@ public:
 
         // Compute the error vector
         Vector<float> v = getOutput() - label;
-
-        // Back propagation run
 
         // L is index of last layer:
         int L = static_cast<int>(m_layers.size()) - 1; // k = 0, 1, ..., L  (so, L is inclusive)
@@ -89,6 +108,16 @@ public:
     {
         return m_layers.back().getY();
     }
+
+    void randomizeWB(float min, float max)
+    {
+        for (Layer &layer : m_layers)
+        {
+            layer.randomizeWB(min, max);
+        }
+    }
+
+    std::string progressLabel;
 
 private:
     float m_eta = 1.0f;

@@ -12,6 +12,7 @@
 #include "Evaluator.hpp"
 #include "Vector.hpp"
 #include "Utils.hpp"
+#include "Network.hpp"
 
 int main()
 {
@@ -33,6 +34,63 @@ int main()
 
     std::cout << "Time reading mnist dataset from disk: " << duration1.count() << " milliseconds" << std::endl;
 
+    uint16_t nEpochs = 1;
+    uint16_t miniBatchSize = 10;
+    float learningRate = 3.0f;
+    std::vector<uint16_t> layersizes{784, 30, 10};
+    uint32_t numTrainImages = dataset.training_images.size();
+    uint32_t numTestImages = dataset.test_images.size();
+
+    // numTrainImages = 20;
+    numTestImages = 10;
+
+    Network network(layersizes);
+    network.randomizeWB(-2.0f, 2.0f);
+
+    std::vector<sw::Vector<float>> train_data(numTrainImages);
+    std::vector<sw::Vector<float>> train_labels(numTrainImages);
+
+    std::vector<sw::Vector<float>> test_data(numTestImages);
+    std::vector<sw::Vector<float>> test_labels(numTestImages);
+
+    {
+        for (uint32_t i = 0; i < numTrainImages; ++i)
+        {
+            sw::VectorView train_image_int(&(dataset.training_images[i]));
+            sw::Vector<float> train_image = train_image_int * (1.0f / 256.0f);
+
+            train_data[i] = std::move(train_image);
+
+            train_labels[i] = oneHotEncode(dataset.training_labels[i], 10);
+        }
+
+        for (uint32_t i = 0; i < numTestImages; ++i)
+        {
+            sw::VectorView test_image_int(&(dataset.test_images[i]));
+            sw::Vector<float> test_image = test_image_int * (1.0f / 256.0f);
+
+            test_data[i] = std::move(test_image);
+
+            test_labels[i] = oneHotEncode(dataset.test_labels[i], 10);
+        }
+    }
+
+    char progressLabel[16];
+    for (int i = 0; i < nEpochs; ++i)
+    {
+        snprintf(progressLabel, 16, "%d / %d", i + 1, nEpochs);
+        network.progressLabel = progressLabel;
+        network.trainMiniBatches(2, learningRate, train_data, train_labels);
+    }
+    printf("\n"); // because the progress bar has no newline.
+
+    for (uint16_t i = 0; i < numTestImages; ++i)
+    {
+        network.feedforward(test_data[i]);
+        printf("%d: ", dataset.test_labels[i]);
+        std::cout << network.getOutput().toString() << std::endl;
+    }
+
     if (false)
     {
         printNumber(dataset.training_images[0]);
@@ -40,41 +98,43 @@ int main()
         printNumber(dataset.training_images[2]);
     }
 
-    Net net({28 * 28, 30, 10});
-    // net.printInfo();
+    /*
+        Net net({28 * 28, 30, 10});
+        // net.printInfo();
 
-    Evaluator evaluator(dataset.test_images, dataset.test_labels);
-    Trainer trainer(dataset.training_images, dataset.training_labels);
+        Evaluator evaluator(dataset.test_images, dataset.test_labels);
+        Trainer trainer(dataset.training_images, dataset.training_labels);
 
-    {
-        auto start2 = std::chrono::steady_clock::now();
+        {
+            auto start2 = std::chrono::steady_clock::now();
 
-        int16_t nEpochs = 3;
-        uint16_t miniBatchSize = 5;
-        float learningRate = 2.0f;
+            int16_t nEpochs = 3;
+            uint16_t miniBatchSize = 5;
+            float learningRate = 2.0f;
 
-        trainer.train(net, nEpochs, miniBatchSize, learningRate, evaluator);
+            trainer.train(net, nEpochs, miniBatchSize, learningRate, evaluator);
 
-        auto end2 = std::chrono::steady_clock::now();
-        auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2);
-        printf("Time permuting data set %d times: %lld milliseconds\n", nEpochs, duration2.count());
-    }
+            auto end2 = std::chrono::steady_clock::now();
+            auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2);
+            printf("Time permuting data set %d times: %lld milliseconds\n", nEpochs, duration2.count());
+        }
 
-    int score = 0;
-    int n = 1;
+        int score = 0;
+        int n = 1;
 
-    auto start3 = std::chrono::steady_clock::now();
+        auto start3 = std::chrono::steady_clock::now();
 
-    for (int i = 0; i < n; ++i)
-    {
-        score += evaluator.evaluate(net);
-    }
+        for (int i = 0; i < n; ++i)
+        {
+            score += evaluator.evaluate(net);
+        }
 
-    auto end3 = std::chrono::steady_clock::now();
-    auto duration3 = std::chrono::duration_cast<std::chrono::milliseconds>(end3 - start3);
-    printf("Time evaluating %d times: %lld ms\n", n, duration3.count());
-    printf("Eval took: %lld ms\n", evaluator.duration / 1000);
-    printf("Score: %8.4f%%\n", (score * 100.0f) / dataset.test_images.size());
+        auto end3 = std::chrono::steady_clock::now();
+        auto duration3 = std::chrono::duration_cast<std::chrono::milliseconds>(end3 - start3);
+        printf("Time evaluating %d times: %lld ms\n", n, duration3.count());
+        printf("Eval took: %lld ms\n", evaluator.duration / 1000);
+        printf("Score: %8.4f%%\n", (score * 100.0f) / dataset.test_images.size());
+    */
 
     return 0;
 }

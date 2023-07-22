@@ -234,7 +234,7 @@ TEST(NetworkTest, multiLayeredNetwork)
     Vector x2{0.8f, 0.6f};
     Vector x3{0.7f, 0.8f};
 
-    for (int i = 0; i < 10000; ++i)
+    for (int i = 0; i < 100; ++i)
     {
         network.train(x1, x1);
         network.train(x2, x2);
@@ -258,10 +258,10 @@ TEST(NetworkTest, trainNet)
     uint16_t nEpochs = 1000;
     uint16_t miniBatchSize = 1;
     float learningRate = 1.0f;
-    std::vector<uint16_t> layersizes{2, 50, 5, 2};
+    std::vector<uint16_t> layersizes{2, 2, 2};
 
-    std::vector<Vector<float>> train_data{{2.0f, 0.0f}, {1.6f, 0.4f}, {1.2f, 0.8f}, {0.8f, 1.2f}, {0.4f, 1.6f}};
-    std::vector<Vector<float>> train_labels{{1.0f, 0.0f}, {0.8f, 0.2f}, {0.6f, 0.4f}, {0.4f, 0.6f}, {0.2f, 0.8f}};
+    std::vector<Vector<float>> train_data{{0.0f, 0.0f}, {1.0f, 0.0f}, {0.5f, 0.5f}, {0.0f, 1.0f}};
+    std::vector<Vector<float>> train_labels{{1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f}};
 
     Network network(layersizes);
 
@@ -281,9 +281,37 @@ TEST(NetworkTest, trainNet)
 
     network.feedforward(train_data[3]);
     std::cout << network.getOutput().toString() << std::endl;
+    // TODO: replace with evaluator
+}
 
-    network.feedforward(train_data[4]);
+TEST(NetworkTest, trainNetRandomWB)
+{
+    uint16_t nEpochs = 1000;
+    uint16_t miniBatchSize = 1;
+    float learningRate = 1.0f;
+    std::vector<uint16_t> layersizes{2, 5, 2};
+
+    std::vector<Vector<float>> train_data{{0.0f, 0.0f}, {1.0f, 0.0f}, {0.5f, 0.5f}, {0.0f, 1.0f}};
+    std::vector<Vector<float>> train_labels{{1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f}};
+
+    Network network(layersizes);
+    network.randomizeWB(-2.0f, 2.0f);
+
+    for (int i = 0; i < nEpochs; ++i)
+    {
+        network.trainMiniBatches(2, learningRate, train_data, train_labels);
+    }
+
+    network.feedforward(train_data[0]);
     std::cout << network.getOutput().toString() << std::endl;
 
+    network.feedforward(train_data[1]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[2]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[3]);
+    std::cout << network.getOutput().toString() << std::endl;
     // TODO: replace with evaluator
 }

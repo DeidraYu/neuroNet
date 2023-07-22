@@ -78,6 +78,11 @@ public:
         m_miniBatchSize = 0;
     }
 
+    void randomizeWB(float min, float max)
+    {
+        m_W = Matrix<float>::rand(m_W.getNumRows(), m_W.getNumCols(), min, max);
+    }
+
     constexpr uint16_t size() const { return m_numOutputs; }
 
     const auto &getW() const { return m_W; }
