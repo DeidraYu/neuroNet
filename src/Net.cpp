@@ -53,6 +53,29 @@ void Net::randomizeWeightsBiases()
     }
 }
 
+void Net::setWeightsBiases(float value)
+{
+
+    for (int n = 0; n < m_weights.size(); ++n)
+    {
+        for (uint32_t i = 0; i < m_weights[n].getNumRows(); ++i)
+        {
+            for (uint32_t j = 0; j < m_weights[n].getNumCols(); ++j)
+            {
+                m_weights[n][i][j] = value;
+            }
+        }
+    }
+
+    for (int n = 0; n < m_biases.size(); ++n)
+    {
+        for (int i = 0; i < m_biases[n].size(); ++i)
+        {
+            m_biases[n][i] = value;
+        }
+    }
+}
+
 sw::Vector<float> Net::sigmoid(sw::Vector<float> z)
 {
     sw::Vector<float> activations(z.size());

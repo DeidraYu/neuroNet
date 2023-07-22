@@ -96,6 +96,9 @@ void Trainer::trainMiniBatch(Net &net, size_t imageIndex, size_t miniBatchSize, 
             biasGradient[j] = biasGradient[j] + gradients.biasGradient[j];
         }
 
+        // printf(weightGradient[1].toString().c_str());
+        // printf(biasGradient[1].toString().c_str());
+
         for (int j = 1; j < netSizes.size() - 1; j++)
         {
             sw::Matrix<float> &weightMatrix = net.getWeights()[j];
@@ -122,7 +125,7 @@ Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
 
     activations.push_back(sw::Vector(image.getStdVector()));
 
-    sw::Vector<float> z = weights[0] * image + biases[0];
+    sw::Vector<float> z = weights[0].transposeMult(sw::Vector(image.getStdVector())) + biases[0];
     sw::Vector<float> activation = net.sigmoid(z);
 
     zs.push_back(z);
@@ -130,7 +133,7 @@ Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
 
     for (int i = 1; i < layerSizes.size() - 1; ++i)
     {
-        z = weights[i] * activation + biases[i];
+        z = weights[i].transposeMult(activation) + biases[i];
         activation = net.sigmoid(z);
 
         zs.push_back(z);
@@ -175,7 +178,7 @@ Trainer::GradientPair Trainer::backProp(Net &net, ResultPair resultPair, uint8_t
         weightGradient[nInBetweenLayers - i - 1] = deltaZ.outer(resultPair.activations[nInBetweenLayers - i - 1]);
         // printf(weightGradient[nInBetweenLayers - i - 1].toString().c_str());
         auto printVec = (0.5f * (weightGradient[nInBetweenLayers - i - 1][1] + sw::Vector(784, 1.0f)));
-        printSW(printVec);
+        // printSW(printVec);
         biasGradient[nInBetweenLayers - i - 1] = deltaZ;
     }
 

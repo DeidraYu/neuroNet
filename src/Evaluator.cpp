@@ -47,7 +47,7 @@ sw::Vector<float> Evaluator::feedforward(sw::VectorView<float> &image, Net &net)
 
     for (int i = 0; i < layerSizes.size() - 1; ++i)
     {
-        activation = net.sigmoid(weights[i] * activation + biases[i]);
+        activation = net.sigmoid(weights[i].transposeMult(activation) + biases[i]);
     }
 
     auto end = std::chrono::steady_clock::now();
