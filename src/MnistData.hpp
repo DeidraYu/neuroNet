@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mnist/mnist_reader.hpp"
+#include "Vector.hpp"
 
 class MnistData
 {
