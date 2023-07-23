@@ -194,7 +194,7 @@ namespace sw
                 using CommonType = typename std::common_type<T, uint16_t>::type;
                 std::uniform_int_distribution<CommonType> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-                for (uint i = 0; i < sz; ++i)
+                for (uint32_t i = 0; i < sz; ++i)
                 {
                     randVector[i] = static_cast<T>(dis(gen));
                 }
@@ -203,7 +203,7 @@ namespace sw
             {
                 // std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
                 std::uniform_real_distribution<T> dis(min, max);
-                for (uint i = 0; i < sz; ++i)
+                for (uint32_t i = 0; i < sz; ++i)
                 {
                     randVector[i] = dis(gen);
                 }
@@ -289,7 +289,7 @@ namespace sw
 
         CommonType result{CommonType{0}};
 
-        for (uint i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result += static_cast<CommonType>(static_cast<CommonType>((*m_pVec)[i]) * static_cast<CommonType>(rhs[i]));
         }
@@ -308,7 +308,7 @@ namespace sw
         std::vector<CommonType> resultVec;
         resultVec.reserve(size());
 
-        for (uint i = 0; i < size(); ++i)
+        for (uint32_t i = 0; i < size(); ++i)
         {
             resultVec.push_back(static_cast<CommonType>((*m_pVec)[i]) * static_cast<CommonType>(rhs));
         }
@@ -324,7 +324,7 @@ namespace sw
 
         Vector<CommonType> result(size());
 
-        for (uint i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] * static_cast<CommonType>(rhs[i]);
         }
@@ -337,7 +337,7 @@ namespace sw
     {
         using CommonType = typename std::common_type<T, U>::type;
         Matrix<CommonType> A(static_cast<uint32_t>(size()), static_cast<uint32_t>(rhs.size()));
-        for (uint r = 0; r < size(); ++r)
+        for (uint32_t r = 0; r < size(); ++r)
         {
             A[r] = (*m_pVec)[r] * rhs;
         }
@@ -350,7 +350,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (uint i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] + rhs[i];
         }
@@ -364,7 +364,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (uint i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] + rhs;
         }
@@ -378,7 +378,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (uint i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] - rhs;
         }
@@ -391,7 +391,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (uint i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] - rhs[i];
         }
@@ -439,7 +439,7 @@ namespace sw
     std::string VectorView<T>::toString() const
     {
         std::string str = "(";
-        for (uint i = 0; i < size() - 1; ++i)
+        for (uint32_t i = 0; i < size() - 1; ++i)
         {
             str = str + num2string((*m_pVec)[i]) + ", ";
         }
@@ -472,7 +472,7 @@ auto operator-(const T lhs, sw::VectorView<U> &rhs)
 
     sw::Vector<CommonType> resultVec(rhs.size());
 
-    for (uint i = 0; i < rhs.size(); ++i)
+    for (uint32_t i = 0; i < rhs.size(); ++i)
     {
         resultVec[i] = lhs - rhs[i];
     }

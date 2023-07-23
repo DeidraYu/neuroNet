@@ -105,7 +105,7 @@ Vector<float> sigmoid(sw::Vector<float> z)
 {
     sw::Vector<float> y(z.size());
 
-    for (uint i = 0; i < z.size(); ++i)
+    for (uint32_t i = 0; i < z.size(); ++i)
     {
         y[i] = sigmoid(z[i]);
     }
@@ -117,7 +117,7 @@ Vector<float> sigmoid_prime(sw::Vector<float> z)
 {
     sw::Vector<float> y(z.size());
 
-    for (uint i = 0; i < z.size(); ++i)
+    for (uint32_t i = 0; i < z.size(); ++i)
     {
         y[i] = sigmoid_prime(z[i]);
     }

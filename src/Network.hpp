@@ -12,7 +12,7 @@ class Network
 public:
     Network(std::vector<uint16_t> layerSizes) : m_layerSizes(layerSizes)
     {
-        for (uint k = 0; k < m_layerSizes.size() - 1; ++k)
+        for (uint32_t k = 0; k < m_layerSizes.size() - 1; ++k)
         {
             m_layers.push_back(Layer(layerSizes[k], layerSizes[k + 1]));
         }
@@ -89,7 +89,7 @@ public:
     void feedforward(sw::Vector<float> x)
     {
         m_layers[0].feedForward(x);
-        for (uint k = 1; k < m_layers.size(); ++k)
+        for (uint32_t k = 1; k < m_layers.size(); ++k)
         {
             m_layers[k].feedForward(m_layers[k - 1].getY());
         }
@@ -98,7 +98,7 @@ public:
     void updateLayers()
     {
         // update
-        for (uint k = 0; k < m_layers.size(); ++k)
+        for (uint32_t k = 0; k < m_layers.size(); ++k)
         {
             m_layers[k].update(m_eta);
         }

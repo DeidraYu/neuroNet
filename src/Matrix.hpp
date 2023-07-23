@@ -172,7 +172,7 @@ namespace sw
 
             for (const Vector<T> &row : m_rows)
             {
-                for (uint c = 0; c < row.size(); ++c)
+                for (uint32_t c = 0; c < row.size(); ++c)
                 {
                     sum += row[c];
                 }
