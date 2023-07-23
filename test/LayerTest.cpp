@@ -85,14 +85,19 @@ TEST(LayerTest, update)
     std::cout << std::endl;
 }
 
+float sigmoid(float z);
+float sigmoid_prime(float z);
+Vector<float> sigmoid(sw::Vector<float> z);
+Vector<float> sigmoid_prime(sw::Vector<float> z);
+
 float sigmoid(float z)
 {
-    return 1.0f / (1.0f + exp(-z));
+    return 1.0f / (1.0f + static_cast<float>(exp(-z)));
 }
 
 float sigmoid_prime(float z)
 {
-    float s = 1.0f / (1.0f + exp(-z));
+    float s = sigmoid(z);
     return (1.0f - s) * s;
 }
 
@@ -100,7 +105,7 @@ Vector<float> sigmoid(sw::Vector<float> z)
 {
     sw::Vector<float> y(z.size());
 
-    for (int i = 0; i < z.size(); ++i)
+    for (uint i = 0; i < z.size(); ++i)
     {
         y[i] = sigmoid(z[i]);
     }
@@ -112,7 +117,7 @@ Vector<float> sigmoid_prime(sw::Vector<float> z)
 {
     sw::Vector<float> y(z.size());
 
-    for (int i = 0; i < z.size(); ++i)
+    for (uint i = 0; i < z.size(); ++i)
     {
         y[i] = sigmoid_prime(z[i]);
     }
@@ -256,7 +261,7 @@ TEST(NetworkTest, multiLayeredNetwork)
 TEST(NetworkTest, trainNet)
 {
     uint16_t nEpochs = 1000;
-    uint16_t miniBatchSize = 1;
+    uint16_t miniBatchSize = 2;
     float learningRate = 1.0f;
     std::vector<uint16_t> layersizes{2, 2, 2};
 
@@ -267,7 +272,7 @@ TEST(NetworkTest, trainNet)
 
     for (int i = 0; i < nEpochs; ++i)
     {
-        network.trainMiniBatches(2, learningRate, train_data, train_labels);
+        network.trainMiniBatches(miniBatchSize, learningRate, train_data, train_labels);
     }
 
     network.feedforward(train_data[0]);
@@ -287,7 +292,7 @@ TEST(NetworkTest, trainNet)
 TEST(NetworkTest, trainNetRandomWB)
 {
     uint16_t nEpochs = 1000;
-    uint16_t miniBatchSize = 1;
+    uint16_t miniBatchSize = 2;
     float learningRate = 1.0f;
     std::vector<uint16_t> layersizes{2, 5, 2};
 
@@ -299,7 +304,7 @@ TEST(NetworkTest, trainNetRandomWB)
 
     for (int i = 0; i < nEpochs; ++i)
     {
-        network.trainMiniBatches(2, learningRate, train_data, train_labels);
+        network.trainMiniBatches(miniBatchSize, learningRate, train_data, train_labels);
     }
 
     network.feedforward(train_data[0]);

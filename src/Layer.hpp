@@ -56,7 +56,7 @@ public:
     }
 
     // call the backProp for miniBatchSize
-    void backProp(const Vector<float> &x, const Vector<float> &v, float learningRate = 1.0f)
+    void backProp(const Vector<float> &x, const Vector<float> &v)
     {
         Vector gamma = v.point_mult(sigmoid_prime(m_z));
         m_nablaC_b = m_nablaC_b + gamma;
@@ -100,12 +100,12 @@ private:
 
     float sigmoid(float z)
     {
-        return 1.0f / (1.0f + exp(-z));
+        return 1.0f / (1.0f + static_cast<float>(exp(-z)));
     }
 
     float sigmoid_prime(float z)
     {
-        float s = 1.0f / (1.0f + exp(-z));
+        float s = sigmoid(z);
         return (1.0f - s) * s;
     }
 
@@ -113,7 +113,7 @@ private:
     {
         sw::Vector<float> y(z.size());
 
-        for (int i = 0; i < z.size(); ++i)
+        for (uint i = 0; i < z.size(); ++i)
         {
             y[i] = sigmoid(z[i]);
         }
@@ -125,7 +125,7 @@ private:
     {
         sw::Vector<float> y(z.size());
 
-        for (int i = 0; i < z.size(); ++i)
+        for (uint i = 0; i < z.size(); ++i)
         {
             y[i] = sigmoid_prime(z[i]);
         }
@@ -135,6 +135,9 @@ private:
 
     sw::Vector<float> oneHotEncode(int value, int numClasses);
 
+    uint16_t m_numInputs;
+    uint16_t m_numOutputs;
+
     Matrix<float> m_W;
     Vector<float> m_b;
     Vector<float> m_z;
@@ -143,9 +146,6 @@ private:
     Vector<float> m_nablaC_b;
     Matrix<float> m_nablaC_W;
     Vector<float> m_u;
-
-    uint16_t m_numInputs;
-    uint16_t m_numOutputs;
 
     uint16_t m_miniBatchSize{0};
 };

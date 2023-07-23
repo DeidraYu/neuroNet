@@ -40,7 +40,6 @@ void printProgress(int part, int total, std::string labelString)
     const int width = 80;
     const int progressWidth = width - 2; // -2 because we don't count the [] symbols as progress
     int nDone = progressWidth * part / total;
-    int nTodo = progressWidth - nDone;
 
     char str[width + 1];
     for (int i = 0; i < progressWidth; ++i)

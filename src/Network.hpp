@@ -12,22 +12,22 @@ class Network
 public:
     Network(std::vector<uint16_t> layerSizes) : m_layerSizes(layerSizes)
     {
-        for (int k = 0; k < m_layerSizes.size() - 1; ++k)
+        for (uint k = 0; k < m_layerSizes.size() - 1; ++k)
         {
             m_layers.push_back(Layer(layerSizes[k], layerSizes[k + 1]));
         }
     }
 
-    void trainEpochs(uint16_t nEpochs, uint16_t miniBatchSize, float learningRate, std::vector<sw::Vector<float>> &train_data, std::vector<sw::Vector<float>> &train_labels)
-    {
-        char progressLabel[16];
-        for (int i = 0; i < nEpochs; ++i)
-        {
-            snprintf(progressLabel, 16, "%d / %d", i + 1, nEpochs);
-            trainMiniBatches(2, learningRate, train_data, train_labels);
-        }
-        printf("\n"); // because the progress bar has no newline.
-    }
+    // void trainEpochs(uint16_t nEpochs, uint16_t miniBatchSize, float learningRate, std::vector<sw::Vector<float>> &train_data, std::vector<sw::Vector<float>> &train_labels)
+    // {
+    //     char progressLabelCharArr[16];
+    //     for (int i = 0; i < nEpochs; ++i)
+    //     {
+    //         snprintf(progressLabelCharArr, 16, "%d / %d", i + 1, nEpochs);
+    //         trainMiniBatches(miniBatchSize, learningRate, train_data, train_labels);
+    //     }
+    //     printf("\n"); // because the progress bar has no newline.
+    // }
 
     void trainMiniBatches(uint16_t miniBatchSize, float learningRate, std::vector<sw::Vector<float>> &train_data, std::vector<sw::Vector<float>> &train_labels)
     {
@@ -89,7 +89,7 @@ public:
     void feedforward(sw::Vector<float> x)
     {
         m_layers[0].feedForward(x);
-        for (int k = 1; k < m_layers.size(); ++k)
+        for (uint k = 1; k < m_layers.size(); ++k)
         {
             m_layers[k].feedForward(m_layers[k - 1].getY());
         }
@@ -98,7 +98,7 @@ public:
     void updateLayers()
     {
         // update
-        for (int k = 0; k < m_layers.size(); ++k)
+        for (uint k = 0; k < m_layers.size(); ++k)
         {
             m_layers[k].update(m_eta);
         }

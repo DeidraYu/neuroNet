@@ -16,18 +16,18 @@ public:
 private:
     struct ResultPair
     {
-        std::vector<sw::Vector<float>> zs;
-        std::vector<sw::Vector<float>> activations;
+        std::vector<sw::Vector<float>> m_zs;
+        std::vector<sw::Vector<float>> m_activations;
 
-        ResultPair(const auto zs, const auto activations) : zs(zs), activations(activations) {}
+        ResultPair(const auto zs, const auto activations) : m_zs(zs), m_activations(activations) {}
     };
 
     struct GradientPair
     {
-        std::vector<sw::Matrix<float>> weightGradient;
-        std::vector<sw::Vector<float>> biasGradient;
+        std::vector<sw::Matrix<float>> m_weightGradient;
+        std::vector<sw::Vector<float>> m_biasGradient;
 
-        GradientPair(const auto weightGradient, const auto biasGradient) : weightGradient(weightGradient), biasGradient(biasGradient) {}
+        GradientPair(const auto weightGradient, const auto biasGradient) : m_weightGradient(weightGradient), m_biasGradient(biasGradient) {}
     };
 
     std::vector<std::vector<uint8_t>> &m_images;

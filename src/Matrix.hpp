@@ -3,6 +3,7 @@
 #include <cinttypes>
 // #include <algorithm>
 #include <execution>
+#include <sstream>
 
 #include "Vector.hpp"
 
@@ -171,7 +172,7 @@ namespace sw
 
             for (const Vector<T> &row : m_rows)
             {
-                for (int c = 0; c < row.size(); ++c)
+                for (uint c = 0; c < row.size(); ++c)
                 {
                     sum += row[c];
                 }

@@ -194,16 +194,16 @@ namespace sw
                 using CommonType = typename std::common_type<T, uint16_t>::type;
                 std::uniform_int_distribution<CommonType> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-                for (int i = 0; i < sz; ++i)
+                for (uint i = 0; i < sz; ++i)
                 {
-                    randVector[i] = dis(gen);
+                    randVector[i] = static_cast<T>(dis(gen));
                 }
             }
             else if constexpr (std::is_floating_point_v<T>)
             {
                 // std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
                 std::uniform_real_distribution<T> dis(min, max);
-                for (int i = 0; i < sz; ++i)
+                for (uint i = 0; i < sz; ++i)
                 {
                     randVector[i] = dis(gen);
                 }
@@ -249,7 +249,7 @@ namespace sw
     }
 
     template <typename T>
-    Vector<T>::Vector(const Vector<T> &other) : m_vecStorage{other.m_vecStorage}
+    Vector<T>::Vector(const Vector<T> &other) : VectorView<T>(other), m_vecStorage{other.m_vecStorage}
     {
         this->m_pVec = &m_vecStorage;
     }
@@ -285,11 +285,13 @@ namespace sw
     template <typename U>
     typename std::common_type<T, U>::type VectorView<T>::operator*(const VectorView<U> &rhs) const
     {
-        typename std::common_type<T, U>::type result{}; // = 0;
+        using CommonType = typename std::common_type<T, U>::type;
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        CommonType result{CommonType{0}};
+
+        for (uint i = 0; i < (*m_pVec).size(); ++i)
         {
-            result += (*m_pVec)[i] * rhs[i];
+            result += static_cast<CommonType>(static_cast<CommonType>((*m_pVec)[i]) * static_cast<CommonType>(rhs[i]));
         }
 
         return result;
@@ -306,9 +308,9 @@ namespace sw
         std::vector<CommonType> resultVec;
         resultVec.reserve(size());
 
-        for (int i = 0; i < size(); ++i)
+        for (uint i = 0; i < size(); ++i)
         {
-            resultVec.push_back((*m_pVec)[i] * rhs);
+            resultVec.push_back(static_cast<CommonType>((*m_pVec)[i]) * static_cast<CommonType>(rhs));
         }
 
         return sw::Vector<CommonType>(resultVec);
@@ -318,11 +320,13 @@ namespace sw
     template <typename U>
     Vector<typename std::common_type<T, U>::type> VectorView<T>::point_mult(const VectorView<U> &rhs) const
     {
-        Vector<typename std::common_type<T, U>::type> result(size());
+        using CommonType = typename std::common_type<T, U>::type;
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        Vector<CommonType> result(size());
+
+        for (uint i = 0; i < (*m_pVec).size(); ++i)
         {
-            result[i] = (*m_pVec)[i] * rhs[i];
+            result[i] = (*m_pVec)[i] * static_cast<CommonType>(rhs[i]);
         }
         return result;
     }
@@ -333,7 +337,7 @@ namespace sw
     {
         using CommonType = typename std::common_type<T, U>::type;
         Matrix<CommonType> A(static_cast<uint32_t>(size()), static_cast<uint32_t>(rhs.size()));
-        for (int r = 0; r < size(); ++r)
+        for (uint r = 0; r < size(); ++r)
         {
             A[r] = (*m_pVec)[r] * rhs;
         }
@@ -346,7 +350,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        for (uint i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] + rhs[i];
         }
@@ -360,7 +364,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        for (uint i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] + rhs;
         }
@@ -374,7 +378,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        for (uint i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] - rhs;
         }
@@ -387,7 +391,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        for (uint i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] - rhs[i];
         }
@@ -410,7 +414,7 @@ namespace sw
         }
         else if constexpr (std::is_floating_point_v<T>)
         {
-            std::snprintf(buffer, 16, "%7.3f", num);
+            std::snprintf(buffer, 16, "%7.3f", static_cast<double>(num));
         }
 
         // else if (std::is_base_of<VectorView<int>, T>::value || std::is_same<T, VectorView<int>>::value)
@@ -435,7 +439,7 @@ namespace sw
     std::string VectorView<T>::toString() const
     {
         std::string str = "(";
-        for (int i = 0; i < size() - 1; ++i)
+        for (uint i = 0; i < size() - 1; ++i)
         {
             str = str + num2string((*m_pVec)[i]) + ", ";
         }
@@ -468,7 +472,7 @@ auto operator-(const T lhs, sw::VectorView<U> &rhs)
 
     sw::Vector<CommonType> resultVec(rhs.size());
 
-    for (int i = 0; i < rhs.size(); ++i)
+    for (uint i = 0; i < rhs.size(); ++i)
     {
         resultVec[i] = lhs - rhs[i];
     }
