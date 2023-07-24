@@ -3,7 +3,7 @@ project(NeuroNet )                    # Create project "simple_example"
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo")
 
 # Set default compile flags for GCC
 if(CMAKE_COMPILER_IS_GNUCXX)
