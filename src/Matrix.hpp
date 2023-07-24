@@ -152,6 +152,11 @@ namespace sw
             return result;
         }
 
+        void operator+=(const Matrix<T> &rhs)
+        {
+            std::transform(std::execution::par, m_rows.cbegin(), m_rows.cend(), rhs.m_rows.cbegin(), m_rows.begin(), std::plus<Vector<T>>());
+        }
+
         template <typename U>
         Matrix<typename std::common_type<T, U>::type> operator-(const Matrix<U> &rhs) const
         {

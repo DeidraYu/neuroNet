@@ -256,3 +256,17 @@ TEST(MatrixTest, operatorMultiplyIsScalar)
     EXPECT_EQ(A, Matrix<int>({{2, 4, 6},
                               {8, 10, 12}}));
 }
+
+TEST(MatrixTest, operatorPlusIs)
+{
+    Matrix<int> A{{1, 2, 3},
+                  {4, 5, 6}};
+
+    Matrix<int> B{{2, 4, 1},
+                  {2, 5, 1}};
+
+    A += B;
+
+    EXPECT_EQ(A, Matrix<int>({{3, 6, 4},
+                              {6, 10, 7}}));
+}
