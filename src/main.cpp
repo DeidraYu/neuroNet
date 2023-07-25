@@ -17,8 +17,8 @@
 
 int main()
 {
-    uint32_t nEpochs = 5;
-    uint16_t miniBatchSize = 10;
+    uint32_t nEpochs = 10;
+    uint16_t miniBatchSize = 5;
     float learningRate = 3.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
 

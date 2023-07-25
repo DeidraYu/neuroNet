@@ -34,6 +34,8 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     add_compile_options("$<$<CONFIG:RELEASE>:-O2;-Werror>")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
+# Set additional compiler flags for Release build (e.g., -O3)
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
 
 # .. -> hint, that the mnist package is one directory level above.
 # When using just "find_package(MNIST REQUIRED)", "MNIST_DIR"

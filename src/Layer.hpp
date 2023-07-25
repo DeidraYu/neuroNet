@@ -45,6 +45,7 @@ public:
                                                      m_b(numOutputs, 0.0f),
                                                      m_z(numOutputs, 0.0f),
                                                      m_y(numOutputs, 0.0f),
+                                                     m_gamma(numOutputs, 0.0f),
                                                      m_nablaC_b(numOutputs, 0.0f),
                                                      m_nablaC_W(numOutputs, numInputs, 0.0f),
                                                      m_u(numInputs) {}
@@ -56,22 +57,29 @@ public:
     }
 
     // call the backProp for miniBatchSize
-    void backProp(const Vector<float> &x, const Vector<float> &v)
+    void backProp(const Vector<float> &x, const Vector<float> &v, bool updateU = true)
     {
-        Vector gamma = v.point_mult(sigmoid_prime(m_z));
-        m_nablaC_b = m_nablaC_b + gamma;
-        m_nablaC_W = m_nablaC_W + gamma.outer(x); // (u .* sigma'(z)) x^T
-        m_u = m_W.transposeMult(gamma);
+        m_gamma = v.point_mult(sigmoid_prime(m_z));
+        // m_nablaC_b = m_nablaC_b + gamma;
+        // m_nablaC_W = m_nablaC_W + gamma.outer(x); // (u .* sigma'(z)) x^T
+        m_nablaC_b += m_gamma;
+        // m_nablaC_W += m_gamma.outer(x); // (u .* sigma'(z)) x^T
+        m_nablaC_W.plusIsOuter(m_gamma, x); // (u .* sigma'(z)) x^T
 
+        // Optimization, for Layer0 we must not compute m_u because there is nothing to back propagate to.
+        if (updateU == true)
+        {
+            m_u = m_W.transposeMult(m_gamma);
+        }
         m_miniBatchSize++;
     }
 
     // update the Weight matrix and bias vector
     void update(float eta)
     {
-        float scaleFactor = eta / m_miniBatchSize;
-        m_W = m_W - m_nablaC_W * scaleFactor; // TODO, implement eta
-        m_b = m_b - m_nablaC_b * scaleFactor; // TODO, implement eta
+        float scaleFactor = -eta / m_miniBatchSize; // Note the minus sign before eta, such that the following two lines get the +=
+        m_W += m_nablaC_W * scaleFactor;            // TODO, implement eta
+        m_b += m_nablaC_b * scaleFactor;            // TODO, implement eta
 
         m_nablaC_b.fill(0.0f);
         m_nablaC_W.fill(0.0f);
@@ -143,6 +151,7 @@ private:
     Vector<float> m_z;
     Vector<float> m_y;
 
+    Vector<float> m_gamma;
     Vector<float> m_nablaC_b;
     Matrix<float> m_nablaC_W;
     Vector<float> m_u;

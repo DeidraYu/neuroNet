@@ -1,11 +1,11 @@
 #pragma once
 
-#include <random>
-#include <vector>
-
-#include <type_traits>
-#include <string>
+#include <execution>
 #include <initializer_list>
+#include <random>
+#include <string>
+#include <type_traits>
+#include <vector>
 
 namespace sw
 {
@@ -48,31 +48,31 @@ namespace sw
 
         void operator+=(const T rhs)
         {
-            std::transform(begin(), end(), begin(), [rhs](const T &element)
+            std::transform(std::execution::par_unseq, begin(), end(), begin(), [rhs](const T &element)
                            { return element + rhs; });
         }
 
         void operator-=(const T rhs)
         {
-            std::transform(begin(), end(), begin(), [rhs](const T &element)
+            std::transform(std::execution::par_unseq, begin(), end(), begin(), [rhs](const T &element)
                            { return element - rhs; });
         }
 
         // We require the right hand side to be of the same type as the vector entries already are.
         void operator*=(const T rhs)
         {
-            std::transform(begin(), end(), begin(), [rhs](const T &element)
+            std::transform(std::execution::par_unseq, begin(), end(), begin(), [rhs](const T &element)
                            { return element * rhs; });
         }
 
         void operator+=(const VectorView<T> &rhs)
         {
-            std::transform(begin(), end(), rhs.cbegin(), begin(), std::plus<T>());
+            std::transform(std::execution::par_unseq, begin(), end(), rhs.cbegin(), begin(), std::plus<T>());
         }
 
         void operator-=(const VectorView<T> &rhs)
         {
-            std::transform(begin(), end(), rhs.cbegin(), begin(), std::minus<T>());
+            std::transform(std::execution::par_unseq, begin(), end(), rhs.cbegin(), begin(), std::minus<T>());
         }
 
         // We require the right hand side to be of the same type as the vector entries already are.
@@ -80,7 +80,7 @@ namespace sw
         //          not be what is expected because the typical * performs a standard vector multiplication.
         void operator*=(const VectorView<T> &rhs)
         {
-            std::transform(begin(), end(), rhs.cbegin(), begin(), std::multiplies<T>());
+            std::transform(std::execution::par_unseq, begin(), end(), rhs.cbegin(), begin(), std::multiplies<T>());
         }
 
         // Comparison operator ==
@@ -104,6 +104,23 @@ namespace sw
         template <typename U>
         Vector<typename std::common_type<T, U>::type> point_mult(const VectorView<U> &rhs) const;
 
+        // in place operation for:
+        // u = u + a*v
+        void updateWithScaledVector(const T scalar, const VectorView<T> &rhs)
+        {
+            // std::transform(std::execution::par_unseq, cbegin(), cend(), rhs.cbegin(), begin(), [scalar](const T &vecElement, const T &vecElement_other)
+            //                { return vecElement + scalar * vecElement_other; });
+
+            // std::transform(std::execution::par_unseq, begin(), end(), rhs.cbegin(), [scalar](T &thisVecElement, const T &otherVecElement)
+            //                { thisVecElement += scalar * otherVecElement; }); // does not build. std::transform requires return statement
+
+            std::for_each(std::execution::par_unseq, begin(), end(), [&](T &thisVecElement)
+                          {
+        const T & otherVecElement  = rhs[static_cast<int>(&thisVecElement - &((*m_pVec)[0]))];
+        // Your operation here, for example, print the sum of each pair
+        thisVecElement += scalar * otherVecElement; });
+        }
+
         template <typename U>
         Matrix<typename std::common_type<T, U>::type> outer(const VectorView<U> &rhs) const;
 
@@ -117,7 +134,10 @@ namespace sw
         template <typename U>
         Vector<typename std::common_type<T, U>::type> operator-(const VectorView<U> &rhs) const;
 
-        void fill(T value) { std::fill(begin(), end(), value); }
+        void fill(T value)
+        {
+            std::fill(begin(), end(), value);
+        }
 
         template <typename U>
             requires arithmetic<U>
@@ -131,12 +151,24 @@ namespace sw
         }
 
         // Iterators
-        typename std::vector<T>::iterator begin() { return m_pVec->begin(); }
-        typename std::vector<T>::iterator end() { return m_pVec->end(); }
+        typename std::vector<T>::iterator begin()
+        {
+            return m_pVec->begin();
+        }
+        typename std::vector<T>::iterator end()
+        {
+            return m_pVec->end();
+        }
 
         // Constant iterators
-        auto cbegin() const { return m_pVec->cbegin(); }
-        auto cend() const { return m_pVec->cend(); }
+        auto cbegin() const
+        {
+            return m_pVec->cbegin();
+        }
+        auto cend() const
+        {
+            return m_pVec->cend();
+        }
 
         std::string toString() const;
 

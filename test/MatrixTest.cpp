@@ -270,3 +270,17 @@ TEST(MatrixTest, operatorPlusIs)
     EXPECT_EQ(A, Matrix<int>({{3, 6, 4},
                               {6, 10, 7}}));
 }
+
+TEST(MatrixTest, plusIsOuter)
+{
+    Matrix<int> A(3, 2, 1);
+
+    Vector u{2, 5, 8};
+    Vector v{1, 2};
+
+    A.plusIsOuter(u, v);
+
+    EXPECT_EQ(A, Matrix<int>({{3, 5},
+                              {6, 11},
+                              {9, 17}}));
+}

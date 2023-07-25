@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cinttypes>
-// #include <algorithm>
 #include <execution>
 #include <sstream>
 
@@ -60,7 +59,7 @@ namespace sw
 
             Vector<CommonType> result(m_nRows);
 
-            std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
+            std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](const auto &row)
                           {
         size_t r = &row - &m_rows[0];
         result[static_cast<int>(r)] = row * rhs; });
@@ -145,7 +144,7 @@ namespace sw
 
             Matrix<CommonType> result(m_nRows, m_nCols);
 
-            std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
+            std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](const auto &row)
                           {
         size_t r = &row - &m_rows[0];
         result[static_cast<int>(r)] = row + rhs[static_cast<int>(r)]; });
@@ -154,7 +153,16 @@ namespace sw
 
         void operator+=(const Matrix<T> &rhs)
         {
-            std::transform(std::execution::par, m_rows.cbegin(), m_rows.cend(), rhs.m_rows.cbegin(), m_rows.begin(), std::plus<Vector<T>>());
+            std::transform(std::execution::par_unseq, m_rows.cbegin(), m_rows.cend(), rhs.m_rows.cbegin(), m_rows.begin(), std::plus<Vector<T>>());
+        }
+
+        // A.plusIsOuter(u, v) ---> A = A + u.outer(v)
+        void plusIsOuter(const VectorView<T> &lhs, const VectorView<T> &rhs)
+        {
+            std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](Vector<T> &thisRow)
+                          { 
+                            int rowIndex = static_cast<int>(&thisRow - &m_rows[0]);
+                          thisRow.updateWithScaledVector(lhs[rowIndex], rhs); });
         }
 
         template <typename U>
@@ -164,7 +172,7 @@ namespace sw
 
             Matrix<CommonType> result(m_nRows, m_nCols);
 
-            std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
+            std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](const auto &row)
                           {
         size_t r = &row - &m_rows[0];
         result[static_cast<int>(r)] = row - rhs[static_cast<int>(r)]; });

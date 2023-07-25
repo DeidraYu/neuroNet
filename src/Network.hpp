@@ -73,7 +73,7 @@ public:
 
         if (L == 0) // there is only one layer
         {
-            m_layers.back().backProp(x, v);
+            m_layers.back().backProp(x, v, false);
         }
         else
         {
@@ -82,7 +82,7 @@ public:
             {
                 m_layers[k].backProp(m_layers[k - 1].getY(), m_layers[k + 1].getU());
             }
-            m_layers[0].backProp(x, m_layers[1].getU());
+            m_layers[0].backProp(x, m_layers[1].getU(), false);
         }
     }
 

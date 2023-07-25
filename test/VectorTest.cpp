@@ -428,3 +428,13 @@ TEST(VectorTest, operatorMinusIsVector)
 
     EXPECT_EQ(u, Vector<int16_t>({-1, -1, -1}));
 }
+
+TEST(VectorTest, updateWithScaledVector)
+{
+    Vector<int16_t> u{1, 2, 3};
+    Vector<int16_t> v{2, 3, 4};
+
+    u.updateWithScaledVector(2, v);
+
+    EXPECT_EQ(u, Vector<int16_t>({5, 8, 11}));
+}
