@@ -118,7 +118,7 @@ namespace sw
                           {
         const T & otherVecElement  = rhs[static_cast<int>(&thisVecElement - &((*m_pVec)[0]))];
         // Your operation here, for example, print the sum of each pair
-        thisVecElement += scalar * otherVecElement; });
+        thisVecElement += static_cast<T>(scalar * otherVecElement); });
         }
 
         template <typename U>
