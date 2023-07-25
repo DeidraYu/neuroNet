@@ -3,7 +3,7 @@ project(NeuroNet )                    # Create project "simple_example"
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo")
 
 # Set default compile flags for GCC
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -19,7 +19,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
         -Wall
         -Wextra
         -pedantic
-        -Wmissing-declarations
+        # -Wmissing-declarations # I suppresed this because there is an Issue with gtest on Linux
         -Wunused
         -Wpedantic
         -Wconversion
@@ -32,6 +32,9 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     )
     
     add_compile_options("$<$<CONFIG:RELEASE>:-O2;-Werror>")
+else()
+    # Set additional compiler flags for Release build (e.g., -O3)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 

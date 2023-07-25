@@ -74,25 +74,30 @@ TEST(LayerTest, update)
         layer.feedForward(x);
         v = layer.getY() - x; // u = dC / dx
         layer.backProp(x, v);
-        layer.update();
-
-        std::cout << "W:    " << layer.getW().toString() << std::endl;
-        std::cout << "b:    " << layer.getB().toString() << std::endl;
-        std::cout << "Cost: " << 0.5f * v * v << std::endl;
-        std::cout << "y:    " << layer.getY().toString() << std::endl;
-
-        std::cout << std::endl;
+        layer.update(1.0f);
     }
+
+    std::cout << "W:    " << layer.getW().toString() << std::endl;
+    std::cout << "b:    " << layer.getB().toString() << std::endl;
+    std::cout << "Cost: " << 0.5f * v * v << std::endl;
+    std::cout << "y:    " << layer.getY().toString() << std::endl;
+
+    std::cout << std::endl;
 }
+
+float sigmoid(float z);
+float sigmoid_prime(float z);
+Vector<float> sigmoid(sw::Vector<float> z);
+Vector<float> sigmoid_prime(sw::Vector<float> z);
 
 float sigmoid(float z)
 {
-    return 1.0f / (1.0f + exp(-z));
+    return 1.0f / (1.0f + static_cast<float>(exp(-z)));
 }
 
 float sigmoid_prime(float z)
 {
-    float s = 1.0f / (1.0f + exp(-z));
+    float s = sigmoid(z);
     return (1.0f - s) * s;
 }
 
@@ -100,7 +105,7 @@ Vector<float> sigmoid(sw::Vector<float> z)
 {
     sw::Vector<float> y(z.size());
 
-    for (int i = 0; i < z.size(); ++i)
+    for (uint32_t i = 0; i < z.size(); ++i)
     {
         y[i] = sigmoid(z[i]);
     }
@@ -112,7 +117,7 @@ Vector<float> sigmoid_prime(sw::Vector<float> z)
 {
     sw::Vector<float> y(z.size());
 
-    for (int i = 0; i < z.size(); ++i)
+    for (uint32_t i = 0; i < z.size(); ++i)
     {
         y[i] = sigmoid_prime(z[i]);
     }
@@ -146,12 +151,12 @@ TEST(LayerTest, update2)
         layer.feedForward(x1);
         v = layer.getY() - x1; // u = dC / dx
         layer.backProp(x1, v);
-        layer.update();
+        layer.update(1.0f);
 
         layer.feedForward(x2);
         v = layer.getY() - x2; // u = dC / dx
         layer.backProp(x2, v);
-        layer.update();
+        layer.update(1.0f);
     }
 
     std::cout << "W:    " << layer.getW().toString() << std::endl;
@@ -180,7 +185,7 @@ TEST(LayerTest, 3to2Layer)
     layer.feedForward(x);
     v = layer.getY() - x; // u = dC / dx
     layer.backProp(x, v);
-    layer.update();
+    layer.update(1.0f);
 
     std::cout << "W:    " << layer.getW().toString() << std::endl;
     std::cout << "b:    " << layer.getB().toString() << std::endl;
@@ -234,7 +239,7 @@ TEST(NetworkTest, multiLayeredNetwork)
     Vector x2{0.8f, 0.6f};
     Vector x3{0.7f, 0.8f};
 
-    for (int i = 0; i < 10000; ++i)
+    for (int i = 0; i < 100; ++i)
     {
         network.train(x1, x1);
         network.train(x2, x2);
@@ -251,4 +256,67 @@ TEST(NetworkTest, multiLayeredNetwork)
     std::cout << network.getOutput().toString() << std::endl;
 
     // TODO: make network return cost
+}
+
+TEST(NetworkTest, trainNet)
+{
+    uint16_t nEpochs = 1000;
+    uint16_t miniBatchSize = 2;
+    float learningRate = 1.0f;
+    std::vector<uint16_t> layersizes{2, 2, 2};
+
+    std::vector<Vector<float>> train_data{{0.0f, 0.0f}, {1.0f, 0.0f}, {0.5f, 0.5f}, {0.0f, 1.0f}};
+    std::vector<Vector<float>> train_labels{{1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f}};
+
+    Network network(layersizes);
+
+    for (int i = 0; i < nEpochs; ++i)
+    {
+        network.trainMiniBatches(miniBatchSize, learningRate, train_data, train_labels);
+    }
+
+    network.feedforward(train_data[0]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[1]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[2]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[3]);
+    std::cout << network.getOutput().toString() << std::endl;
+    // TODO: replace with evaluator
+}
+
+TEST(NetworkTest, trainNetRandomWB)
+{
+    uint16_t nEpochs = 1000;
+    uint16_t miniBatchSize = 2;
+    float learningRate = 1.0f;
+    std::vector<uint16_t> layersizes{2, 5, 2};
+
+    std::vector<Vector<float>> train_data{{0.0f, 0.0f}, {1.0f, 0.0f}, {0.5f, 0.5f}, {0.0f, 1.0f}};
+    std::vector<Vector<float>> train_labels{{1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f}};
+
+    Network network(layersizes);
+    network.randomizeWB(-2.0f, 2.0f);
+
+    for (int i = 0; i < nEpochs; ++i)
+    {
+        network.trainMiniBatches(miniBatchSize, learningRate, train_data, train_labels);
+    }
+
+    network.feedforward(train_data[0]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[1]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[2]);
+    std::cout << network.getOutput().toString() << std::endl;
+
+    network.feedforward(train_data[3]);
+    std::cout << network.getOutput().toString() << std::endl;
+    // TODO: replace with evaluator
 }

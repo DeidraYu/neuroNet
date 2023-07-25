@@ -11,7 +11,7 @@ template <typename T>
 class MatrixPerformance
 {
 public:
-    MatrixPerformance(int size, int numRepeats) : A(size, size), x(size), numRepeats(numRepeats)
+    MatrixPerformance(int size, int numRepeats) : A(size, size), x(size), m_numRepeats(numRepeats)
     {
 
         if constexpr (std::is_integral_v<T>)
@@ -30,7 +30,7 @@ public:
     {
         auto start = std::chrono::steady_clock::now();
 
-        for (int n = 0; n < numRepeats; n++)
+        for (int n = 0; n < m_numRepeats; n++)
         {
             y = A * x;
         }
@@ -39,15 +39,15 @@ public:
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
         long long time_us = duration.count();
-        float totalTime_ms = time_us / 1'000.0f;
-        float meanTime_ms = totalTime_ms / numRepeats;
+        float totalTime_ms = static_cast<float>(time_us) / 1'000.0f;
+        float meanTime_ms = totalTime_ms / static_cast<float>(m_numRepeats);
         return meanTime_ms;
     }
 
     Matrix<T> A;
     Vector<T> x;
     Vector<T> y;
-    int numRepeats;
+    int m_numRepeats;
 };
 
 template <typename T>
@@ -58,7 +58,7 @@ struct MatrixRunner
     {
         MatrixPerformance<T> matrixPerformance(size, numRepeats);
         printf(".");
-        float meanTime_ms = matrixPerformance.run();
+        double meanTime_ms = matrixPerformance.run();
         printf("Type: %8s  Size: %5d  Time: %7.2f ms\n", typeString.c_str(), size, meanTime_ms);
 
         // return meanTime_ms;
@@ -71,7 +71,7 @@ TEST(Numbers, numbers)
         uint64_t a = std::numeric_limits<uint64_t>::max();
         unsigned long long b = std::numeric_limits<unsigned long long>::max();
         std::cout << "a: " << a << std::endl;
-        std::cout << "b: " << a << std::endl
+        std::cout << "b: " << b << std::endl
                   << std::endl;
         std::uniform_int_distribution<uint64_t> dis(0, a);
     }

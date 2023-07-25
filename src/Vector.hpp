@@ -1,11 +1,11 @@
 #pragma once
 
-#include <random>
-#include <vector>
-
-#include <type_traits>
-#include <string>
+#include <execution>
 #include <initializer_list>
+#include <random>
+#include <string>
+#include <type_traits>
+#include <vector>
 
 namespace sw
 {
@@ -46,8 +46,80 @@ namespace sw
                          sw::Vector<typename std::common_type<T, U>::type>>
         operator*(const U &rhs) const;
 
+        void operator+=(const T rhs)
+        {
+            std::transform(std::execution::par_unseq, begin(), end(), begin(), [rhs](const T &element)
+                           { return element + rhs; });
+        }
+
+        void operator-=(const T rhs)
+        {
+            std::transform(std::execution::par_unseq, begin(), end(), begin(), [rhs](const T &element)
+                           { return element - rhs; });
+        }
+
+        // We require the right hand side to be of the same type as the vector entries already are.
+        void operator*=(const T rhs)
+        {
+            std::transform(std::execution::par_unseq, begin(), end(), begin(), [rhs](const T &element)
+                           { return element * rhs; });
+        }
+
+        void operator+=(const VectorView<T> &rhs)
+        {
+            std::transform(std::execution::par_unseq, begin(), end(), rhs.cbegin(), begin(), std::plus<T>());
+        }
+
+        void operator-=(const VectorView<T> &rhs)
+        {
+            std::transform(std::execution::par_unseq, begin(), end(), rhs.cbegin(), begin(), std::minus<T>());
+        }
+
+        // We require the right hand side to be of the same type as the vector entries already are.
+        // Warning: Note that *= is performing an element-wise / point-wise multiplication. This might
+        //          not be what is expected because the typical * performs a standard vector multiplication.
+        void operator*=(const VectorView<T> &rhs)
+        {
+            std::transform(std::execution::par_unseq, begin(), end(), rhs.cbegin(), begin(), std::multiplies<T>());
+        }
+
+        // Comparison operator ==
+        bool operator==(const VectorView<T> &other) const
+        {
+            return (*m_pVec) == (*other.m_pVec);
+        }
+
+        bool operator!=(const VectorView<T> &other) const
+        {
+            return (*m_pVec) != (*other.m_pVec);
+        }
+
+        // Overload the << operator for output
+        friend std::ostream &operator<<(std::ostream &os, const Vector<T> &vec)
+        {
+            os << vec.toString();
+            return os;
+        }
+
         template <typename U>
         Vector<typename std::common_type<T, U>::type> point_mult(const VectorView<U> &rhs) const;
+
+        // in place operation for:
+        // u = u + a*v
+        void updateWithScaledVector(const T scalar, const VectorView<T> &rhs)
+        {
+            // std::transform(std::execution::par_unseq, cbegin(), cend(), rhs.cbegin(), begin(), [scalar](const T &vecElement, const T &vecElement_other)
+            //                { return vecElement + scalar * vecElement_other; });
+
+            // std::transform(std::execution::par_unseq, begin(), end(), rhs.cbegin(), [scalar](T &thisVecElement, const T &otherVecElement)
+            //                { thisVecElement += scalar * otherVecElement; }); // does not build. std::transform requires return statement
+
+            std::for_each(std::execution::par_unseq, begin(), end(), [&](T &thisVecElement)
+                          {
+        const T & otherVecElement  = rhs[static_cast<int>(&thisVecElement - &((*m_pVec)[0]))];
+        // Your operation here, for example, print the sum of each pair
+        thisVecElement += static_cast<T>(scalar * otherVecElement); });
+        }
 
         template <typename U>
         Matrix<typename std::common_type<T, U>::type> outer(const VectorView<U> &rhs) const;
@@ -62,6 +134,11 @@ namespace sw
         template <typename U>
         Vector<typename std::common_type<T, U>::type> operator-(const VectorView<U> &rhs) const;
 
+        void fill(T value)
+        {
+            std::fill(begin(), end(), value);
+        }
+
         template <typename U>
             requires arithmetic<U>
         auto operator-(const U &rhs) const;
@@ -73,16 +150,24 @@ namespace sw
             m_pVec->resize(newSize);
         }
 
-        // Begin iterator
+        // Iterators
         typename std::vector<T>::iterator begin()
         {
             return m_pVec->begin();
         }
-
-        // End iterator
         typename std::vector<T>::iterator end()
         {
             return m_pVec->end();
+        }
+
+        // Constant iterators
+        auto cbegin() const
+        {
+            return m_pVec->cbegin();
+        }
+        auto cend() const
+        {
+            return m_pVec->cend();
         }
 
         std::string toString() const;
@@ -141,16 +226,16 @@ namespace sw
                 using CommonType = typename std::common_type<T, uint16_t>::type;
                 std::uniform_int_distribution<CommonType> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 
-                for (int i = 0; i < sz; ++i)
+                for (uint32_t i = 0; i < sz; ++i)
                 {
-                    randVector[i] = dis(gen);
+                    randVector[i] = static_cast<T>(dis(gen));
                 }
             }
             else if constexpr (std::is_floating_point_v<T>)
             {
                 // std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
                 std::uniform_real_distribution<T> dis(min, max);
-                for (int i = 0; i < sz; ++i)
+                for (uint32_t i = 0; i < sz; ++i)
                 {
                     randVector[i] = dis(gen);
                 }
@@ -196,7 +281,7 @@ namespace sw
     }
 
     template <typename T>
-    Vector<T>::Vector(const Vector<T> &other) : m_vecStorage{other.m_vecStorage}
+    Vector<T>::Vector(const Vector<T> &other) : VectorView<T>(other), m_vecStorage{other.m_vecStorage}
     {
         this->m_pVec = &m_vecStorage;
     }
@@ -232,11 +317,13 @@ namespace sw
     template <typename U>
     typename std::common_type<T, U>::type VectorView<T>::operator*(const VectorView<U> &rhs) const
     {
-        typename std::common_type<T, U>::type result{}; // = 0;
+        using CommonType = typename std::common_type<T, U>::type;
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        CommonType result{CommonType{0}};
+
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
-            result += (*m_pVec)[i] * rhs[i];
+            result += static_cast<CommonType>(static_cast<CommonType>((*m_pVec)[i]) * static_cast<CommonType>(rhs[i]));
         }
 
         return result;
@@ -253,9 +340,9 @@ namespace sw
         std::vector<CommonType> resultVec;
         resultVec.reserve(size());
 
-        for (int i = 0; i < size(); ++i)
+        for (uint32_t i = 0; i < size(); ++i)
         {
-            resultVec.push_back((*m_pVec)[i] * rhs);
+            resultVec.push_back(static_cast<CommonType>((*m_pVec)[i]) * static_cast<CommonType>(rhs));
         }
 
         return sw::Vector<CommonType>(resultVec);
@@ -265,11 +352,13 @@ namespace sw
     template <typename U>
     Vector<typename std::common_type<T, U>::type> VectorView<T>::point_mult(const VectorView<U> &rhs) const
     {
-        Vector<typename std::common_type<T, U>::type> result(size());
+        using CommonType = typename std::common_type<T, U>::type;
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        Vector<CommonType> result(size());
+
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
-            result[i] = (*m_pVec)[i] * rhs[i];
+            result[i] = (*m_pVec)[i] * static_cast<CommonType>(rhs[i]);
         }
         return result;
     }
@@ -280,7 +369,7 @@ namespace sw
     {
         using CommonType = typename std::common_type<T, U>::type;
         Matrix<CommonType> A(static_cast<uint32_t>(size()), static_cast<uint32_t>(rhs.size()));
-        for (int r = 0; r < size(); ++r)
+        for (uint32_t r = 0; r < size(); ++r)
         {
             A[r] = (*m_pVec)[r] * rhs;
         }
@@ -293,7 +382,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] + rhs[i];
         }
@@ -307,7 +396,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] + rhs;
         }
@@ -321,7 +410,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] - rhs;
         }
@@ -334,7 +423,7 @@ namespace sw
     {
         Vector<typename std::common_type<T, U>::type> result(size());
 
-        for (int i = 0; i < (*m_pVec).size(); ++i)
+        for (uint32_t i = 0; i < (*m_pVec).size(); ++i)
         {
             result[i] = (*m_pVec)[i] - rhs[i];
         }
@@ -357,7 +446,7 @@ namespace sw
         }
         else if constexpr (std::is_floating_point_v<T>)
         {
-            std::snprintf(buffer, 16, "%7.3f", num);
+            std::snprintf(buffer, 16, "%7.3f", static_cast<double>(num));
         }
 
         // else if (std::is_base_of<VectorView<int>, T>::value || std::is_same<T, VectorView<int>>::value)
@@ -382,7 +471,7 @@ namespace sw
     std::string VectorView<T>::toString() const
     {
         std::string str = "(";
-        for (int i = 0; i < size() - 1; ++i)
+        for (uint32_t i = 0; i < size() - 1; ++i)
         {
             str = str + num2string((*m_pVec)[i]) + ", ";
         }
@@ -415,7 +504,7 @@ auto operator-(const T lhs, sw::VectorView<U> &rhs)
 
     sw::Vector<CommonType> resultVec(rhs.size());
 
-    for (int i = 0; i < rhs.size(); ++i)
+    for (uint32_t i = 0; i < rhs.size(); ++i)
     {
         resultVec[i] = lhs - rhs[i];
     }

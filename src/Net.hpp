@@ -16,6 +16,7 @@ public:
 
     void updateWeights(std::vector<sw::Matrix<float>>);
     void updateBiases(std::vector<sw::Vector<float>>);
+    void setWeightsBiases(float value);
     std::vector<uint16_t> getSizes();
 
     sw::Vector<float> sigmoid(sw::Vector<float> z);

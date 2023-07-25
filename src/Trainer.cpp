@@ -92,9 +92,12 @@ void Trainer::trainMiniBatch(Net &net, size_t imageIndex, size_t miniBatchSize, 
         {
 
             // !!!!!!!!!!!!!!!!!!! make it += this is a temporary fix !!!!!!!!!!!!!!!!!!!!!!!!!!
-            weightGradient[j] = weightGradient[j] + gradients.weightGradient[j];
-            biasGradient[j] = biasGradient[j] + gradients.biasGradient[j];
+            weightGradient[j] = weightGradient[j] + gradients.m_weightGradient[j];
+            biasGradient[j] = biasGradient[j] + gradients.m_biasGradient[j];
         }
+
+        // printf(weightGradient[1].toString().c_str());
+        // printf(biasGradient[1].toString().c_str());
 
         for (int j = 1; j < netSizes.size() - 1; j++)
         {
@@ -122,7 +125,7 @@ Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
 
     activations.push_back(sw::Vector(image.getStdVector()));
 
-    sw::Vector<float> z = weights[0] * image + biases[0];
+    sw::Vector<float> z = weights[0].transposeMult(sw::Vector(image.getStdVector())) + biases[0];
     sw::Vector<float> activation = net.sigmoid(z);
 
     zs.push_back(z);
@@ -130,7 +133,7 @@ Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
 
     for (int i = 1; i < layerSizes.size() - 1; ++i)
     {
-        z = weights[i] * activation + biases[i];
+        z = weights[i].transposeMult(activation) + biases[i];
         activation = net.sigmoid(z);
 
         zs.push_back(z);
@@ -142,7 +145,7 @@ Trainer::ResultPair Trainer::feedforward(Net &net, sw::VectorView<float> &image)
 
 Trainer::GradientPair Trainer::backProp(Net &net, ResultPair resultPair, uint8_t label, size_t miniBatchSize, float learningRate)
 {
-    sw::Vector<float> netWorkOutput = resultPair.activations[resultPair.activations.size() - 1];
+    sw::Vector<float> netWorkOutput = resultPair.m_activations[resultPair.m_activations.size() - 1];
     sw::Vector<float> errorVector = netWorkOutput - oneHotEncode(label, 10);
 
     auto &weights = net.getWeights();
@@ -161,21 +164,21 @@ Trainer::GradientPair Trainer::backProp(Net &net, ResultPair resultPair, uint8_t
     //(so the last index is nLayers - 2).  sigmoid_prime(z) is the rate of change of the output, multiply this with your error
     //(wanted change in the output to get rid of this error) to calculate how much to change z. So for the last layer deltaZ has length 10.
     // scale deltaZ here to avoid a matrix-scalar product
-    sw::Vector<float> deltaZ = errorVector.point_mult(net.sigmoid_prime(resultPair.zs[nInBetweenLayers - 1])) * (learningRate / miniBatchSize);
-    weightGradient[nInBetweenLayers - 1] = deltaZ.outer(resultPair.activations[nInBetweenLayers - 1]);
+    sw::Vector<float> deltaZ = errorVector.point_mult(net.sigmoid_prime(resultPair.m_zs[nInBetweenLayers - 1])) * (learningRate / miniBatchSize);
+    weightGradient[nInBetweenLayers - 1] = deltaZ.outer(resultPair.m_activations[nInBetweenLayers - 1]);
     biasGradient[nInBetweenLayers - 1] = deltaZ;
 
     for (int i = 1; i < nInBetweenLayers; ++i)
     {
-        sigmoidPrime = net.sigmoid_prime(resultPair.zs[nInBetweenLayers - i - 1]);
+        sigmoidPrime = net.sigmoid_prime(resultPair.m_zs[nInBetweenLayers - i - 1]);
         // auto x = weights[nInBetweenLayers - i] * deltaZ;
 
         deltaZ = sigmoidPrime.point_mult(weights[nInBetweenLayers - i].transposeMult(deltaZ));
 
-        weightGradient[nInBetweenLayers - i - 1] = deltaZ.outer(resultPair.activations[nInBetweenLayers - i - 1]);
+        weightGradient[nInBetweenLayers - i - 1] = deltaZ.outer(resultPair.m_activations[nInBetweenLayers - i - 1]);
         // printf(weightGradient[nInBetweenLayers - i - 1].toString().c_str());
         auto printVec = (0.5f * (weightGradient[nInBetweenLayers - i - 1][1] + sw::Vector(784, 1.0f)));
-        printSW(printVec);
+        // printSW(printVec);
         biasGradient[nInBetweenLayers - i - 1] = deltaZ;
     }
 

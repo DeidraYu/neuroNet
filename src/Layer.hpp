@@ -45,6 +45,7 @@ public:
                                                      m_b(numOutputs, 0.0f),
                                                      m_z(numOutputs, 0.0f),
                                                      m_y(numOutputs, 0.0f),
+                                                     m_gamma(numOutputs, 0.0f),
                                                      m_nablaC_b(numOutputs, 0.0f),
                                                      m_nablaC_W(numOutputs, numInputs, 0.0f),
                                                      m_u(numInputs) {}
@@ -56,18 +57,38 @@ public:
     }
 
     // call the backProp for miniBatchSize
-    void backProp(const Vector<float> &x, const Vector<float> &v, float learningRate = 1.0f)
+    void backProp(const Vector<float> &x, const Vector<float> &v, bool updateU = true)
     {
-        m_nablaC_b = v.point_mult(sigmoid_prime(m_z));
-        m_nablaC_W = m_nablaC_b.outer(x); // (u .* sigma'(z)) x^T
-        m_u = m_W.transposeMult(m_nablaC_b);
+        m_gamma = v.point_mult(sigmoid_prime(m_z));
+        // m_nablaC_b = m_nablaC_b + gamma;
+        // m_nablaC_W = m_nablaC_W + gamma.outer(x); // (u .* sigma'(z)) x^T
+        m_nablaC_b += m_gamma;
+        // m_nablaC_W += m_gamma.outer(x); // (u .* sigma'(z)) x^T
+        m_nablaC_W.plusIsOuter(m_gamma, x); // (u .* sigma'(z)) x^T
+
+        // Optimization, for Layer0 we must not compute m_u because there is nothing to back propagate to.
+        if (updateU == true)
+        {
+            m_u = m_W.transposeMult(m_gamma);
+        }
+        m_miniBatchSize++;
     }
 
     // update the Weight matrix and bias vector
-    void update()
+    void update(float eta)
     {
-        m_W = m_W - m_nablaC_W; // TODO, implement eta
-        m_b = m_b - m_nablaC_b; // TODO, implement eta
+        float scaleFactor = -eta / m_miniBatchSize; // Note the minus sign before eta, such that the following two lines get the +=
+        m_W += m_nablaC_W * scaleFactor;            // TODO, implement eta
+        m_b += m_nablaC_b * scaleFactor;            // TODO, implement eta
+
+        m_nablaC_b.fill(0.0f);
+        m_nablaC_W.fill(0.0f);
+        m_miniBatchSize = 0;
+    }
+
+    void randomizeWB(float min, float max)
+    {
+        m_W = Matrix<float>::rand(m_W.getNumRows(), m_W.getNumCols(), min, max);
     }
 
     constexpr uint16_t size() const { return m_numOutputs; }
@@ -87,12 +108,12 @@ private:
 
     float sigmoid(float z)
     {
-        return 1.0f / (1.0f + exp(-z));
+        return 1.0f / (1.0f + static_cast<float>(exp(-z)));
     }
 
     float sigmoid_prime(float z)
     {
-        float s = 1.0f / (1.0f + exp(-z));
+        float s = sigmoid(z);
         return (1.0f - s) * s;
     }
 
@@ -100,7 +121,7 @@ private:
     {
         sw::Vector<float> y(z.size());
 
-        for (int i = 0; i < z.size(); ++i)
+        for (uint32_t i = 0; i < z.size(); ++i)
         {
             y[i] = sigmoid(z[i]);
         }
@@ -112,7 +133,7 @@ private:
     {
         sw::Vector<float> y(z.size());
 
-        for (int i = 0; i < z.size(); ++i)
+        for (uint32_t i = 0; i < z.size(); ++i)
         {
             y[i] = sigmoid_prime(z[i]);
         }
@@ -122,15 +143,18 @@ private:
 
     sw::Vector<float> oneHotEncode(int value, int numClasses);
 
+    uint16_t m_numInputs;
+    uint16_t m_numOutputs;
+
     Matrix<float> m_W;
     Vector<float> m_b;
     Vector<float> m_z;
     Vector<float> m_y;
 
+    Vector<float> m_gamma;
     Vector<float> m_nablaC_b;
     Matrix<float> m_nablaC_W;
     Vector<float> m_u;
 
-    uint16_t m_numInputs;
-    uint16_t m_numOutputs;
+    uint16_t m_miniBatchSize{0};
 };

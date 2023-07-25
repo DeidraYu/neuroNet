@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cinttypes>
-// #include <algorithm>
 #include <execution>
+#include <sstream>
 
 #include "Vector.hpp"
 
@@ -59,11 +59,65 @@ namespace sw
 
             Vector<CommonType> result(m_nRows);
 
-            std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
+            std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](const auto &row)
                           {
         size_t r = &row - &m_rows[0];
         result[static_cast<int>(r)] = row * rhs; });
             return result;
+        }
+
+        template <typename U>
+            requires arithmetic<U>
+        auto operator*(U rhs) const
+        {
+            using CommonType = typename std::common_type<T, U>::type;
+
+            Matrix<CommonType> result(m_nRows, m_nCols);
+
+            // TODO: Implement a parallezed version for the multiplication
+            // Take the linear combination of the columns of the transpose matrix.
+            for (uint32_t i = 0; i < m_nRows; ++i)
+            {
+                // Note that m_rows[i] is the i-th column of the transposed matrix.
+                result[i] = m_rows[i] * rhs;
+            }
+            return result;
+        }
+
+        void operator+=(T rhs)
+        {
+            std::for_each(m_rows.begin(), m_rows.end(), [rhs](auto &row)
+                          { row += rhs; });
+        }
+
+        void operator-=(T rhs)
+        {
+            std::for_each(m_rows.begin(), m_rows.end(), [rhs](auto &row)
+                          { row -= rhs; });
+        }
+
+        void operator*=(T rhs)
+        {
+            std::for_each(m_rows.begin(), m_rows.end(), [rhs](auto &row)
+                          { row *= rhs; });
+        }
+
+        // Comparison operator ==
+        bool operator==(const Matrix<T> &other) const
+        {
+            return m_rows == other.m_rows;
+        }
+
+        bool operator!=(const VectorView<T> &other) const
+        {
+            return m_rows != other.m_rows;
+        }
+
+        // Overload the << operator for output
+        friend std::ostream &operator<<(std::ostream &os, const Matrix<T> &mat)
+        {
+            os << mat.toString();
+            return os;
         }
 
         template <typename U>
@@ -90,11 +144,25 @@ namespace sw
 
             Matrix<CommonType> result(m_nRows, m_nCols);
 
-            std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
+            std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](const auto &row)
                           {
         size_t r = &row - &m_rows[0];
         result[static_cast<int>(r)] = row + rhs[static_cast<int>(r)]; });
             return result;
+        }
+
+        void operator+=(const Matrix<T> &rhs)
+        {
+            std::transform(std::execution::par_unseq, m_rows.cbegin(), m_rows.cend(), rhs.m_rows.cbegin(), m_rows.begin(), std::plus<Vector<T>>());
+        }
+
+        // A.plusIsOuter(u, v) ---> A = A + u.outer(v)
+        void plusIsOuter(const VectorView<T> &lhs, const VectorView<T> &rhs)
+        {
+            std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](Vector<T> &thisRow)
+                          { 
+                            int rowIndex = static_cast<int>(&thisRow - &m_rows[0]);
+                          thisRow.updateWithScaledVector(lhs[rowIndex], rhs); });
         }
 
         template <typename U>
@@ -104,7 +172,7 @@ namespace sw
 
             Matrix<CommonType> result(m_nRows, m_nCols);
 
-            std::for_each(std::execution::par, m_rows.begin(), m_rows.end(), [&](const auto &row)
+            std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](const auto &row)
                           {
         size_t r = &row - &m_rows[0];
         result[static_cast<int>(r)] = row - rhs[static_cast<int>(r)]; });
@@ -117,13 +185,21 @@ namespace sw
 
             for (const Vector<T> &row : m_rows)
             {
-                for (int c = 0; c < row.size(); ++c)
+                for (uint32_t c = 0; c < row.size(); ++c)
                 {
                     sum += row[c];
                 }
             }
 
             return sum;
+        }
+
+        void fill(T value)
+        {
+            for (Vector<T> &row : m_rows)
+            {
+                row.fill(value);
+            }
         }
 
         std::string toString() const
