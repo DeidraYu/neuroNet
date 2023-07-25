@@ -9,3 +9,5 @@ target_link_libraries(matrix_performance gtest_main)
 
 add_executable(layer_test LayerTest.cpp)
 target_link_libraries(layer_test gtest_main)
+
+add_subdirectory(math)
