@@ -3,7 +3,7 @@
 #include "../../src/math/Vector.hpp"
 #include "../../src/math/Matrix.hpp"
 
-using namespace math;
+using namespace sw::math;
 
 TEST(VectorTest, initializeWithStdVector)
 {

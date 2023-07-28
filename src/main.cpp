@@ -9,7 +9,7 @@
 #include "Net.hpp"
 #include "Trainer.hpp"
 #include "Evaluator.hpp"
-#include "Vector.hpp"
+// #include "Vector.hpp"
 #include "Utils.hpp"
 #include "Network.hpp"
 #include "NetworkTrainer.hpp"
