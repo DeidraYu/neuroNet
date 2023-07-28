@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "Utils.hpp"
 #include "Matrix.hpp"
 
@@ -40,6 +42,7 @@ void printProgress(int part, int total, std::string labelString)
     const int width = 80;
     const int progressWidth = width - 2; // -2 because we don't count the [] symbols as progress
     int nDone = progressWidth * part / total;
+    int percentage = int(100.0f * float(part) / float(total) + 0.5f);
 
     char str[width + 1];
     for (int i = 0; i < progressWidth; ++i)
@@ -49,7 +52,8 @@ void printProgress(int part, int total, std::string labelString)
     str[0] = '[';
     str[width - 1] = ']';
     str[width] = '\0';
-    printf("\r%s %s", labelString.c_str(), str);
+    printf("\r%s  (%d%%) %s  ", labelString.c_str(), percentage, str);
+    fflush(stdout);
 }
 
 void printSW(sw::Vector<float> &vec)
