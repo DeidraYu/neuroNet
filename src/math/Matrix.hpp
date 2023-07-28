@@ -29,6 +29,8 @@ namespace math
     class Matrix : public MatrixExpression<Matrix<T>>
     {
     public:
+        static constexpr bool is_leaf = true;
+
         Matrix() = default;
 
         Matrix(std::initializer_list<std::initializer_list<T>> initializerList)
@@ -46,11 +48,25 @@ namespace math
             }
         }
 
+        // A Matrix can be constructed from any MatrixExpression, forcing its evaluation.
+        template <typename M>
+        Matrix(MatrixExpression<M> const &expr) : m_rows(expr.size())
+        {
+            for (size_t i = 0; i != expr.size(); ++i)
+            {
+                m_rows[i] = expr[i];
+            }
+        }
+
         Vector<T> &operator[](size_t i) { return m_rows[i]; }
 
         const Vector<T> &operator[](size_t i) const { return m_rows[i]; }
 
         size_t size() const { return m_rows.size(); }
+
+        // Comparison operators == and !=
+        bool operator==(const Matrix<T> &other) const { return (m_rows == other.m_rows); }
+        bool operator!=(const Matrix<T> &other) const { return (m_rows != other.m_rows); }
 
         friend std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix)
         {
@@ -87,10 +103,68 @@ namespace math
     };
 
     template <typename M, typename V>
-    MatrixVectorProduct<M, V>
-    operator*(const MatrixExpression<M> &m, const VectorExpression<V> &v)
+    MatrixVectorProduct<M, V> operator*(const MatrixExpression<M> &m, const VectorExpression<V> &v)
     {
         return MatrixVectorProduct<M, V>(*static_cast<const M *>(&m), *static_cast<const V *>(&v));
+    }
+
+    //-----------------------------------------------------------------------------------------
+    // Matrix-Scalar-Addition
+    //-----------------------------------------------------------------------------------------
+    template <typename M, arithmetic S>
+    class MatrixScalarAddition : public MatrixExpression<MatrixScalarAddition<M, S>>
+    {
+        // cref if leaf, copy otherwise
+        std::conditional_t<M::is_leaf, const M &, const M> m_m;
+        const S m_s;
+
+    public:
+        static constexpr bool is_leaf = false;
+
+        MatrixScalarAddition(const M &m, const S s) : m_m(m), m_s(s) {}
+
+        auto operator[](size_t i) const
+        {
+            return m_m[i] + m_s;
+        }
+
+        size_t size() const { return m_m.size(); }
+    };
+
+    template <typename M, typename S>
+    MatrixScalarAddition<M, S> operator+(const MatrixExpression<M> &m, const S s)
+    {
+        return MatrixScalarAddition<M, S>(*static_cast<const M *>(&m), s);
+    }
+
+    //-----------------------------------------------------------------------------------------
+    // Vector-Vector Outer Product
+    //-----------------------------------------------------------------------------------------
+    template <typename U, typename V>
+    class OuterProduct : public MatrixExpression<OuterProduct<U, V>>
+    {
+        // cref if leaf, copy otherwise
+        std::conditional_t<U::is_leaf, const U &, const U> m_u;
+        std::conditional_t<V::is_leaf, const V &, const V> m_v;
+
+    public:
+        static constexpr bool is_leaf = false;
+
+        OuterProduct(const U &u, const V &v) : m_u(u), m_v(v) {}
+
+        // Return row-i of the outer product
+        auto operator[](size_t i) const
+        {
+            return m_v * m_u[i]; // changed order because we have the vector * scalar but not scalar * vector
+        }
+
+        size_t size() const { return m_u.size(); }
+    };
+
+    template <typename U, typename V>
+    OuterProduct<U, V> outer(const VectorExpression<U> &u, const VectorExpression<V> &v)
+    {
+        return OuterProduct<U, V>(*static_cast<const U *>(&u), *static_cast<const V *>(&v));
     }
 
 } // namespace math

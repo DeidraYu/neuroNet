@@ -5,17 +5,21 @@
 // #include <random>
 // #include <string>
 // #include <type_traits>
+#include <cmath>
+#include <functional>
 #include <vector>
+
+#include "utils.hpp"
 
 namespace math
 {
-    template <class T>
-    concept arithmetic = std::is_arithmetic_v<T>;
-
     template <typename V>
     class VectorExpression
     {
     public:
+        // Define the value_type alias to match the Vector's element type
+        // using value_type = typename Vector<T>::value_type;
+
         static constexpr bool is_leaf = false;
 
         auto operator[](size_t i) const
@@ -51,6 +55,11 @@ namespace math
     class Vector : public VectorExpression<Vector<T>>
     {
     public:
+        // Define the value_type alias to represent the element type
+        // using value_type = T;
+
+        static constexpr bool is_leaf = true;
+
         Vector() = default;
 
         Vector(std::vector<T>::size_type sz) : m_data(sz) {}
@@ -67,7 +76,7 @@ namespace math
         {
             for (size_t i = 0; i != expr.size(); ++i)
             {
-                m_data[i] = expr[i];
+                m_data[i] = static_cast<T>(expr[i]);
             }
         }
 
@@ -284,6 +293,57 @@ namespace math
     operator*(VectorExpression<V> const &u, const S s)
     {
         return VectorScalarMultiplication<V, S>(*static_cast<const V *>(&u), s);
+    }
+
+    //-----------------------------------------------------------------------------------------
+    // VectorFunction
+    //-----------------------------------------------------------------------------------------
+    template <typename U>
+    class VectorFunction : public VectorExpression<VectorFunction<U>>
+    {
+        // cref if leaf, copy otherwise
+        std::conditional_t<U::is_leaf, const U &, const U> m_u;
+        std::function<double(double)> m_function;
+
+    public:
+        static constexpr bool is_leaf = false;
+
+        VectorFunction(const U &u, std::function<double(double)> function) : m_u(u), m_function(function) {}
+
+        auto operator[](size_t i) const
+        {
+            return m_function(m_u[i]);
+        }
+
+        size_t size() const { return m_u.size(); }
+    };
+
+    template <typename U>
+    VectorFunction<U> sigmoid(const VectorExpression<U> &u)
+    {
+        return VectorFunction<U>(*static_cast<const U *>(&u), [](double x) -> double
+                                 { return sigmoid(x); });
+    }
+
+    template <typename U>
+    VectorFunction<U> sigmoid_prime(const VectorExpression<U> &u)
+    {
+        return VectorFunction<U>(*static_cast<const U *>(&u), [](double x) -> double
+                                 { return sigmoid_prime(x); });
+    }
+
+    template <typename U>
+    VectorFunction<U> sin(const VectorExpression<U> &u)
+    {
+        return VectorFunction<U>(*static_cast<const U *>(&u), [](double x) -> double
+                                 { return std::sin(x); });
+    }
+
+    template <typename U>
+    VectorFunction<U> cos(const VectorExpression<U> &u)
+    {
+        return VectorFunction<U>(*static_cast<const U *>(&u), [](double x) -> double
+                                 { return std::cos(x); });
     }
 
 } // namespace math

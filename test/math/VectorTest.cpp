@@ -243,6 +243,71 @@ TEST(VectorTest, operatorTimesIs_with_scalar)
     EXPECT_EQ(v, expected);
 }
 
+TEST(VectorTest, sigmoid)
+{
+    // inputs
+    // Force computation to be done on a double vector.
+    Vector<double> v{0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f};
+
+    auto sigmoid_v_expression = sigmoid(v);
+
+    // Now create the float version for comparison.
+    Vector<float> sigmoid_v = sigmoid_v_expression;
+
+    Vector<float> expected{0.5f, 0.5498339973124953f, 0.5986876601124858f, 0.6456563062258437f, 0.6899744811276725f, 0.731058578630074f};
+    // Vector<float> expected{0.25f, 0.2475165727118582f, 0.24026074574152248f, 0.22878424045664325f, 0.2139096965202716f, 0.19661193324144993f};
+
+    EXPECT_EQ(sigmoid_v, expected);
+}
+
+TEST(VectorTest, sigmoid_prime)
+{
+    // inputs
+    // Force computation to be done on a double vector.
+    Vector<double> v{0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f};
+
+    auto sigmoid_prime_v_expression = sigmoid_prime(v);
+
+    // Now create the float version for comparison.
+    Vector<float> sigmoid_prime = sigmoid_prime_v_expression;
+
+    // Vector<float> expected{0.5f, 0.5498339973124953f, 0.5986876601124858f, 0.6456563062258437f, 0.6899744811276725f, 0.731058578630074f};
+    Vector<float> expected{0.25f, 0.2475165727118582f, 0.24026074574152248f, 0.22878424045664325f, 0.2139096965202716f, 0.19661193324144993f};
+
+    EXPECT_EQ(sigmoid_prime, expected);
+}
+
+TEST(VectorTest, VectorFunction_sin)
+{
+    // inputs
+    Vector<float> v{0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f};
+
+    auto sin_v_expression = sin(v);
+
+    // Now create the float version for comparison.
+    Vector<float> sin_v = sin_v_expression;
+
+    Vector<float> expected{0.f, 0.19866933f, 0.38941834f, 0.56464247f, 0.71735609f, 0.84147098f};
+
+    EXPECT_EQ(sin_v, expected);
+}
+
+TEST(VectorTest, VectorFunction_cos)
+{
+    // inputs
+    Vector<float> v{0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f};
+
+    auto cos_v_expression = cos(v);
+
+    // Evaulate the expression
+    Vector<float> cos_v = cos_v_expression;
+
+    Vector<float> expected{1.f, std::cosf(0.2f), std::cosf(0.4f), std::cosf(0.6f), std::cosf(0.8f), std::cosf(1.0f)};
+
+    EXPECT_EQ(cos_v, expected);
+}
+
+#if 0 // for documentation
 TEST(VectorTest, CodeForMdFile)
 {
     // create and initialize two vectors
@@ -259,6 +324,7 @@ TEST(VectorTest, CodeForMdFile)
     std::cout << "x: " << x << std::endl;
     std::cout << "y: " << x << std::endl;
 }
+#endif
 
 TEST(MatrixTest, creation)
 {
@@ -291,8 +357,6 @@ TEST(MatrixTest, MatrixVectorProduct)
 
 TEST(MatrixTest, operatorPlusIs)
 {
-    // Check the expression w = u + v.dot(v)
-
     // inputs:  A * b evaluates to [4, 22, 6]
     Matrix<int> A{{0, 1, 2}, {3, 4, 5}, {1, 1, 1}};
     Vector<int> b{3, 2, 1};
@@ -308,4 +372,39 @@ TEST(MatrixTest, operatorPlusIs)
 
     y += A * b + u.dot(v);
     EXPECT_EQ(y, expected);
+}
+
+TEST(MatrixTest, MatrixScalarAddition)
+{
+    // inputs:  A * b evaluates to [4, 22, 6]
+    Matrix<int> A{{0, 1, 2}, {3, 4, 5}, {1, 1, 1}};
+
+    auto W = A + 3;
+
+    Matrix<int> expected{{3, 4, 5},
+                         {6, 7, 8},
+                         {4, 4, 4}};
+
+    Matrix<int> Y = W;
+
+    EXPECT_EQ(Y, expected);
+}
+
+TEST(MatrixTest, OuterProduct)
+{
+    // inputs
+    Vector<int> u{1, 2, 3};
+    Vector<int> v{3, 4, 5};
+
+    Matrix<int> expected{{3, 4, 5},
+                         {6, 8, 10},
+                         {9, 12, 15}};
+
+    auto W = outer(u, v);
+    // auto w_0 = W[0]; // Just to see that w_0 is not evaluated yet
+
+    Matrix<int> Y = W;
+    // Vector<int> y_0 = w_0; // Just to see that y_0 is evaluated
+
+    EXPECT_EQ(Y, expected);
 }
