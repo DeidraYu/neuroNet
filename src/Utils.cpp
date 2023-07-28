@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "Utils.hpp"
 #include "Matrix.hpp"
 
@@ -35,39 +37,14 @@ void printNumber(std::vector<uint8_t> &vec)
     }
 }
 
-int getConsoleWidth()
-{
-    // Open a pipe to the 'tput cols' command
-    FILE *pipe = popen("tput cols", "r");
-    if (!pipe)
-    {
-        // Unable to open pipe, return a default value
-        return 80; // Default to 80 columns if tput is not available
-    }
-
-    // Read the output of the command into a buffer
-    char buffer[128];
-    std::string result = "";
-    while (!feof(pipe))
-    {
-        if (fgets(buffer, 128, pipe) != nullptr)
-            result += buffer;
-    }
-
-    // Close the pipe and get the terminal width as an integer
-    pclose(pipe);
-    int width = std::stoi(result);
-    return width;
-}
-
 void printProgress(int part, int total, std::string labelString)
 {
-    const int width = getConsoleWidth() - 16;
+    const int width = 80;
     const int progressWidth = width - 2; // -2 because we don't count the [] symbols as progress
     int nDone = progressWidth * part / total;
     int percentage = int(100.0f * float(part) / float(total) + 0.5f);
 
-    char str[1000];
+    char str[width + 1];
     for (int i = 0; i < progressWidth; ++i)
     {
         i < nDone ? str[i + 1] = '#' : str[i + 1] = ' ';
@@ -75,7 +52,7 @@ void printProgress(int part, int total, std::string labelString)
     str[0] = '[';
     str[width - 1] = ']';
     str[width] = '\0';
-    printf("\r%s  (%d%%) %s", labelString.c_str(), percentage, str);
+    printf("\r%s  (%d%%) %s  ", labelString.c_str(), percentage, str);
     fflush(stdout);
 }
 
