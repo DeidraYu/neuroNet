@@ -9,16 +9,15 @@ namespace sw
         template <class T>
         concept arithmetic = std::is_arithmetic_v<T>;
 
-        template <arithmetic T>
-        T sigmoid(T z)
+        double sigmoid(double z)
         {
-            return T{1} / (T{1} + static_cast<float>(exp(-z)));
+            return 1.0 / (1.0 + exp(-z));
         }
 
         double sigmoid_prime(double z)
         {
             double s = 1.0 / (1.0 + exp(-z));
-            return (1.0f - s) * s;
+            return (1.0 - s) * s;
         }
 
     } // namespace math

@@ -15,14 +15,13 @@ if(CMAKE_COMPILER_IS_GNUCXX)
         -Wpointer-arith
         -Wcast-qual
         -Wcast-align
-        -Wconversion
         -Wall
         -Wextra
         -pedantic
         # -Wmissing-declarations # I suppresed this because there is an Issue with gtest on Linux
         -Wunused
         -Wpedantic
-        -Wconversion
+        # -Wconversion
         -Wlogical-op
         -Wdouble-promotion
         -Wformat=2

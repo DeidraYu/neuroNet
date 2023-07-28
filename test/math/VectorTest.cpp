@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "gtest/gtest.h"
 
 #include "../../src/math/Vector.hpp"
@@ -302,7 +304,7 @@ TEST(VectorTest, VectorFunction_cos)
     // Evaulate the expression
     Vector<float> cos_v = cos_v_expression;
 
-    Vector<float> expected{1.f, std::cosf(0.2f), std::cosf(0.4f), std::cosf(0.6f), std::cosf(0.8f), std::cosf(1.0f)};
+    Vector<float> expected{1.f, cosf(0.2f), cosf(0.4f), cosf(0.6f), cosf(0.8f), cosf(1.0f)};
 
     EXPECT_EQ(cos_v, expected);
 }
