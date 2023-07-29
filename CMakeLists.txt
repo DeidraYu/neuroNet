@@ -23,7 +23,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
         -Wpedantic
         # -Wconversion
         -Wlogical-op
-        -Wdouble-promotion
+        # -Wdouble-promotion # For now we want double promotion. Turn on later.
         -Wformat=2
         -fmessage-length=0
         # -fno-exceptions

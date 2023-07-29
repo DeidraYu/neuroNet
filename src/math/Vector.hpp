@@ -6,8 +6,10 @@
 
 #include <cassert>
 #include <cmath>
+#include <execution>
 #include <functional>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -78,10 +80,15 @@ namespace sw
             template <typename V>
             Vector(VectorExpression<V> const &expr) : m_data(expr.size())
             {
-                for (size_t i = 0; i != expr.size(); ++i)
-                {
-                    m_data[i] = static_cast<T>(expr[i]);
-                }
+                // for (size_t i = 0; i != expr.size(); ++i)
+                // {
+                //     m_data[i] = static_cast<T>(expr[i]);
+                // }
+
+                std::for_each(std::execution::par_unseq, m_data.begin(), m_data.end(), [&](auto &thisElement)
+                              { 
+                            int index = static_cast<int>(&thisElement - &m_data[0]);
+                            thisElement = expr[index]; });
             }
 
             Vector<T> &operator+=(const Vector<T> &other)

@@ -72,10 +72,15 @@ namespace sw
             template <typename M>
             Matrix(MatrixExpression<M> const &expr) : m_rows(expr.size())
             {
-                for (size_t i = 0; i != expr.size(); ++i)
-                {
-                    m_rows[i] = expr[i];
-                }
+                // for (size_t i = 0; i != expr.size(); ++i)
+                // {
+                //     m_rows[i] = expr[i];
+                // }
+
+                std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](Vector<T> &thisRow)
+                              { 
+                            int rowIndex = static_cast<int>(&thisRow - &m_rows[0]);
+                            thisRow = expr[rowIndex]; });
             }
 
             Vector<T> &operator[](size_t i) { return m_rows[i]; }
