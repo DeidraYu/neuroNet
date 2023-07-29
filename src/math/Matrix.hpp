@@ -25,6 +25,20 @@ namespace sw
             }
 
             size_t size() const { return static_cast<M const &>(*this).size(); }
+
+            template <typename U>
+            auto transposeMult(const Vector<U> &rhs) const
+            {
+                // Take the linear combination of the columns of the transpose matrix.
+                // Note that m_rows[i] is the i-th column of the transposed matrix.
+                // Furthermore, to optimize the memory access the transposeMult is immediatly evaluated.
+                Vector<U> sum = (*this)[0] * rhs[0];
+                for (size_t i = 1; i < size(); ++i)
+                {
+                    sum += (*this)[i] * rhs[i];
+                }
+                return sum;
+            }
         };
 
         template <typename T>
@@ -50,6 +64,10 @@ namespace sw
                 }
             }
 
+            Matrix(std::vector<Vector<T>>::size_type nRows, std::vector<T>::size_type nCols) : m_rows(nRows, Vector<T>(nCols)) {}
+
+            Matrix(std::vector<Vector<T>>::size_type nRows, std::vector<T>::size_type nCols, T initialValue) : m_rows(nRows, Vector<T>(nCols, initialValue)) {}
+
             // A Matrix can be constructed from any MatrixExpression, forcing its evaluation.
             template <typename M>
             Matrix(MatrixExpression<M> const &expr) : m_rows(expr.size())
@@ -66,15 +84,59 @@ namespace sw
 
             size_t size() const { return m_rows.size(); }
 
+            size_t getNumRows() const { return m_rows.size(); }
+            size_t getNumCols() const { return m_rows[0].size(); }
+
             // Comparison operators == and !=
             bool operator==(const Matrix<T> &other) const { return (m_rows == other.m_rows); }
             bool operator!=(const Matrix<T> &other) const { return (m_rows != other.m_rows); }
 
+            std::string toString() const
+            {
+                return m_rows.toString();
+            }
+
             friend std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix)
             {
-                std::string str = matrix.m_rows.toString();
+                std::string str = matrix.toString();
                 os << str;
                 return os;
+            }
+
+            Matrix<T> &operator+=(const Matrix<T> &other)
+            {
+                if (size() != other.size())
+                {
+                    throw std::invalid_argument("Number of matrix rows do not match for += operation");
+                }
+
+                for (size_t i = 0; i < size(); ++i)
+                {
+                    m_rows[i] += other[i];
+                }
+
+                return *this;
+            }
+
+            void fill(T value)
+            {
+                for (Vector<T> &row : m_rows)
+                {
+                    row.fill(value);
+                }
+            }
+
+            /**
+             * @brief Create a random matrix with values uniformly distributed between min and max (inclusive).
+             */
+            static Matrix<T> rand(size_t nRows, size_t nCols, T min, T max)
+            {
+                Matrix<T> randomMatrix(nRows, nCols);
+                for (uint32_t r = 0; r < nRows; ++r)
+                {
+                    randomMatrix[r] = Vector<T>::rand(nCols, min, max);
+                }
+                return randomMatrix;
             }
 
         private:
@@ -137,6 +199,35 @@ namespace sw
         MatrixScalarAddition<M, S> operator+(const MatrixExpression<M> &m, const S s)
         {
             return MatrixScalarAddition<M, S>(*static_cast<const M *>(&m), s);
+        }
+
+        //-----------------------------------------------------------------------------------------
+        // Matrix-Scalar-Product
+        //-----------------------------------------------------------------------------------------
+        template <typename M, arithmetic S>
+        class MatrixScalarProduct : public MatrixExpression<MatrixScalarProduct<M, S>>
+        {
+            // cref if leaf, copy otherwise
+            std::conditional_t<M::is_leaf, const M &, const M> m_m;
+            const S m_s;
+
+        public:
+            static constexpr bool is_leaf = false;
+
+            MatrixScalarProduct(const M &m, const S s) : m_m(m), m_s(s) {}
+
+            auto operator[](size_t i) const
+            {
+                return m_m[i] * m_s;
+            }
+
+            size_t size() const { return m_m.size(); }
+        };
+
+        template <typename M, typename S>
+        MatrixScalarProduct<M, S> operator*(const MatrixExpression<M> &m, const S s)
+        {
+            return MatrixScalarProduct<M, S>(*static_cast<const M *>(&m), s);
         }
 
         //-----------------------------------------------------------------------------------------

@@ -2,10 +2,14 @@
 
 #include <cstdint>
 #include <vector>
-#include "Vector.hpp"
+// #include "Vector.hpp"
 // #include "Matrix.hpp"
+#include "math/Vector.hpp"
+#include "math/Matrix.hpp"
 #include "Layer.hpp"
 #include "Utils.hpp"
+
+using namespace sw::math;
 
 class Network
 {
@@ -18,18 +22,7 @@ public:
         }
     }
 
-    // void trainEpochs(uint16_t nEpochs, uint16_t miniBatchSize, float learningRate, std::vector<sw::Vector<float>> &train_data, std::vector<sw::Vector<float>> &train_labels)
-    // {
-    //     char progressLabelCharArr[16];
-    //     for (int i = 0; i < nEpochs; ++i)
-    //     {
-    //         snprintf(progressLabelCharArr, 16, "%d / %d", i + 1, nEpochs);
-    //         trainMiniBatches(miniBatchSize, learningRate, train_data, train_labels);
-    //     }
-    //     printf("\n"); // because the progress bar has no newline.
-    // }
-
-    void trainMiniBatches(uint16_t miniBatchSize, float learningRate, std::vector<sw::Vector<float>> &train_data, std::vector<sw::Vector<float>> &train_labels)
+    void trainMiniBatches(uint16_t miniBatchSize, float learningRate, std::vector<Vector<float>> &train_data, std::vector<Vector<float>> &train_labels)
     {
         uint16_t mbIndex = 0;
         m_eta = learningRate;
@@ -60,7 +53,7 @@ public:
         }
     }
 
-    void train(const Vector<float> &x, sw::Vector<float> label)
+    void train(const Vector<float> &x, Vector<float> label)
     {
         // Feed forward run
         feedforward(x);
@@ -86,7 +79,7 @@ public:
         }
     }
 
-    void feedforward(sw::Vector<float> x)
+    void feedforward(Vector<float> x)
     {
         m_layers[0].feedForward(x);
         for (uint32_t k = 1; k < m_layers.size(); ++k)
@@ -104,7 +97,7 @@ public:
         }
     }
 
-    sw::Vector<float> getOutput()
+    Vector<float> getOutput()
     {
         return m_layers.back().getY();
     }

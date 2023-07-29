@@ -3,15 +3,18 @@
 #include <iostream>
 #include <vector>
 
-#include "Matrix.hpp"
+// #include "Matrix.hpp"
+#include "math/Vector.hpp"
 #include "mnist/mnist_reader.hpp"
+
+using namespace sw::math;
 
 void printNumber(std::vector<uint8_t> &vec);
 
 void printProgress(int part, int total, std::string labelString);
 
-void printSW(sw::Vector<float> &vec);
+void printSW(Vector<float> &vec);
 
 void processMNIST();
 
-sw::Vector<float> oneHotEncode(int value, int numClasses);
+Vector<float> oneHotEncode(int value, int numClasses);

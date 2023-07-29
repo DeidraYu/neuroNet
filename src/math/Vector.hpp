@@ -2,11 +2,13 @@
 
 // #include <execution>
 // #include <initializer_list>
-// #include <random>
-// #include <string>
 // #include <type_traits>
+
+#include <cassert>
 #include <cmath>
 #include <functional>
+#include <random>
+#include <string>
 #include <vector>
 
 #include "utils.hpp"
@@ -107,6 +109,31 @@ namespace sw
                 return *this;
             }
 
+            Vector<T> &operator-=(const Vector<T> &other)
+            {
+                if (size() != other.size())
+                {
+                    throw std::invalid_argument("Vector sizes do not match for -= operation");
+                }
+
+                for (size_t i = 0; i < size(); ++i)
+                {
+                    m_data[i] -= other[i];
+                }
+
+                return *this;
+            }
+
+            Vector<T> &operator-=(const T other)
+            {
+                for (size_t i = 0; i < size(); ++i)
+                {
+                    m_data[i] -= other;
+                }
+
+                return *this;
+            }
+
             Vector<T> &operator*=(const Vector<T> &other)
             {
                 if (size() != other.size())
@@ -169,11 +196,63 @@ namespace sw
                 return str;
             }
 
+            void fill(T value)
+            {
+                std::fill(m_data.begin(), m_data.end(), value);
+            }
+            // Iterators
+            typename std::vector<T>::iterator begin() { return m_data.begin(); }
+            typename std::vector<T>::iterator end() { return m_data.end(); }
+
+            // Constant iterators
+            auto cbegin() const { return m_data.cbegin(); }
+            auto cend() const { return m_data.cend(); }
+
             // Overload the << operator for output
             friend std::ostream &operator<<(std::ostream &os, const Vector<T> &vec)
             {
                 os << vec.toString();
                 return os;
+            }
+
+            /**
+             * @brief Create a random matrix with values uniformly distributed between min and max (inclusive).
+             */
+            static Vector<T> rand(std::vector<T>::size_type sz, T min, T max)
+            {
+                std::random_device rd;  // Will be used to obtain a seed for the random number engine
+                std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+
+                Vector<T> randVector(sz);
+
+                if constexpr (std::is_integral_v<T>)
+                {
+                    // For some reason the std does not define the std::uniform_int_distribution<> for the uint8_t type.
+                    using CommonType = typename std::common_type<T, uint16_t>::type;
+                    std::uniform_int_distribution<CommonType> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+
+                    for (uint32_t i = 0; i < sz; ++i)
+                    {
+                        randVector[i] = static_cast<T>(dis(gen));
+                    }
+                }
+                else if constexpr (std::is_floating_point_v<T>)
+                {
+                    // std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+                    std::uniform_real_distribution<T> dis(min, max);
+                    for (uint32_t i = 0; i < sz; ++i)
+                    {
+                        randVector[i] = dis(gen);
+                    }
+                }
+                return randVector;
+            }
+
+            uint64_t argmax()
+            {
+                auto maxElement = std::max_element(begin(), end());
+                uint64_t index = std::distance(begin(), maxElement);
+                return index;
             }
 
         private:
@@ -238,6 +317,66 @@ namespace sw
         operator+(VectorExpression<V> const &u, const S s)
         {
             return VectorScalarAddition<V, S>(*static_cast<const V *>(&u), s);
+        }
+
+        //-----------------------------------------------------------------------------------------
+        // Vector-Vector-Subtraction
+        //-----------------------------------------------------------------------------------------
+        template <typename V1, typename V2>
+        class VectorVectorSubtraction : public VectorExpression<VectorVectorSubtraction<V1, V2>>
+        {
+            // cref if leaf, copy otherwise
+            std::conditional_t<V1::is_leaf, const V1 &, const V1> m_u;
+            std::conditional_t<V2::is_leaf, const V2 &, const V2> m_v;
+
+        public:
+            static constexpr bool is_leaf = false;
+
+            VectorVectorSubtraction(V1 const &u, V2 const &v) : m_u(u), m_v(v)
+            {
+                assert(u.size() == v.size());
+            }
+
+            auto operator[](size_t i) const
+            {
+                return m_u[i] - m_v[i];
+            }
+
+            size_t size() const { return m_v.size(); }
+        };
+
+        template <typename V1, typename V2>
+        VectorVectorSubtraction<V1, V2>
+        operator-(VectorExpression<V1> const &u, VectorExpression<V2> const &v)
+        {
+            return VectorVectorSubtraction<V1, V2>(*static_cast<const V1 *>(&u), *static_cast<const V2 *>(&v));
+        }
+
+        //-----------------------------------------------------------------------------------------
+        // Vector-Scalar-Subtraction
+        //-----------------------------------------------------------------------------------------
+        template <typename V, arithmetic S>
+        class VectorScalarSubtraction : public VectorExpression<VectorScalarSubtraction<V, S>>
+        {
+            // cref if leaf, copy otherwise
+            std::conditional_t<V::is_leaf, const V &, const V> m_u;
+            S m_s;
+
+        public:
+            static constexpr bool is_leaf = false;
+
+            VectorScalarSubtraction(V const &u, const S s) : m_u(u), m_s(s){};
+
+            auto operator[](size_t i) const { return m_u[i] - m_s; }
+
+            size_t size() const { return m_u.size(); }
+        };
+
+        template <typename V, typename S>
+        VectorScalarSubtraction<V, S>
+        operator-(VectorExpression<V> const &u, const S s)
+        {
+            return VectorScalarSubtraction<V, S>(*static_cast<const V *>(&u), s);
         }
 
         //-----------------------------------------------------------------------------------------

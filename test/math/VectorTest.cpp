@@ -409,4 +409,6 @@ TEST(MatrixTest, OuterProduct)
     // Vector<int> y_0 = w_0; // Just to see that y_0 is evaluated
 
     EXPECT_EQ(Y, expected);
+
+    Y += outer(u, v);
 }

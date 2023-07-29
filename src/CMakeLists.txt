@@ -1,4 +1,4 @@
-add_executable(neuronet main.cpp Network.hpp Layer.hpp Utils.cpp NetworkTrainer.cpp MnistData.cpp)
+add_executable(neuronet main.cpp Network.hpp Layer.hpp Utils.cpp NetworkTrainer.cpp MnistData.cpp math/utils.cpp)
 
 target_link_libraries(neuronet)
 #target_compile_features(neuronet PRIVATE cxx_range_for)

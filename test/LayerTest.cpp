@@ -6,6 +6,8 @@
 #include "../src/Layer.hpp"
 #include "../src/Network.hpp"
 
+#include "../src/math/Vector.hpp"
+
 using namespace sw;
 
 TEST(LayerTest, initialize)
@@ -18,7 +20,7 @@ TEST(LayerTest, feedForward)
     // Create a network with default weights of 0.5 and bias of 0.
     Layer layer = Layer(2, 2);
 
-    Vector x{0.3f, 0.9f};
+    Vector<float> x{0.3f, 0.9f};
 
     layer.feedForward(x);
 
@@ -33,11 +35,11 @@ TEST(LayerTest, backProp)
     // Create a network with default weights of 0.5 and bias of 0.
     Layer layer = Layer(2, 2);
 
-    Vector x{0.3f, 0.9f};
+    Vector<float> x{0.3f, 0.9f};
 
     layer.feedForward(x);
 
-    Vector v = layer.getY() - x; // u = dC / dx
+    Vector<float> v = layer.getY() - x; // u = dC / dx
 
     layer.backProp(x, v);
 
@@ -49,9 +51,9 @@ TEST(LayerTest, backProp)
     std::cout << "u:        " << layer.getU().toString() << std::endl;
 
     float sigmoid_prime_06 = 0.22878424045664325f;
-    Vector<float> nablaC_b_expected = sigmoid_prime_06 * v;
+    Vector<float> nablaC_b_expected = v * sigmoid_prime_06;
 
-    Matrix nablaC_W_expected = nablaC_b_expected.outer(x);
+    Matrix<float> nablaC_W_expected = outer(nablaC_b_expected, x);
     Vector u_expected = Matrix<float>(2, 2, 0.5f).transposeMult(nablaC_b_expected);
 
     std::cout << "nablaC_W_expected: " << nablaC_W_expected.toString() << std::endl;
@@ -79,51 +81,51 @@ TEST(LayerTest, update)
 
     std::cout << "W:    " << layer.getW().toString() << std::endl;
     std::cout << "b:    " << layer.getB().toString() << std::endl;
-    std::cout << "Cost: " << 0.5f * v * v << std::endl;
+    std::cout << "Cost: " << 0.5f * v.dot(v) << std::endl;
     std::cout << "y:    " << layer.getY().toString() << std::endl;
 
     std::cout << std::endl;
 }
 
-float sigmoid(float z);
-float sigmoid_prime(float z);
-Vector<float> sigmoid(sw::Vector<float> z);
-Vector<float> sigmoid_prime(sw::Vector<float> z);
+// float sigmoid(float z);
+// float sigmoid_prime(float z);
+// Vector<float> sigmoid(sw::Vector<float> z);
+// Vector<float> sigmoid_prime(sw::Vector<float> z);
 
-float sigmoid(float z)
-{
-    return 1.0f / (1.0f + static_cast<float>(exp(-z)));
-}
+// float sigmoid(float z)
+// {
+//     return 1.0f / (1.0f + static_cast<float>(exp(-z)));
+// }
 
-float sigmoid_prime(float z)
-{
-    float s = sigmoid(z);
-    return (1.0f - s) * s;
-}
+// float sigmoid_prime(float z)
+// {
+//     float s = sigmoid(z);
+//     return (1.0f - s) * s;
+// }
 
-Vector<float> sigmoid(sw::Vector<float> z)
-{
-    sw::Vector<float> y(z.size());
+// Vector<float> sigmoid(sw::Vector<float> z)
+// {
+//     sw::Vector<float> y(z.size());
 
-    for (uint32_t i = 0; i < z.size(); ++i)
-    {
-        y[i] = sigmoid(z[i]);
-    }
+//     for (uint32_t i = 0; i < z.size(); ++i)
+//     {
+//         y[i] = sigmoid(z[i]);
+//     }
 
-    return y;
-}
+//     return y;
+// }
 
-Vector<float> sigmoid_prime(sw::Vector<float> z)
-{
-    sw::Vector<float> y(z.size());
+// Vector<float> sigmoid_prime(sw::Vector<float> z)
+// {
+//     sw::Vector<float> y(z.size());
 
-    for (uint32_t i = 0; i < z.size(); ++i)
-    {
-        y[i] = sigmoid_prime(z[i]);
-    }
+//     for (uint32_t i = 0; i < z.size(); ++i)
+//     {
+//         y[i] = sigmoid_prime(z[i]);
+//     }
 
-    return y;
-}
+//     return y;
+// }
 
 TEST(LayerTest, notest)
 {
@@ -132,7 +134,8 @@ TEST(LayerTest, notest)
     Vector x{0.3f, 0.9f};
 
     Vector<float> z = W * x + b;
-    std::cout << "y:    " << sigmoid(z).toString() << std::endl;
+    Vector<float> y = sigmoid(z);
+    std::cout << "y:    " << y.toString() << std::endl;
 }
 
 TEST(LayerTest, update2)
@@ -163,11 +166,11 @@ TEST(LayerTest, update2)
     std::cout << "b:    " << layer.getB().toString() << std::endl;
 
     layer.feedForward(x1);
-    std::cout << "Cost: " << 0.5f * v * v << std::endl;
+    std::cout << "Cost: " << 0.5f * v.dot(v) << std::endl;
     std::cout << "y:    " << layer.getY().toString() << std::endl;
 
     layer.feedForward(x2);
-    std::cout << "Cost: " << 0.5f * v * v << std::endl;
+    std::cout << "Cost: " << 0.5f * v.dot(v) << std::endl;
     std::cout << "y:    " << layer.getY().toString() << std::endl;
 
     std::cout << std::endl;
@@ -189,7 +192,7 @@ TEST(LayerTest, 3to2Layer)
 
     std::cout << "W:    " << layer.getW().toString() << std::endl;
     std::cout << "b:    " << layer.getB().toString() << std::endl;
-    std::cout << "Cost: " << 0.5f * v * v << std::endl;
+    std::cout << "Cost: " << 0.5f * v.dot(v) << std::endl;
     std::cout << "y:    " << layer.getY().toString() << std::endl;
 
     std::cout << std::endl;

@@ -1,7 +1,8 @@
 #include <cstdio>
 
 #include "Utils.hpp"
-#include "Matrix.hpp"
+// #include "Matrix.hpp"
+#include "math/Vector.hpp"
 
 void printNumber(std::vector<uint8_t> &vec)
 {
@@ -56,7 +57,7 @@ void printProgress(int part, int total, std::string labelString)
     fflush(stdout);
 }
 
-void printSW(sw::Vector<float> &vec)
+void printSW(sw::math::Vector<float> &vec)
 {
     for (int y = 0; y < 28; y += 2)
     {
@@ -90,9 +91,9 @@ void printSW(sw::Vector<float> &vec)
     }
 }
 
-sw::Vector<float> oneHotEncode(int value, int numClasses)
+Vector<float> oneHotEncode(int value, int numClasses)
 {
-    sw::Vector<float> encodedVector(numClasses);
+    Vector<float> encodedVector(numClasses);
     if (value >= 0 && value < numClasses)
     {
         encodedVector[value] = 1.0f;

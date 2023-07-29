@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vector>
-#include "Vector.hpp"
-#include "Matrix.hpp"
-#include "Net.hpp"
-#include "Evaluator.hpp"
+#include "math/Vector.hpp"
+#include "math/Matrix.hpp"
+// #include "Net.hpp"
+// #include "Evaluator.hpp"
 
 /**
  * This class describes a single layer of a multi-layer network.
@@ -34,7 +34,7 @@
  *                 +---------------------------------------+
  */
 
-using namespace sw;
+using namespace sw::math;
 
 class Layer
 {
@@ -59,12 +59,9 @@ public:
     // call the backProp for miniBatchSize
     void backProp(const Vector<float> &x, const Vector<float> &v, bool updateU = true)
     {
-        m_gamma = v.point_mult(sigmoid_prime(m_z));
-        // m_nablaC_b = m_nablaC_b + gamma;
-        // m_nablaC_W = m_nablaC_W + gamma.outer(x); // (u .* sigma'(z)) x^T
+        m_gamma = v * sigmoid_prime(m_z);
         m_nablaC_b += m_gamma;
-        // m_nablaC_W += m_gamma.outer(x); // (u .* sigma'(z)) x^T
-        m_nablaC_W.plusIsOuter(m_gamma, x); // (u .* sigma'(z)) x^T
+        m_nablaC_W += outer(m_gamma, x); // (u .* sigma'(z)) x^T
 
         // Optimization, for Layer0 we must not compute m_u because there is nothing to back propagate to.
         if (updateU == true)
@@ -104,44 +101,44 @@ public:
     const auto &getNablaC_b() const { return m_nablaC_b; }
 
 private:
-    void feedforward(sw::VectorView<float> &x);
+    void feedforward(Vector<float> &x);
 
-    float sigmoid(float z)
-    {
-        return 1.0f / (1.0f + static_cast<float>(exp(-z)));
-    }
+    // float sigmoid(float z)
+    // {
+    //     return 1.0f / (1.0f + static_cast<float>(exp(-z)));
+    // }
 
-    float sigmoid_prime(float z)
-    {
-        float s = sigmoid(z);
-        return (1.0f - s) * s;
-    }
+    // float sigmoid_prime(float z)
+    // {
+    //     float s = sigmoid(z);
+    //     return (1.0f - s) * s;
+    // }
 
-    Vector<float> sigmoid(sw::Vector<float> z)
-    {
-        sw::Vector<float> y(z.size());
+    // Vector<float> sigmoid(sw::Vector<float> z)
+    // {
+    //     sw::Vector<float> y(z.size());
 
-        for (uint32_t i = 0; i < z.size(); ++i)
-        {
-            y[i] = sigmoid(z[i]);
-        }
+    //     for (uint32_t i = 0; i < z.size(); ++i)
+    //     {
+    //         y[i] = sigmoid(z[i]);
+    //     }
 
-        return y;
-    }
+    //     return y;
+    // }
 
-    Vector<float> sigmoid_prime(sw::Vector<float> z)
-    {
-        sw::Vector<float> y(z.size());
+    // Vector<float> sigmoid_prime(sw::Vector<float> z)
+    // {
+    //     sw::Vector<float> y(z.size());
 
-        for (uint32_t i = 0; i < z.size(); ++i)
-        {
-            y[i] = sigmoid_prime(z[i]);
-        }
+    //     for (uint32_t i = 0; i < z.size(); ++i)
+    //     {
+    //         y[i] = sigmoid_prime(z[i]);
+    //     }
 
-        return y;
-    }
+    //     return y;
+    // }
 
-    sw::Vector<float> oneHotEncode(int value, int numClasses);
+    Vector<float> oneHotEncode(int value, int numClasses);
 
     uint16_t m_numInputs;
     uint16_t m_numOutputs;

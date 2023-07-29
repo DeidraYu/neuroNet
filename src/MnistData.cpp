@@ -24,17 +24,18 @@ void MnistData::processMNIST()
     numTrainImages = dataset.training_images.size();
     numTestImages = dataset.test_images.size();
 
-    train_data = std::vector<sw::Vector<float>>(numTrainImages);
-    train_labels = std::vector<sw::Vector<float>>(numTrainImages);
+    train_data = std::vector<Vector<float>>(numTrainImages);
+    train_labels = std::vector<Vector<float>>(numTrainImages);
 
-    test_data = std::vector<sw::Vector<float>>(numTestImages);
-    test_labels = std::vector<sw::Vector<float>>(numTestImages);
+    test_data = std::vector<Vector<float>>(numTestImages);
+    test_labels = std::vector<Vector<float>>(numTestImages);
 
     {
         for (uint32_t i = 0; i < numTrainImages; ++i)
         {
-            sw::VectorView train_image_int(&(dataset.training_images[i]));
-            sw::Vector<float> train_image = train_image_int * (1.0f / 256.0f);
+            // VectorView train_image_int(&(dataset.training_images[i]));
+            Vector<uint8_t> train_image_int(dataset.training_images[i]);
+            Vector<float> train_image = train_image_int * (1.0f / 256.0f);
 
             train_data[i] = std::move(train_image);
 
@@ -43,8 +44,9 @@ void MnistData::processMNIST()
 
         for (uint32_t i = 0; i < numTestImages; ++i)
         {
-            sw::VectorView test_image_int(&(dataset.test_images[i]));
-            sw::Vector<float> test_image = test_image_int * (1.0f / 256.0f);
+            // VectorView test_image_int(&(dataset.test_images[i]));
+            Vector<uint8_t> test_image_int(dataset.test_images[i]);
+            Vector<float> test_image = test_image_int * (1.0f / 256.0f);
 
             test_data[i] = std::move(test_image);
 
