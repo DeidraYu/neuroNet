@@ -50,29 +50,42 @@ public:
                                                      m_nablaC_W(numOutputs, numInputs, 0.0f),
                                                      m_u(numInputs) {}
 
-    void feedForward(const Vector<float> &x)
+    __declspec(noinline) void feedForward(const Vector<float> &x)
     {
         m_z = m_W * x + m_b;
         m_y = sigmoid(m_z);
     }
 
-    // call the backProp for miniBatchSize
-    void backProp(const Vector<float> &x, const Vector<float> &v, bool updateU = true)
-    {
-        m_gamma = v * sigmoid_prime(m_z);
-        m_nablaC_b += m_gamma;
-        m_nablaC_W += outer(m_gamma, x); // (u .* sigma'(z)) x^T
+    __declspec(noinline) void update_gamma(const Vector<float> &v) { m_gamma = v * sigmoid_prime(m_z); }
+    __declspec(noinline) void update_nablaC_b() { m_nablaC_b += m_gamma; }
+    __declspec(noinline) void update_nablaC_W(const Vector<float> &x) { m_nablaC_W += outer(m_gamma, x); }
+    __declspec(noinline) void update_u() { m_u = m_W.transposeMult(m_gamma); }
 
-        // Optimization, for Layer0 we must not compute m_u because there is nothing to back propagate to.
-        if (updateU == true)
+    // call the backProp for miniBatchSize
+    __declspec(noinline) void backProp(const Vector<float> &x, const Vector<float> &v, bool updateU = true)
+    {
+        // m_gamma = v * sigmoid_prime(m_z);
+        // m_nablaC_b += m_gamma;
+        // m_nablaC_W += outer(m_gamma, x); // (u .* sigma'(z)) x^T
+
+        // // Optimization, for Layer0 we must not compute m_u because there is nothing to back propagate to.
+        // if (updateU == true)
+        // {
+        //     m_u = m_W.transposeMult(m_gamma);
+        // }
+
+        update_gamma(v);
+        update_nablaC_b();
+        update_nablaC_W(x);
+        if (updateU == true) // guards must not be necessary
         {
-            m_u = m_W.transposeMult(m_gamma);
+            update_u();
         }
         m_miniBatchSize++;
     }
 
     // update the Weight matrix and bias vector
-    void update(float eta)
+    __declspec(noinline) void update(float eta)
     {
         float scaleFactor = -eta / m_miniBatchSize; // Note the minus sign before eta, such that the following two lines get the +=
         m_W += m_nablaC_W * scaleFactor;            // TODO, implement eta
@@ -101,42 +114,7 @@ public:
     const auto &getNablaC_b() const { return m_nablaC_b; }
 
 private:
-    void feedforward(Vector<float> &x);
-
-    // float sigmoid(float z)
-    // {
-    //     return 1.0f / (1.0f + static_cast<float>(exp(-z)));
-    // }
-
-    // float sigmoid_prime(float z)
-    // {
-    //     float s = sigmoid(z);
-    //     return (1.0f - s) * s;
-    // }
-
-    // Vector<float> sigmoid(sw::Vector<float> z)
-    // {
-    //     sw::Vector<float> y(z.size());
-
-    //     for (uint32_t i = 0; i < z.size(); ++i)
-    //     {
-    //         y[i] = sigmoid(z[i]);
-    //     }
-
-    //     return y;
-    // }
-
-    // Vector<float> sigmoid_prime(sw::Vector<float> z)
-    // {
-    //     sw::Vector<float> y(z.size());
-
-    //     for (uint32_t i = 0; i < z.size(); ++i)
-    //     {
-    //         y[i] = sigmoid_prime(z[i]);
-    //     }
-
-    //     return y;
-    // }
+    // void feedforward(Vector<float> &x);
 
     Vector<float> oneHotEncode(int value, int numClasses);
 

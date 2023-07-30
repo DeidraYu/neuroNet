@@ -409,6 +409,29 @@ TEST(MatrixTest, OuterProduct)
     // Vector<int> y_0 = w_0; // Just to see that y_0 is evaluated
 
     EXPECT_EQ(Y, expected);
+}
+
+TEST(MatrixTest, OuterProduct_and_operatorPlusIs)
+{
+    // inputs
+    Vector<int> u{1, 2, 3};
+    Vector<int> v{3, 4, 5};
+
+    Matrix<int> Y{{3, 4, 5},
+                  {6, 8, 10},
+                  {9, 12, 15}};
+
+    Matrix<int> expected{{6, 8, 10},
+                         {12, 16, 20},
+                         {18, 24, 30}};
+
+    auto W = outer(u, v);
+    // auto w_0 = W[0]; // Just to see that w_0 is not evaluated yet
+
+    Y += W;
+    // Vector<int> y_0 = w_0; // Just to see that y_0 is evaluated
+
+    EXPECT_EQ(Y, expected);
 
     Y += outer(u, v);
 }

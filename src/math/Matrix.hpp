@@ -70,7 +70,7 @@ namespace sw
 
             // A Matrix can be constructed from any MatrixExpression, forcing its evaluation.
             template <typename M>
-            Matrix(MatrixExpression<M> const &expr) : m_rows(expr.size())
+            __declspec(noinline) Matrix(MatrixExpression<M> const &expr) : m_rows(expr.size())
             {
                 // for (size_t i = 0; i != expr.size(); ++i)
                 // {
@@ -79,7 +79,7 @@ namespace sw
 
                 std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](Vector<T> &thisRow)
                               { 
-                            int rowIndex = static_cast<int>(&thisRow - &m_rows[0]);
+                            size_t rowIndex = &thisRow - &m_rows[0];
                             thisRow = expr[rowIndex]; });
             }
 
@@ -108,17 +108,24 @@ namespace sw
                 return os;
             }
 
-            Matrix<T> &operator+=(const Matrix<T> &other)
+            // __declspec(noinline) Matrix<T> &operator+=(const Matrix<T> &other)
+            template <typename M>
+            __declspec(noinline) Matrix<T> &operator+=(const MatrixExpression<M> &other)
             {
                 if (size() != other.size())
                 {
                     throw std::invalid_argument("Number of matrix rows do not match for += operation");
                 }
 
-                for (size_t i = 0; i < size(); ++i)
-                {
-                    m_rows[i] += other[i];
-                }
+                // for (size_t i = 0; i < size(); ++i)
+                // {
+                //     m_rows[i] += other[i];
+                // }
+
+                std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](Vector<T> &thisRow)
+                              { 
+                            size_t rowIndex = &thisRow - &m_rows[0];
+                            thisRow += other[rowIndex]; });
 
                 return *this;
             }
@@ -172,7 +179,7 @@ namespace sw
         };
 
         template <typename M, typename V>
-        MatrixVectorProduct<M, V> operator*(const MatrixExpression<M> &m, const VectorExpression<V> &v)
+        __declspec(noinline) MatrixVectorProduct<M, V> operator*(const MatrixExpression<M> &m, const VectorExpression<V> &v)
         {
             return MatrixVectorProduct<M, V>(*static_cast<const M *>(&m), *static_cast<const V *>(&v));
         }
@@ -201,7 +208,7 @@ namespace sw
         };
 
         template <typename M, typename S>
-        MatrixScalarAddition<M, S> operator+(const MatrixExpression<M> &m, const S s)
+        __declspec(noinline) MatrixScalarAddition<M, S> operator+(const MatrixExpression<M> &m, const S s)
         {
             return MatrixScalarAddition<M, S>(*static_cast<const M *>(&m), s);
         }
@@ -230,7 +237,7 @@ namespace sw
         };
 
         template <typename M, typename S>
-        MatrixScalarProduct<M, S> operator*(const MatrixExpression<M> &m, const S s)
+        __declspec(noinline) MatrixScalarProduct<M, S> operator*(const MatrixExpression<M> &m, const S s)
         {
             return MatrixScalarProduct<M, S>(*static_cast<const M *>(&m), s);
         }
@@ -260,7 +267,7 @@ namespace sw
         };
 
         template <typename U, typename V>
-        OuterProduct<U, V> outer(const VectorExpression<U> &u, const VectorExpression<V> &v)
+        __declspec(noinline) OuterProduct<U, V> outer(const VectorExpression<U> &u, const VectorExpression<V> &v)
         {
             return OuterProduct<U, V>(*static_cast<const U *>(&u), *static_cast<const V *>(&v));
         }

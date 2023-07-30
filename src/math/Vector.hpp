@@ -87,11 +87,13 @@ namespace sw
 
                 std::for_each(std::execution::par_unseq, m_data.begin(), m_data.end(), [&](auto &thisElement)
                               { 
-                            int index = static_cast<int>(&thisElement - &m_data[0]);
+                            size_t index = &thisElement - &m_data[0];
                             thisElement = expr[index]; });
             }
 
-            Vector<T> &operator+=(const Vector<T> &other)
+            template <typename V1>
+            Vector<T> &operator+=(const VectorExpression<V1> &other)
+            // Vector<T> &operator+=(const Vector<T> &other)
             {
                 if (size() != other.size())
                 {
@@ -116,7 +118,9 @@ namespace sw
                 return *this;
             }
 
-            Vector<T> &operator-=(const Vector<T> &other)
+            template <typename V1>
+            Vector<T> &operator-=(const VectorExpression<V1> &other)
+            // Vector<T> &operator-=(const Vector<T> &other)
             {
                 if (size() != other.size())
                 {
@@ -141,7 +145,9 @@ namespace sw
                 return *this;
             }
 
-            Vector<T> &operator*=(const Vector<T> &other)
+            template <typename V1>
+            Vector<T> &operator*=(const VectorExpression<V1> &other)
+            // Vector<T> &operator*=(const Vector<T> &other)
             {
                 if (size() != other.size())
                 {
