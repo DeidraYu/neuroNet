@@ -186,9 +186,9 @@ namespace sw
 
         Vector(std::vector<T> vec);
 
-        Vector(std::vector<T>::size_type sz);
+        Vector(typename std::vector<T>::size_type sz);
 
-        Vector(std::vector<T>::size_type sz, T initialValue);
+        Vector(typename std::vector<T>::size_type sz, T initialValue);
 
         Vector(std::initializer_list<T> initializerList);
 
@@ -201,7 +201,7 @@ namespace sw
         /**
          * @brief Create a random matrix with values uniformly distributed between min and max (inclusive).
          */
-        static Vector<T> rand(std::vector<T>::size_type sz, T min, T max)
+        static Vector<T> rand(typename std::vector<T>::size_type sz, T min, T max)
         {
             std::random_device rd;  // Will be used to obtain a seed for the random number engine
             std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
@@ -248,13 +248,13 @@ namespace sw
     }
 
     template <typename T>
-    Vector<T>::Vector(std::vector<T>::size_type sz) : m_vecStorage(sz)
+    Vector<T>::Vector(typename std::vector<T>::size_type sz) : m_vecStorage(sz)
     {
         this->m_pVec = &m_vecStorage;
     }
 
     template <typename T>
-    Vector<T>::Vector(std::vector<T>::size_type sz, T initialValue) : m_vecStorage(sz, initialValue)
+    Vector<T>::Vector(typename std::vector<T>::size_type sz, T initialValue) : m_vecStorage(sz, initialValue)
     {
         this->m_pVec = &m_vecStorage;
     }

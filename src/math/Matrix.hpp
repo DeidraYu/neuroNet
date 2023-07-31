@@ -64,9 +64,9 @@ namespace sw
                 }
             }
 
-            Matrix(std::vector<Vector<T>>::size_type nRows, std::vector<T>::size_type nCols) : m_rows(nRows, Vector<T>(nCols)) {}
+            Matrix(typename std::vector<Vector<T>>::size_type nRows, typename std::vector<T>::size_type nCols) : m_rows(nRows, Vector<T>(nCols)) {}
 
-            Matrix(std::vector<Vector<T>>::size_type nRows, std::vector<T>::size_type nCols, T initialValue) : m_rows(nRows, Vector<T>(nCols, initialValue)) {}
+            Matrix(typename std::vector<Vector<T>>::size_type nRows, typename std::vector<T>::size_type nCols, T initialValue) : m_rows(nRows, Vector<T>(nCols, initialValue)) {}
 
             // A Matrix can be constructed from any MatrixExpression, forcing its evaluation.
             template <typename M>

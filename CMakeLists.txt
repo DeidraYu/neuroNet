@@ -5,37 +5,74 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo")
 
-# Set default compile flags for GCC
-if(CMAKE_COMPILER_IS_GNUCXX)
-    message(STATUS "GCC detected, adding compile flags")
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -pedantic -Wall -Wextra")
+# # Set default compile flags for GCC
+# if(CMAKE_COMPILER_IS_GNUCXX)
+#     message(STATUS "GCC detected, adding compile flags")
+# #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -pedantic -Wall -Wextra")
 
-    add_compile_options(
-        -Wshadow
-        -Wpointer-arith
-        -Wcast-qual
-        -Wcast-align
-        -Wall
-        -Wextra
-        -pedantic
-        # -Wmissing-declarations # I suppresed this because there is an Issue with gtest on Linux
-        -Wunused
-        -Wpedantic
-        # -Wconversion
-        -Wlogical-op
-        # -Wdouble-promotion # For now we want double promotion. Turn on later.
-        -Wformat=2
-        -fmessage-length=0
-        # -fno-exceptions
-        # -march=broadwell
-    )
+#     add_compile_options(
+#         -Wshadow
+#         -Wpointer-arith
+#         -Wcast-qual
+#         -Wcast-align
+#         -Wall
+#         -Wextra
+#         -pedantic
+#         # -Wmissing-declarations # I suppresed this because there is an Issue with gtest on Linux
+#         -Wunused
+#         -Wpedantic
+#         # -Wconversion
+#         -Wlogical-op
+#         # -Wdouble-promotion # For now we want double promotion. Turn on later.
+#         -Wformat=2
+#         -fmessage-length=0
+#         # -fno-exceptions
+#         # -march=broadwell
+#     )
     
-    add_compile_options("$<$<CONFIG:RELEASE>:-O3;-Werror>")
-else()
-    # Set additional compiler flags for Release build (e.g., -O3)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
-endif(CMAKE_COMPILER_IS_GNUCXX)
+#     add_compile_options("$<$<CONFIG:RELEASE>:-O3;-Werror>")
+# else()
+#     # Set additional compiler flags for Release build (e.g., -O3)
+#     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
+# endif(CMAKE_COMPILER_IS_GNUCXX)
 
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  # using Clang
+  add_compile_options("$<$<CONFIG:RELEASE>:-O3;-Werror>")
+
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # using GCC
+  message(STATUS "GCC detected, adding compile flags")
+  #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -pedantic -Wall -Wextra")
+  
+      add_compile_options(
+          -Wshadow
+          -Wpointer-arith
+          -Wcast-qual
+          -Wcast-align
+          -Wall
+          -Wextra
+          -pedantic
+          # -Wmissing-declarations # I suppresed this because there is an Issue with gtest on Linux
+          -Wunused
+          -Wpedantic
+          # -Wconversion
+          -Wlogical-op
+          # -Wdouble-promotion # For now we want double promotion. Turn on later.
+          -Wformat=2
+          -fmessage-length=0
+          # -fno-exceptions
+          # -march=broadwell
+      )
+      
+      add_compile_options("$<$<CONFIG:RELEASE>:-O3;-Werror>")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  # using Intel C++
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  # using Visual Studio C++
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
+endif()
 
 # .. -> hint, that the mnist package is one directory level above.
 # When using just "find_package(MNIST REQUIRED)", "MNIST_DIR"

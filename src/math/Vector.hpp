@@ -37,7 +37,7 @@ namespace sw
             // Iterators
             // typename std::vector<T>::iterator begin() { return static_cast<V const &>(*this).begin(); }
             // typename std::vector<T>::iterator end() { return static_cast<V const &>(*this).end(); }
-            auto begin() { return static_cast<V const &>(*this).begin(); }
+            // auto begin() { return static_cast<V const &>(*this).begin(); }
             auto end() { return static_cast<V const &>(*this).end(); }
 
             // Constant iterators
@@ -88,9 +88,9 @@ namespace sw
 
             Vector() = default;
 
-            Vector(std::vector<T>::size_type sz) : m_data(sz) {}
+            Vector(typename std::vector<T>::size_type sz) : m_data(sz) {}
 
-            Vector(std::vector<T>::size_type sz, T initialValue) : m_data(sz, initialValue) {}
+            Vector(typename std::vector<T>::size_type sz, T initialValue) : m_data(sz, initialValue) {}
 
             Vector(std::vector<T> &stdVector) : m_data(stdVector) {}
 
@@ -251,7 +251,7 @@ namespace sw
             /**
              * @brief Create a random matrix with values uniformly distributed between min and max (inclusive).
              */
-            static Vector<T> rand(std::vector<T>::size_type sz, T min, T max)
+            static Vector<T> rand(typename std::vector<T>::size_type sz, T min, T max)
             {
                 std::random_device rd;  // Will be used to obtain a seed for the random number engine
                 std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
