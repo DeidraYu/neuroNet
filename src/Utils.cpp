@@ -1,3 +1,4 @@
+#include <cinttypes>
 #include <cstdio>
 
 #include "Utils.hpp"
@@ -169,9 +170,7 @@ namespace sw
             {
                 const std::string &name = pair.first;
                 const Counter &counter = pair.second;
-                const float nano2micro = 1.0f / 1'000.0f;
-                const float nano2milli = 1.0f / 1'000'000.0f;
-                snprintf(line, N, "%-*s    %8llu    %10.2f    %10.2f    %14.2f\n", nameWidth, name.c_str(), counter.count(), counter.time_ns() * nano2milli, counter.time_ns() * nano2milli / nEpochs, counter.mean_ns() * nano2micro);
+                snprintf(line, N, "%-*s    %8" PRIu64 "    %10.2f    %10.2f    %14.2f\n", nameWidth, name.c_str(), counter.count(), counter.time_ms(), counter.time_ms() / nEpochs, counter.mean_us());
                 str += std::string(line);
             }
             return str;
