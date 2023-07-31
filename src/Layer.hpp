@@ -3,6 +3,8 @@
 #include <vector>
 #include "math/Vector.hpp"
 #include "math/Matrix.hpp"
+#include "Utils.hpp"
+
 // #include "Net.hpp"
 // #include "Evaluator.hpp"
 
@@ -50,29 +52,26 @@ public:
                                                      m_nablaC_W(numOutputs, numInputs, 0.0f),
                                                      m_u(numInputs) {}
 
-    __declspec(noinline) void feedForward(const Vector<float> &x)
+    NOINLINE void feedForward(const Vector<float> &x)
     {
         m_z = m_W * x + m_b;
         m_y = sigmoid(m_z);
     }
 
-    __declspec(noinline) void update_gamma(const Vector<float> &v) { m_gamma = v * sigmoid_prime(m_z); }
-    __declspec(noinline) void update_nablaC_b() { m_nablaC_b += m_gamma; }
-    __declspec(noinline) void update_nablaC_W(const Vector<float> &x) { m_nablaC_W += outer(m_gamma, x); }
-    __declspec(noinline) void update_u() { m_u = m_W.transposeMult(m_gamma); }
+    NOINLINE void fastFeedForward(const Vector<float> &x)
+    {
+        m_y = sigmoid(m_W * x + m_b);
+    }
+
+    NOINLINE void update_gamma(const Vector<float> &v) { m_gamma = v * sigmoid_prime(m_z); }
+    NOINLINE void update_nablaC_b() { m_nablaC_b += m_gamma; }
+    NOINLINE void update_nablaC_W(const Vector<float> &x) { m_nablaC_W += outer(m_gamma, x); }
+    NOINLINE void update_u() { m_u = m_W.transposeMult(m_gamma); }
 
     // call the backProp for miniBatchSize
-    __declspec(noinline) void backProp(const Vector<float> &x, const Vector<float> &v, bool updateU = true)
+    NOINLINE void backProp(const Vector<float> &x, const Vector<float> &v, bool updateU = true)
     {
-        // m_gamma = v * sigmoid_prime(m_z);
-        // m_nablaC_b += m_gamma;
-        // m_nablaC_W += outer(m_gamma, x); // (u .* sigma'(z)) x^T
-
-        // // Optimization, for Layer0 we must not compute m_u because there is nothing to back propagate to.
-        // if (updateU == true)
-        // {
-        //     m_u = m_W.transposeMult(m_gamma);
-        // }
+        // sw::prof::Measure M("Layer::backProp");
 
         update_gamma(v);
         update_nablaC_b();
@@ -85,7 +84,7 @@ public:
     }
 
     // update the Weight matrix and bias vector
-    __declspec(noinline) void update(float eta)
+    NOINLINE void update(float eta)
     {
         float scaleFactor = -eta / m_miniBatchSize; // Note the minus sign before eta, such that the following two lines get the +=
         m_W += m_nablaC_W * scaleFactor;            // TODO, implement eta

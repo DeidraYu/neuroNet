@@ -151,24 +151,12 @@ namespace sw
         }
 
         // Iterators
-        typename std::vector<T>::iterator begin()
-        {
-            return m_pVec->begin();
-        }
-        typename std::vector<T>::iterator end()
-        {
-            return m_pVec->end();
-        }
+        typename std::vector<T>::iterator begin() { return m_pVec->begin(); }
+        typename std::vector<T>::iterator end() { return m_pVec->end(); }
 
         // Constant iterators
-        auto cbegin() const
-        {
-            return m_pVec->cbegin();
-        }
-        auto cend() const
-        {
-            return m_pVec->cend();
-        }
+        auto cbegin() const { return m_pVec->cbegin(); }
+        auto cend() const { return m_pVec->cend(); }
 
         std::string toString() const;
 

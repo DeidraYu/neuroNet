@@ -24,6 +24,8 @@ public:
 
     void trainMiniBatches(uint16_t miniBatchSize, float learningRate, std::vector<Vector<float>> &train_data, std::vector<Vector<float>> &train_labels)
     {
+        sw::prof::Measure M("networkTrainer.trainEpoch");
+
         uint16_t mbIndex = 0;
         m_eta = learningRate;
         int numMiniBatches = static_cast<int>((train_data.size() - 1) / miniBatchSize + 1);
@@ -53,13 +55,44 @@ public:
         }
     }
 
-    void train(const Vector<float> &x, Vector<float> label)
+    void train(const Vector<float> &x, const Vector<float> &label)
     {
-        // Feed forward run
         feedforward(x);
+        Vector<float> v = computeLoss(label);
+        backProp(x, v);
+    }
 
-        // Compute the error vector
-        Vector<float> v = getOutput() - label;
+    void feedforward(const Vector<float> &x)
+    {
+        // sw::prof::Measure M("Network::feedForward");
+
+        m_layers[0].feedForward(x);
+        for (uint32_t k = 1; k < m_layers.size(); ++k)
+        {
+            m_layers[k].feedForward(m_layers[k - 1].getY());
+        }
+    }
+
+    void fastFeedforward(const Vector<float> &x)
+    {
+        // sw::prof::Measure M("Network::fastFeedForward");
+
+        m_layers[0].fastFeedForward(x);
+        for (uint32_t k = 1; k < m_layers.size(); ++k)
+        {
+            m_layers[k].fastFeedForward(m_layers[k - 1].getY());
+        }
+    }
+
+    Vector<float> computeLoss(const Vector<float> &label)
+    {
+        // sw::prof::Measure M("Network::computeLoss");
+        return std::move(getOutput() - label);
+    }
+
+    void backProp(const Vector<float> &x, const Vector<float> &v)
+    {
+        // sw::prof::Measure M("Network::backProp");
 
         // L is index of last layer:
         int L = static_cast<int>(m_layers.size()) - 1; // k = 0, 1, ..., L  (so, L is inclusive)
@@ -76,15 +109,6 @@ public:
                 m_layers[k].backProp(m_layers[k - 1].getY(), m_layers[k + 1].getU());
             }
             m_layers[0].backProp(x, m_layers[1].getU(), false);
-        }
-    }
-
-    void feedforward(Vector<float> x)
-    {
-        m_layers[0].feedForward(x);
-        for (uint32_t k = 1; k < m_layers.size(); ++k)
-        {
-            m_layers[k].feedForward(m_layers[k - 1].getY());
         }
     }
 

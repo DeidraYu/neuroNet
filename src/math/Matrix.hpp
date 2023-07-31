@@ -70,7 +70,7 @@ namespace sw
 
             // A Matrix can be constructed from any MatrixExpression, forcing its evaluation.
             template <typename M>
-            __declspec(noinline) Matrix(MatrixExpression<M> const &expr) : m_rows(expr.size())
+            NOINLINE Matrix(MatrixExpression<M> const &expr) : m_rows(expr.size())
             {
                 // for (size_t i = 0; i != expr.size(); ++i)
                 // {
@@ -110,7 +110,7 @@ namespace sw
 
             // __declspec(noinline) Matrix<T> &operator+=(const Matrix<T> &other)
             template <typename M>
-            __declspec(noinline) Matrix<T> &operator+=(const MatrixExpression<M> &other)
+            NOINLINE Matrix<T> &operator+=(const MatrixExpression<M> &other)
             {
                 if (size() != other.size())
                 {
@@ -179,7 +179,7 @@ namespace sw
         };
 
         template <typename M, typename V>
-        __declspec(noinline) MatrixVectorProduct<M, V> operator*(const MatrixExpression<M> &m, const VectorExpression<V> &v)
+        NOINLINE MatrixVectorProduct<M, V> operator*(const MatrixExpression<M> &m, const VectorExpression<V> &v)
         {
             return MatrixVectorProduct<M, V>(*static_cast<const M *>(&m), *static_cast<const V *>(&v));
         }
@@ -208,7 +208,7 @@ namespace sw
         };
 
         template <typename M, typename S>
-        __declspec(noinline) MatrixScalarAddition<M, S> operator+(const MatrixExpression<M> &m, const S s)
+        NOINLINE MatrixScalarAddition<M, S> operator+(const MatrixExpression<M> &m, const S s)
         {
             return MatrixScalarAddition<M, S>(*static_cast<const M *>(&m), s);
         }
@@ -237,7 +237,7 @@ namespace sw
         };
 
         template <typename M, typename S>
-        __declspec(noinline) MatrixScalarProduct<M, S> operator*(const MatrixExpression<M> &m, const S s)
+        NOINLINE MatrixScalarProduct<M, S> operator*(const MatrixExpression<M> &m, const S s)
         {
             return MatrixScalarProduct<M, S>(*static_cast<const M *>(&m), s);
         }
@@ -267,7 +267,7 @@ namespace sw
         };
 
         template <typename U, typename V>
-        __declspec(noinline) OuterProduct<U, V> outer(const VectorExpression<U> &u, const VectorExpression<V> &v)
+        NOINLINE OuterProduct<U, V> outer(const VectorExpression<U> &u, const VectorExpression<V> &v)
         {
             return OuterProduct<U, V>(*static_cast<const U *>(&u), *static_cast<const V *>(&v));
         }

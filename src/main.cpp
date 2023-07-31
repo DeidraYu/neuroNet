@@ -17,9 +17,9 @@
 
 int main()
 {
-    uint32_t nEpochs = 1;
-    uint16_t miniBatchSize = 5;
-    float learningRate = 3.0f;
+    uint32_t nEpochs = 1000;
+    uint16_t miniBatchSize = 10;
+    float learningRate = 0.5f;
     std::vector<uint16_t> layersizes{784, 30, 10};
 
     Network network(layersizes);
@@ -31,7 +31,11 @@ int main()
     NetworkTrainer networkTrainer;
     networkTrainer.trainNet(network, nEpochs, learningRate, miniBatchSize, mnistData);
 
-    printf("score: %d", networkTrainer.evalNet(network, mnistData));
+    std::cout << sw::prof::Times::toString(nEpochs) << std::endl;
+
+    uint32_t score = networkTrainer.evalNet(network, mnistData);
+
+    printf("\nscore: %d\n\n", score);
 
     return 0;
 }

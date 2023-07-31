@@ -6,12 +6,12 @@ namespace sw
 {
     namespace math
     {
-        double sigmoid(double z)
+        NOINLINE double sigmoid(double z)
         {
             return 1.0 / (1.0 + exp(-z));
         }
 
-        double sigmoid_prime(double z)
+        NOINLINE double sigmoid_prime(double z)
         {
             double s = 1.0 / (1.0 + exp(-z));
             return (1.0 - s) * s;

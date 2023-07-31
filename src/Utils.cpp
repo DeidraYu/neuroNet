@@ -40,10 +40,16 @@ void printNumber(std::vector<uint8_t> &vec)
 
 void printProgress(int part, int total, std::string labelString)
 {
+    static int prevPercentage = 0;
     const int width = 80;
     const int progressWidth = width - 2; // -2 because we don't count the [] symbols as progress
     int nDone = progressWidth * part / total;
     int percentage = int(100.0f * float(part) / float(total) + 0.5f);
+
+    if (percentage == prevPercentage)
+    {
+        return;
+    }
 
     char str[width + 1];
     for (int i = 0; i < progressWidth; ++i)
@@ -55,6 +61,7 @@ void printProgress(int part, int total, std::string labelString)
     str[width] = '\0';
     printf("\r%s  (%d%%) %s  ", labelString.c_str(), percentage, str);
     fflush(stdout);
+    prevPercentage = percentage;
 }
 
 void printSW(sw::math::Vector<float> &vec)
@@ -100,3 +107,85 @@ Vector<float> oneHotEncode(int value, int numClasses)
     }
     return encodedVector;
 }
+
+namespace sw
+{
+    namespace prof
+    {
+        // Implementations for Counter
+        Counter::Counter() : m_time_ns(0.0f), m_count(0) {}
+        Counter::Counter(float time_ns) : m_time_ns(time_ns), m_count(1) {}
+        void Counter::update(float time_ns)
+        {
+            m_time_ns += time_ns;
+            ++m_count;
+        }
+
+        uint64_t Counter::count() const { return m_count; }
+        float Counter::time_ns() const { return m_time_ns; }
+        float Counter::mean_ns() const { return m_time_ns / m_count; };
+
+        // Implementations for Times
+        void Times::update(const std::string name, float time_ns)
+        {
+            if (m_times.find(name) != m_times.end())
+            {
+                m_times[name].update(time_ns);
+            }
+            else
+            {
+                m_times[name] = Counter(time_ns);
+            }
+        }
+
+        const Counter &Times::getCounter(const std::string name)
+        {
+            return m_times[name];
+        }
+
+        std::string Times::toString(int nEpochs)
+        {
+            std::string str = "";
+            const size_t N = 256;
+            char line[N];
+
+            const int nameWidth = 40;
+            const int countWidth = 8;
+            const int totalWidth = 10;
+            const int meanWidth = 14;
+
+            snprintf(line, N, "%-*s    %-*s    %-*s    %-*s    %-*s\n", nameWidth, "Name", countWidth, "Count", totalWidth, "tot. [ms]", totalWidth, "per epoch [ms]", meanWidth, "per call [us]");
+            str += std::string(line);
+
+            for (auto &pair : m_times)
+            {
+                const std::string &name = pair.first;
+                const Counter &counter = pair.second;
+                const float nano2micro = 1.0f / 1'000.0f;
+                const float nano2milli = 1.0f / 1'000'000.0f;
+                snprintf(line, N, "%-*s    %8lu    %10.2f    %10.2f    %14.2f\n", nameWidth, name.c_str(), counter.count(), counter.time_ns() * nano2milli, counter.time_ns() * nano2milli / nEpochs, counter.mean_ns() * nano2micro);
+                str += std::string(line);
+            }
+            return str;
+        }
+
+        std::unordered_map<std::string, Counter> Times::m_times;
+
+        // Implementations for Measure
+        Measure::Measure(std::string name) : m_name(name)
+        {
+            m_start = std::chrono::steady_clock::now();
+        }
+
+        Measure::~Measure()
+        {
+
+            m_end = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(m_end - m_start);
+
+            m_time_ns = duration.count();
+            Times::update(m_name, m_time_ns);
+        }
+
+    } // namespace prof
+} // namespace sw

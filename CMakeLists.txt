@@ -30,7 +30,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
         # -march=broadwell
     )
     
-    add_compile_options("$<$<CONFIG:RELEASE>:-O2;-Werror>")
+    add_compile_options("$<$<CONFIG:RELEASE>:-O3;-Werror>")
 else()
     # Set additional compiler flags for Release build (e.g., -O3)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")

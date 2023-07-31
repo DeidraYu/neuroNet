@@ -2,6 +2,8 @@
 
 void NetworkTrainer::trainNet(Network &network, uint32_t nEpochs, float learningRate, uint16_t miniBatchSize, MnistData &mnistData)
 {
+    sw::prof::Measure M("NetworkTrainer.trainNet");
+
     char progressLabel[16];
     for (uint32_t i = 0; i < nEpochs; ++i)
     {
@@ -14,11 +16,13 @@ void NetworkTrainer::trainNet(Network &network, uint32_t nEpochs, float learning
 
 uint32_t NetworkTrainer::evalNet(Network &network, MnistData &mnistData)
 {
+    sw::prof::Measure M("NetworkTrainer.evalNet");
+
     uint32_t score = 0;
 
     for (uint32_t i = 0; i < mnistData.numTestImages; ++i)
     {
-        network.feedforward(mnistData.test_data[i]);
+        network.fastFeedforward(mnistData.test_data[i]);
 
         if (network.getOutput().argmax() == mnistData.dataset.test_labels[i])
         {

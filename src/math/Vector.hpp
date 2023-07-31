@@ -34,18 +34,38 @@ namespace sw
                 return static_cast<V const &>(*this)[i];
             }
 
+            // Iterators
+            // typename std::vector<T>::iterator begin() { return static_cast<V const &>(*this).begin(); }
+            // typename std::vector<T>::iterator end() { return static_cast<V const &>(*this).end(); }
+            auto begin() { return static_cast<V const &>(*this).begin(); }
+            auto end() { return static_cast<V const &>(*this).end(); }
+
+            // Constant iterators
+            auto cbegin() const { return static_cast<V const &>(*this).cbegin(); }
+            auto cend() const { return static_cast<V const &>(*this).cend(); }
+
             // Design choice: The dot product is not Lazy. Calling the .dot() operation enforces it's children to be immediatly
             //                being evaluated. This avoids repeated computation of a single scalar. It is possible that we need
             //                to come back on this decision at a later moment.
             template <typename V2>
             auto dot(const V2 &other) const
             {
-                auto sum = (*this)[0] * other[0];
-                for (size_t i = 1; i < size(); ++i)
-                {
-                    sum += (*this)[i] * other[i];
-                }
-                return sum;
+                // auto sum = (*this)[0] * other[0];
+                // for (size_t i = 1; i < size(); ++i)
+                // {
+                //     sum += (*this)[i] * other[i];
+                // }
+                // return sum;
+                // return std::inner_product(begin(), end(), other.begin(), 0);
+
+                // Compute the inner product in parallel using C++20's execution policies
+                return std::transform_reduce(std::execution::par_unseq,
+                                             cbegin(), cend(),
+                                             other.cbegin(),
+                                             0.0,           // Initial value for the sum
+                                             std::plus<>(), // Binary operation (sum)
+                                             [](double x, double y)
+                                             { return x * y; }); // Element-wise multiplication
             }
 
             size_t size() const { return static_cast<V const &>(*this).size(); }

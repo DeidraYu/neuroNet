@@ -84,19 +84,19 @@ namespace sw
             return result;
         }
 
-        __declspec(noinline) void operator+=(T rhs)
+        void operator+=(T rhs)
         {
             std::for_each(m_rows.begin(), m_rows.end(), [rhs](auto &row)
                           { row += rhs; });
         }
 
-        __declspec(noinline) void operator-=(T rhs)
+        void operator-=(T rhs)
         {
             std::for_each(m_rows.begin(), m_rows.end(), [rhs](auto &row)
                           { row -= rhs; });
         }
 
-        __declspec(noinline) void operator*=(T rhs)
+        void operator*=(T rhs)
         {
             std::for_each(m_rows.begin(), m_rows.end(), [rhs](auto &row)
                           { row *= rhs; });
@@ -121,7 +121,7 @@ namespace sw
         }
 
         template <typename U>
-        __declspec(noinline) Vector<typename std::common_type<T, U>::type> transposeMult(const Vector<U> &rhs) const
+        Vector<typename std::common_type<T, U>::type> transposeMult(const Vector<U> &rhs) const
         {
             using CommonType = typename std::common_type<T, U>::type;
 
