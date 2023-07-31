@@ -113,20 +113,28 @@ namespace sw
     namespace prof
     {
         // Implementations for Counter
-        Counter::Counter() : m_time_ns(0.0f), m_count(0) {}
-        Counter::Counter(float time_ns) : m_time_ns(time_ns), m_count(1) {}
-        void Counter::update(float time_ns)
+        Counter::Counter() : m_time_ns(0), m_count(0) {}
+        Counter::Counter(uint64_t time_ns) : m_time_ns(time_ns), m_count(1) {}
+        void Counter::update(uint64_t time_ns)
         {
             m_time_ns += time_ns;
             ++m_count;
         }
 
         uint64_t Counter::count() const { return m_count; }
-        float Counter::time_ns() const { return m_time_ns; }
-        float Counter::mean_ns() const { return m_time_ns / m_count; };
+        uint64_t Counter::time_ns() const { return m_time_ns; }
+
+        float Counter::time_us() const { return m_time_ns / 1'000.0f; }
+        float Counter::time_ms() const { return m_time_ns / 1'000'000.0f; }
+        float Counter::time_s() const { return m_time_ns / 1'000'000'000.0f; }
+
+        float Counter::mean_ns() const { return static_cast<float>(m_time_ns) / m_count; }
+        float Counter::mean_us() const { return static_cast<float>(m_time_ns) / m_count / 1'000.0f; }
+        float Counter::mean_ms() const { return static_cast<float>(m_time_ns) / m_count / 1'000'000.0f; }
+        float Counter::mean_s() const { return static_cast<float>(m_time_ns) / m_count / 1'000'000'000.0f; }
 
         // Implementations for Times
-        void Times::update(const std::string name, float time_ns)
+        void Times::update(const std::string name, uint64_t time_ns)
         {
             if (m_times.find(name) != m_times.end())
             {
@@ -163,7 +171,7 @@ namespace sw
                 const Counter &counter = pair.second;
                 const float nano2micro = 1.0f / 1'000.0f;
                 const float nano2milli = 1.0f / 1'000'000.0f;
-                snprintf(line, N, "%-*s    %8lu    %10.2f    %10.2f    %14.2f\n", nameWidth, name.c_str(), counter.count(), counter.time_ns() * nano2milli, counter.time_ns() * nano2milli / nEpochs, counter.mean_ns() * nano2micro);
+                snprintf(line, N, "%-*s    %8llu    %10.2f    %10.2f    %14.2f\n", nameWidth, name.c_str(), counter.count(), counter.time_ns() * nano2milli, counter.time_ns() * nano2milli / nEpochs, counter.mean_ns() * nano2micro);
                 str += std::string(line);
             }
             return str;

@@ -108,7 +108,7 @@ namespace sw
                 std::for_each(std::execution::par_unseq, m_data.begin(), m_data.end(), [&](auto &thisElement)
                               { 
                             size_t index = &thisElement - &m_data[0];
-                            thisElement = expr[index]; });
+                            thisElement = static_cast<T>(expr[index]); });
             }
 
             template <typename V1>
@@ -122,7 +122,7 @@ namespace sw
 
                 for (size_t i = 0; i < size(); ++i)
                 {
-                    m_data[i] += other[i];
+                    m_data[i] += static_cast<T>(other[i]);
                 }
 
                 return *this;

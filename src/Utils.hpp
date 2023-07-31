@@ -27,22 +27,30 @@ namespace sw
         {
         public:
             Counter();
-            Counter(float time_ns);
-            void update(float time_ns);
+            Counter(uint64_t time_ns);
+            void update(uint64_t time_ns);
 
             uint64_t count() const;
-            float time_ns() const;
+
+            uint64_t time_ns() const;
+            float time_us() const;
+            float time_ms() const;
+            float time_s() const;
+
             float mean_ns() const;
+            float mean_us() const;
+            float mean_ms() const;
+            float mean_s() const;
 
         private:
-            float m_time_ns;
+            uint64_t m_time_ns;
             uint64_t m_count;
         };
 
         class Times
         {
         public:
-            static void update(const std::string name, float time_ns);
+            static void update(const std::string name, uint64_t time_ns);
             static const Counter &getCounter(const std::string name);
             static std::string toString(int nEpochs);
 
