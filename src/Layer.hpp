@@ -52,6 +52,17 @@ public:
                                                      m_nablaC_W(numOutputs, numInputs, 0.0f),
                                                      m_u(numInputs) {}
 
+    Layer(uint16_t numInputs, uint16_t numOutputs, Matrix<float> weights, Vector<float> biases) : m_numInputs(numInputs),
+                                                                                                  m_numOutputs(numOutputs),
+                                                                                                  m_W(weights),
+                                                                                                  m_b(biases),
+                                                                                                  m_z(numOutputs, 0.0f),
+                                                                                                  m_y(numOutputs, 0.0f),
+                                                                                                  m_gamma(numOutputs, 0.0f),
+                                                                                                  m_nablaC_b(numOutputs, 0.0f),
+                                                                                                  m_nablaC_W(numOutputs, numInputs, 0.0f),
+                                                                                                  m_u(numInputs) {}
+
     NOINLINE void feedForward(const Vector<float> &x)
     {
         m_z = m_W * x + m_b;
@@ -111,6 +122,26 @@ public:
 
     const auto &getNablaC_W() const { return m_nablaC_W; }
     const auto &getNablaC_b() const { return m_nablaC_b; }
+
+    uint16_t getNumInputs()
+    {
+        return m_numInputs;
+    }
+
+    uint16_t getNumOutputs()
+    {
+        return m_numOutputs;
+    }
+
+    Matrix<float> &getWeights()
+    {
+        return m_W;
+    }
+
+    Vector<float> &getBiases()
+    {
+        return m_b;
+    }
 
 private:
     // void feedforward(Vector<float> &x);

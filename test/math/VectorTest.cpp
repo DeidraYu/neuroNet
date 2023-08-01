@@ -309,6 +309,21 @@ TEST(VectorTest, VectorFunction_cos)
     EXPECT_EQ(cos_v, expected);
 }
 
+TEST(VectorTest, VectorToBinary)
+{
+    // inputs
+    Vector<uint16_t> v{1, 2, 3, 4, 5, 8};
+
+    std::vector<uint8_t> b = v.getBinaryString();
+
+    size_t typeSize = sizeof(TypeInfo);
+    size_t numElementSize = sizeof(size_t);
+    size_t dataSize = sizeof(uint16_t) * v.size();
+
+    EXPECT_EQ(b.size(), typeSize + numElementSize + dataSize);
+    // std::cout << Vector<uint8_t>(b) << std::endl;
+}
+
 #if 0 // for documentation
 TEST(VectorTest, CodeForMdFile)
 {

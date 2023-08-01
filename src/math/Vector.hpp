@@ -8,10 +8,13 @@
 #include <cmath>
 #include <execution>
 #include <functional>
+#include <iostream>
 #include <random>
 #include <stdexcept>
 #include <string>
+#include <typeindex>
 #include <vector>
+#include <variant>
 
 #include "utils.hpp"
 
@@ -19,6 +22,12 @@ namespace sw
 {
     namespace math
     {
+        struct TypeInfo
+        {
+            std::type_index index;
+            size_t size;
+        };
+
         template <typename V>
         class VectorExpression
         {
@@ -95,6 +104,29 @@ namespace sw
             Vector(std::vector<T> &stdVector) : m_data(stdVector) {}
 
             Vector(std::initializer_list<T> initializerList) : m_data{initializerList} {}
+
+            Vector(const std::vector<uint8_t> &binaryData)
+            {
+                void parseBinaryData(const std::vector<uint8_t> &binaryData)
+                {
+                    Vector<T> outputVector;
+
+                    // Extract the type information from the binary data
+                    TypeInfo typeInfo;
+                    std::memcpy(&typeInfo, binaryData.data(), sizeof(TypeInfo));
+
+                    // Extract the number of elements from the binary data
+                    size_t numElements;
+                    std::memcpy(&numElements, binaryData.data() + sizeof(TypeInfo), sizeof(size_t));
+
+                    // Calculate the expected size of the data
+                    size_t expectedSize = sizeof(TypeInfo) + sizeof(size_t) + numElements * sizeof(T);
+
+                    // Extract the vector data from the binary data and populate the outputVector
+                    const uint8_t *dataPtr = binaryData.data() + sizeof(TypeInfo) + sizeof(size_t);
+                    outputVector.assign(reinterpret_cast<const T *>(dataPtr), reinterpret_cast<const T *>(dataPtr) + numElements);
+                }
+            }
 
             // A Vec can be constructed from any VecExpression, forcing its evaluation.
             template <typename V>
@@ -286,6 +318,38 @@ namespace sw
                 auto maxElement = std::max_element(begin(), end());
                 uint64_t index = std::distance(begin(), maxElement);
                 return index;
+            }
+
+            const T *data() const
+            {
+                return m_data.data();
+            }
+
+            template <typename V>
+            TypeInfo getTypeInfo()
+            {
+                return {std::type_index(typeid(T)), sizeof(T)};
+            }
+
+            std::vector<uint8_t> getBinaryString()
+            {
+                std::vector<uint8_t> binaryData;
+
+                // Add the type information to binary data
+                TypeInfo typeInfo = getTypeInfo<T>();
+                const uint8_t *typeInfoPtr = reinterpret_cast<const uint8_t *>(&typeInfo);
+                binaryData.insert(binaryData.end(), typeInfoPtr, typeInfoPtr + sizeof(TypeInfo));
+
+                // Add the number of elements to binary data
+                size_t numElements = m_data.size();
+                const uint8_t *numElementsPtr = reinterpret_cast<const uint8_t *>(&numElements);
+                binaryData.insert(binaryData.end(), numElementsPtr, numElementsPtr + sizeof(size_t));
+
+                // Add the vector data to binary data
+                const uint8_t *dataPtr = reinterpret_cast<const uint8_t *>(m_data.data());
+                binaryData.insert(binaryData.end(), dataPtr, dataPtr + numElements * sizeof(T));
+
+                return binaryData;
             }
 
         private:
