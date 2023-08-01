@@ -109,6 +109,7 @@ public:
     void randomizeWB(float min, float max)
     {
         m_W = Matrix<float>::rand(m_W.getNumRows(), m_W.getNumCols(), min, max);
+        m_b = Vector<float>::rand(m_b.size(), min, max);
     }
 
     constexpr uint16_t size() const { return m_numOutputs; }

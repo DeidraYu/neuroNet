@@ -9,7 +9,7 @@
 #include <execution>
 #include <functional>
 #include <iostream>
-#include <random>
+// #include <random>
 #include <stdexcept>
 #include <string>
 #include <typeindex>
@@ -46,7 +46,7 @@ namespace sw
             // Iterators
             // typename std::vector<T>::iterator begin() { return static_cast<V const &>(*this).begin(); }
             // typename std::vector<T>::iterator end() { return static_cast<V const &>(*this).end(); }
-            auto begin() { return static_cast<V const &>(*this).begin(); }
+            // auto begin() { return static_cast<V const &>(*this).begin(); }
             auto end() { return static_cast<V const &>(*this).end(); }
 
             // Constant iterators
@@ -97,15 +97,15 @@ namespace sw
 
             Vector() = default;
 
-            Vector(std::vector<T>::size_type sz) : m_data(sz) {}
+            Vector(typename std::vector<T>::size_type sz) : m_data(sz) {}
 
-            Vector(std::vector<T>::size_type sz, T initialValue) : m_data(sz, initialValue) {}
+            Vector(typename std::vector<T>::size_type sz, T initialValue) : m_data(sz, initialValue) {}
 
             Vector(std::vector<T> &stdVector) : m_data(stdVector) {}
 
             Vector(std::initializer_list<T> initializerList) : m_data{initializerList} {}
 
-            Vector(const std::vector<uint8_t> &binaryData)
+            /*Vector(const std::vector<uint8_t> &binaryData)
             {
                 void parseBinaryData(const std::vector<uint8_t> &binaryData)
                 {
@@ -126,7 +126,7 @@ namespace sw
                     const uint8_t *dataPtr = binaryData.data() + sizeof(TypeInfo) + sizeof(size_t);
                     outputVector.assign(reinterpret_cast<const T *>(dataPtr), reinterpret_cast<const T *>(dataPtr) + numElements);
                 }
-            }
+            }*/
 
             // A Vec can be constructed from any VecExpression, forcing its evaluation.
             template <typename V>
@@ -283,10 +283,10 @@ namespace sw
             /**
              * @brief Create a random matrix with values uniformly distributed between min and max (inclusive).
              */
-            static Vector<T> rand(std::vector<T>::size_type sz, T min, T max)
+            static Vector<T> rand(typename std::vector<T>::size_type sz, T min, T max)
             {
-                std::random_device rd;  // Will be used to obtain a seed for the random number engine
-                std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+                // std::random_device rd;  // Will be used to obtain a seed for the random number engine
+                // std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
 
                 Vector<T> randVector(sz);
 
@@ -298,7 +298,7 @@ namespace sw
 
                     for (uint32_t i = 0; i < sz; ++i)
                     {
-                        randVector[i] = static_cast<T>(dis(gen));
+                        randVector[i] = static_cast<T>(dis(Random::gen));
                     }
                 }
                 else if constexpr (std::is_floating_point_v<T>)
@@ -307,7 +307,7 @@ namespace sw
                     std::uniform_real_distribution<T> dis(min, max);
                     for (uint32_t i = 0; i < sz; ++i)
                     {
-                        randVector[i] = dis(gen);
+                        randVector[i] = dis(Random::gen);
                     }
                 }
                 return randVector;
