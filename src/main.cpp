@@ -6,23 +6,21 @@
 #include <algorithm>
 #include <ranges>
 
-#include "Net.hpp"
-// #include "Trainer.hpp"
-// #include "Evaluator.hpp"
-// #include "Vector.hpp"
 #include "Utils.hpp"
 #include "Network.hpp"
 #include "NetworkTrainer.hpp"
 #include "MnistData.hpp"
+#include "math/utils.hpp"
 
 int main()
 {
-    uint32_t nEpochs = 10;
-    uint16_t miniBatchSize = 10;
-    float learningRate = 0.5f;
+    uint32_t nEpochs = 100;
+    uint16_t miniBatchSize = 60000;
+    float learningRate = 1.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
 
     Network network(layersizes);
+    Random::seed(); // Use a randomized seed
     network.randomizeWB(-2.0f, 2.0f);
 
     MnistData mnistData;

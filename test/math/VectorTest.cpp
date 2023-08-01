@@ -328,6 +328,15 @@ TEST(VectorTest, CodeForMdFile)
 }
 #endif
 
+TEST(VectorTest, random)
+{
+    Vector u = Vector<float>::rand(10, 0, std::numeric_limits<float>::max());
+
+    bool isRandom = u[0] != u[2];
+
+    EXPECT_EQ(isRandom, true);
+}
+
 TEST(MatrixTest, creation)
 {
     Matrix<int> A{{0, 1, 2}, {3, 4, 5}};

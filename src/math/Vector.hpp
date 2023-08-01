@@ -8,7 +8,7 @@
 #include <cmath>
 #include <execution>
 #include <functional>
-#include <random>
+// #include <random>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -253,8 +253,8 @@ namespace sw
              */
             static Vector<T> rand(typename std::vector<T>::size_type sz, T min, T max)
             {
-                std::random_device rd;  // Will be used to obtain a seed for the random number engine
-                std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+                // std::random_device rd;  // Will be used to obtain a seed for the random number engine
+                // std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
 
                 Vector<T> randVector(sz);
 
@@ -266,7 +266,7 @@ namespace sw
 
                     for (uint32_t i = 0; i < sz; ++i)
                     {
-                        randVector[i] = static_cast<T>(dis(gen));
+                        randVector[i] = static_cast<T>(dis(Random::gen));
                     }
                 }
                 else if constexpr (std::is_floating_point_v<T>)
@@ -275,7 +275,7 @@ namespace sw
                     std::uniform_real_distribution<T> dis(min, max);
                     for (uint32_t i = 0; i < sz; ++i)
                     {
-                        randVector[i] = dis(gen);
+                        randVector[i] = dis(Random::gen);
                     }
                 }
                 return randVector;

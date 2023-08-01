@@ -1,13 +1,10 @@
-# Now simply link against gtest or gtest_main as needed. Eg
-# add_executable(neuronet_test VectorTest.cpp MatrixTest.cpp ../src/Utils.cpp ../src/math/utils.cpp)
-# target_link_libraries(neuronet_test gtest_main)
-# add_test(NAME example_test COMMAND example)
-
-
-# add_executable(matrix_performance MatrixPerformance.cpp ../src/Utils.cpp ../src/math/utils.cpp)
-# target_link_libraries(matrix_performance gtest_main)
-
 add_executable(layer_test LayerTest.cpp ../src/Utils.cpp ../src/math/utils.cpp)
 target_link_libraries(layer_test gtest_main)
+
+add_executable(network_test NetworkTest.cpp ../src/Utils.cpp ../src/math/utils.cpp ../src/MnistData.cpp ../src/NetworkTrainer.cpp)
+target_link_libraries(network_test gtest_main)
+
+# Pass MNIST data directory to network_test
+target_compile_definitions(network_test PRIVATE MNIST_DATA_LOCATION="${MNIST_DATA_DIR}")
 
 add_subdirectory(math)
