@@ -24,6 +24,8 @@ namespace sw
     {
         struct TypeInfo
         {
+            //            TypeInfo() = default;
+
             std::type_index index;
             size_t size;
         };
@@ -104,29 +106,6 @@ namespace sw
             Vector(std::vector<T> &stdVector) : m_data(stdVector) {}
 
             Vector(std::initializer_list<T> initializerList) : m_data{initializerList} {}
-
-            /*Vector(const std::vector<uint8_t> &binaryData)
-            {
-                void parseBinaryData(const std::vector<uint8_t> &binaryData)
-                {
-                    Vector<T> outputVector;
-
-                    // Extract the type information from the binary data
-                    TypeInfo typeInfo;
-                    std::memcpy(&typeInfo, binaryData.data(), sizeof(TypeInfo));
-
-                    // Extract the number of elements from the binary data
-                    size_t numElements;
-                    std::memcpy(&numElements, binaryData.data() + sizeof(TypeInfo), sizeof(size_t));
-
-                    // Calculate the expected size of the data
-                    size_t expectedSize = sizeof(TypeInfo) + sizeof(size_t) + numElements * sizeof(T);
-
-                    // Extract the vector data from the binary data and populate the outputVector
-                    const uint8_t *dataPtr = binaryData.data() + sizeof(TypeInfo) + sizeof(size_t);
-                    outputVector.assign(reinterpret_cast<const T *>(dataPtr), reinterpret_cast<const T *>(dataPtr) + numElements);
-                }
-            }*/
 
             // A Vec can be constructed from any VecExpression, forcing its evaluation.
             template <typename V>

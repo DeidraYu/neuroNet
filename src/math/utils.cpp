@@ -1,7 +1,18 @@
 #include "utils.hpp"
 
+#include <cassert>
 #include <cmath>
 #include <random>
+#include <typeindex>
+#include <vector>
+#include <variant>
+#include <stdexcept>
+
+struct TypeInfo
+{
+    std::type_index index;
+    size_t size;
+};
 
 namespace sw
 {

@@ -18,3 +18,11 @@ TEST(FileIoTest, initialize)
 
     // saveVectorToFile(testVec, fileName);
 }
+
+TEST(FileIoTest, initialize2)
+{
+    Vector<float> testVec{1.0f, 2.0f, 3.0f, 5.0f};
+    std::string fileName = "/home/koenr/projects/neuroNetSaves/testVec.bin";
+
+    // saveVectorToFile(testVec, fileName);
+}

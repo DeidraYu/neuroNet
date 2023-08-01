@@ -22,7 +22,7 @@ TypeInfo getTypeInfo()
 }*/
 
 // Function to save an std::vector<float> to a binary file
-template <typename T>
+/*template <typename T>
 void saveVectorToFile(const Vector<T> &vec, const std::string &filename)
 {
     std::ofstream file(filename, std::ios::binary);
@@ -74,6 +74,76 @@ std::vector<float> loadVectorFromFile(const std::string &filename)
 
     return vec;
 }
+
+std::vector<uint8_t> readBinaryDataFromFile(const std::string &filename)
+{
+    std::ifstream file(filename, std::ios::binary | std::ios::ate);
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return {};
+    }
+
+    std::streamsize fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<uint8_t> binaryData(fileSize);
+    if (!file.read(reinterpret_cast<char *>(binaryData.data()), fileSize))
+    {
+        std::cerr << "Error reading file: " << filename << std::endl;
+        return {};
+    }
+
+    return binaryData;
+}*/
+
+/*std::vector<uint16_t> parseBinaryData(std::vector<uint8_t> binaryData)
+{
+    auto itr = binaryData.begin();
+
+    // Extract type information from binary data
+    TypeInfo typeInfo{std::type_index(typeid(0)), 0};
+    std::copy_n(itr, sizeof(TypeInfo), reinterpret_cast<uint8_t *>(&typeInfo));
+    itr += sizeof(TypeInfo);
+
+    // Extract the number of elements from binary data
+    size_t numElements;
+    std::copy_n(itr, sizeof(size_t), reinterpret_cast<uint8_t *>(&numElements));
+    itr += sizeof(size_t);
+
+    // Extract vector data and construct the Vector
+    std::vector<uint16_t> outputVector(numElements);
+    // outputVector.reserve(numElements);
+    std::copy_n(itr, sizeof(uint16_t) * numElements, reinterpret_cast<uint8_t *>(outputVector.data()));
+    // outputVector.push_back(element);
+    itr += sizeof(uint16_t) * numElements;
+
+    return outputVector;
+}*/
+
+/*template <typename T>
+Vector<T> parseBinaryData(std::vector<uint8_t> binaryData)
+{
+    auto itr = binaryData.begin();
+
+    // Extract type information from binary data
+    TypeInfo typeInfo{std::type_index(typeid(0)), 0};
+    std::copy_n(itr, sizeof(TypeInfo), reinterpret_cast<uint8_t *>(&typeInfo));
+    itr += sizeof(TypeInfo);
+
+    // Extract the number of elements from binary data
+    size_t numElements;
+    std::copy_n(itr, sizeof(size_t), reinterpret_cast<uint8_t *>(&numElements));
+    itr += sizeof(size_t);
+
+    // Extract vector data and construct the Vector
+    Vector<T> outputVector;
+
+    std::copy_n(itr, sizeof(T), reinterpret_cast<uint8_t *>(outputVector.data()));
+    itr += sizeof(T);
+
+    return outputVector;
+}*/
 
 /*void FileIO::saveNetwork(Network &network, std::string filename)
 {

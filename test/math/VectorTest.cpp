@@ -4,6 +4,7 @@
 
 #include "../../src/math/Vector.hpp"
 #include "../../src/math/Matrix.hpp"
+#include "../../src/FileIO.hpp"
 
 using namespace sw::math;
 
@@ -321,7 +322,55 @@ TEST(VectorTest, VectorToBinary)
     size_t dataSize = sizeof(uint16_t) * v.size();
 
     EXPECT_EQ(b.size(), typeSize + numElementSize + dataSize);
-    // std::cout << Vector<uint8_t>(b) << std::endl;
+    std::cout << Vector<uint8_t>(b) << std::endl;
+}
+
+TEST(VectorTest, BinaryToVector)
+{
+    // inputs
+    Vector<uint16_t> v{1, 2, 3, 4, 5, 8};
+
+    std::vector<uint8_t> b = v.getBinaryString();
+
+    Vector<uint16_t> vecFromBin = parseBinaryData<uint16_t>(b);
+    // auto swVecFromBin = Vector<uint16_t>(vecFromBin);
+
+    EXPECT_EQ(vecFromBin, v);
+    std::cout << vecFromBin << std::endl;
+}
+
+TEST(VectorTest, BinaryToVectorMultipleTypes)
+{
+    {
+        Vector<uint8_t> v{3, 1, 4, 1, 5};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<uint8_t> vecFromBin = parseBinaryData<uint8_t>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
+    {
+        Vector<uint16_t> v{3, 1, 4, 1, 5};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<uint16_t> vecFromBin = parseBinaryData<uint16_t>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
+    {
+        Vector<size_t> v{3, 1, 4, 1, 5};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<size_t> vecFromBin = parseBinaryData<size_t>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
+    {
+        Vector<float> v{3.0f, 1.0f, 4.0f, 1.0f, 5.0f};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<float> vecFromBin = parseBinaryData<float>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
+    {
+        Vector<double> v{3.0, 1.0, 4.0, 1.0, 5.0};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<double> vecFromBin = parseBinaryData<double>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
 }
 
 #if 0 // for documentation
