@@ -108,3 +108,22 @@ FetchContent_MakeAvailable(googletest)
 ##
 add_subdirectory(src)
 add_subdirectory(test)
+
+# enable testing functionality
+enable_testing()
+
+# define tests
+add_test(
+  NAME layer_test
+  COMMAND $<TARGET_FILE:layer_test>
+  )
+
+add_test(
+  NAME network_test
+  COMMAND $<TARGET_FILE:network_test>
+  )
+
+add_test(
+  NAME math_test
+  COMMAND $<TARGET_FILE:math_test>
+  )
