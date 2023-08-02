@@ -96,7 +96,7 @@ TEST_F(LayerTest, update)
         layer.update(1.0f);
     }
 
-    float cost = 0.5f * v.dot(v);
+    float cost = 0.5f * static_cast<float>(v.dot(v));
 
     EXPECT_LE(cost, 1e-3);
 }
@@ -117,7 +117,7 @@ TEST_F(LayerTest, update2)
         {
             layer.feedForward(x1);
             v = layer.getY() - x1; // u = dC / dx
-            cost1 = 0.5f * v.dot(v);
+            cost1 = 0.5f * static_cast<float>(v.dot(v));
             layer.backProp(x1, v);
             layer.update(1.0f);
         }
@@ -125,7 +125,7 @@ TEST_F(LayerTest, update2)
         {
             layer.feedForward(x2);
             v = layer.getY() - x2; // u = dC / dx
-            cost2 = 0.5f * v.dot(v);
+            cost2 = 0.5f * static_cast<float>(v.dot(v));
             layer.backProp(x2, v);
             layer.update(1.0f);
         }
