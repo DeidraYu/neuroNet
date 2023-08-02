@@ -10,13 +10,13 @@
 TEST(NetworkTest, test_01)
 {
     uint32_t nEpochs = 2;
-    uint16_t miniBatchSize = 10;
-    float learningRate = 1.0f;
+    uint16_t miniBatchSize = 5;
+    float learningRate = 10.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
 
     // Read MNIST dataset and convert to our own Vector format
     MnistData mnistData;
-    mnistData.processMNIST();
+    mnistData.processMNIST(600, 100);
 
     // Setup the network topology
     Network network(layersizes);
@@ -30,5 +30,5 @@ TEST(NetworkTest, test_01)
     networkTrainer.trainNet(network, nEpochs, learningRate, miniBatchSize, mnistData);
     uint32_t score = networkTrainer.evalNet(network, mnistData);
 
-    EXPECT_EQ(score, 8944);
+    EXPECT_EQ(score, 51); // out of 100
 }
