@@ -1,3 +1,6 @@
 # Now simply link against gtest or gtest_main as needed. Eg
-add_executable(math_test VectorTest.cpp  utilsTest.cpp ../../src/math/utils.cpp)
-target_link_libraries(math_test gtest_main)
+add_executable(math_utils_test utilsTest.cpp ../../src/math/utils.cpp)
+target_link_libraries(math_utils_test gtest_main)
+
+add_executable(vector_test VectorTest.cpp  utilsTest.cpp ../../src/math/utils.cpp)
+target_link_libraries(vector_test gtest_main)

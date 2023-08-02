@@ -107,6 +107,8 @@ FetchContent_MakeAvailable(googletest)
 # Our own application
 ##
 add_subdirectory(src)
+
+
 add_subdirectory(test)
 
 # enable testing functionality
@@ -114,6 +116,16 @@ enable_testing()
 
 # define tests
 add_test(
+  NAME math_utils_test
+  COMMAND $<TARGET_FILE:vector_test>
+  )
+  
+add_test(
+  NAME math_test
+  COMMAND $<TARGET_FILE:vector_test>
+  )
+
+  add_test(
   NAME layer_test
   COMMAND $<TARGET_FILE:layer_test>
   )
@@ -123,7 +135,3 @@ add_test(
   COMMAND $<TARGET_FILE:network_test>
   )
 
-add_test(
-  NAME math_test
-  COMMAND $<TARGET_FILE:math_test>
-  )
