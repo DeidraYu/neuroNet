@@ -14,8 +14,10 @@
 
 int main()
 {
-    uint32_t nEpochs = 100;
-    uint16_t miniBatchSize = 60000;
+    // sw::verbosity = 0; // suppress progress bar
+
+    uint32_t nEpochs = 10;
+    uint16_t miniBatchSize = 10;
     float learningRate = 1.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
 
