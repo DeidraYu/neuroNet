@@ -5,52 +5,34 @@
 
 void MnistData::processMNIST()
 {
-    std::cout << "MNIST data directory: " << MNIST_DATA_LOCATION << std::endl;
-    auto start1 = std::chrono::steady_clock::now();
+    processMNIST(0, 0); // no limits on the size of the training and test set
+}
 
+void MnistData::processMNIST(size_t trainingLimit, size_t testLimit)
+{
     // Load MNIST data
-    dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(MNIST_DATA_LOCATION);
+    dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(MNIST_DATA_LOCATION, trainingLimit, testLimit);
 
-    auto end1 = std::chrono::steady_clock::now();
-    auto duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1);
-
-    std::cout << "Nbr of training images = " << dataset.training_images.size() << std::endl;
-    std::cout << "Nbr of training labels = " << dataset.training_labels.size() << std::endl;
-    std::cout << "Nbr of test images = " << dataset.test_images.size() << std::endl;
-    std::cout << "Nbr of test labels = " << dataset.test_labels.size() << std::endl;
-
-    std::cout << "Time reading mnist dataset from disk: " << duration1.count() << " milliseconds" << std::endl;
-
+    // Get the actual sizes of the training and testing data sets.
     numTrainImages = dataset.training_images.size();
     numTestImages = dataset.test_images.size();
 
+    // Allocate the memory for the training/testing data/labels
     train_data = std::vector<Vector<float>>(numTrainImages);
     train_labels = std::vector<Vector<float>>(numTrainImages);
-
     test_data = std::vector<Vector<float>>(numTestImages);
     test_labels = std::vector<Vector<float>>(numTestImages);
 
+    // Convert and scale the image data and create one-hot encoded labels, both for training and test sets
+    for (uint32_t i = 0; i < numTrainImages; ++i)
     {
-        for (uint32_t i = 0; i < numTrainImages; ++i)
-        {
-            // VectorView train_image_int(&(dataset.training_images[i]));
-            Vector<uint8_t> train_image_int(dataset.training_images[i]);
-            Vector<float> train_image = train_image_int * (1.0f / 256.0f);
+        train_data[i] = Vector<uint8_t>(dataset.training_images[i]) * (1.0f / 256.0f);
+        train_labels[i] = oneHotEncode(dataset.training_labels[i], 10);
+    }
 
-            train_data[i] = std::move(train_image);
-
-            train_labels[i] = oneHotEncode(dataset.training_labels[i], 10);
-        }
-
-        for (uint32_t i = 0; i < numTestImages; ++i)
-        {
-            // VectorView test_image_int(&(dataset.test_images[i]));
-            Vector<uint8_t> test_image_int(dataset.test_images[i]);
-            Vector<float> test_image = test_image_int * (1.0f / 256.0f);
-
-            test_data[i] = std::move(test_image);
-
-            test_labels[i] = oneHotEncode(dataset.test_labels[i], 10);
-        }
+    for (uint32_t i = 0; i < numTestImages; ++i)
+    {
+        test_data[i] = Vector<uint8_t>(dataset.test_images[i]) * (1.0f / 256.0f);
+        test_labels[i] = oneHotEncode(dataset.test_labels[i], 10);
     }
 }

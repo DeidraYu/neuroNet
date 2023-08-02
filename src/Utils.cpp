@@ -5,6 +5,8 @@
 // #include "Matrix.hpp"
 #include "math/Vector.hpp"
 
+int sw::verbosity = 1;
+
 void printNumber(std::vector<uint8_t> &vec)
 {
     for (int y = 0; y < 28; y += 2)
@@ -41,6 +43,11 @@ void printNumber(std::vector<uint8_t> &vec)
 
 void printProgress(int part, int total, std::string labelString)
 {
+    if (sw::verbosity < 1)
+    {
+        return;
+    }
+
     static int prevPercentage = 0;
     const int width = 80;
     const int progressWidth = width - 2; // -2 because we don't count the [] symbols as progress

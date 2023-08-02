@@ -322,7 +322,6 @@ TEST(VectorTest, VectorToBinary)
     size_t dataSize = sizeof(uint16_t) * v.size();
 
     EXPECT_EQ(b.size(), typeSize + numElementSize + dataSize);
-    std::cout << Vector<uint8_t>(b) << std::endl;
 }
 
 TEST(VectorTest, BinaryToVector)
@@ -333,10 +332,8 @@ TEST(VectorTest, BinaryToVector)
     std::vector<uint8_t> b = v.getBinaryString();
 
     Vector<uint16_t> vecFromBin = parseBinaryData<uint16_t>(b);
-    // auto swVecFromBin = Vector<uint16_t>(vecFromBin);
 
     EXPECT_EQ(vecFromBin, v);
-    std::cout << vecFromBin << std::endl;
 }
 
 TEST(VectorTest, BinaryToVectorMultipleTypes)

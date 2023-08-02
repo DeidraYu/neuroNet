@@ -10,12 +10,32 @@
 
 using namespace sw;
 
-TEST(LayerTest, initialize)
+class LayerTest : public ::testing::Test
+{
+protected:
+    // Store the original value of 'verbosity' in a member variable
+    int originalVerbosity;
+
+    void SetUp() override
+    {
+        // Set up for each test: Overwrite 'verbosity' to 0 and store the original value
+        originalVerbosity = sw::verbosity;
+        sw::verbosity = 0;
+    }
+
+    void TearDown() override
+    {
+        // Tear down after each test: Restore 'verbosity' to its original value
+        sw::verbosity = originalVerbosity;
+    }
+};
+
+TEST_F(LayerTest, initialize)
 {
     Layer layer = Layer(2, 2);
 }
 
-TEST(LayerTest, feedForward)
+TEST_F(LayerTest, feedForward)
 {
     // Create a network with default weights of 0.5 and bias of 0.
     Layer layer = Layer(2, 2);
@@ -30,38 +50,35 @@ TEST(LayerTest, feedForward)
     EXPECT_NEAR(layer.getY()[1], 0.645656, 0.000001);
 }
 
-TEST(LayerTest, backProp)
+TEST_F(LayerTest, backProp)
 {
     // Create a network with default weights of 0.5 and bias of 0.
     Layer layer = Layer(2, 2);
 
+    // Set the input vector
     Vector<float> x{0.3f, 0.9f};
 
+    // Perform the feed forward
     layer.feedForward(x);
 
+    // Compute the loss
     Vector<float> v = layer.getY() - x; // u = dC / dx
 
+    // Compute the back propagation
     layer.backProp(x, v);
 
-    // const Matrix M = layer.getNablaC_W();
-    // const std::string s = M.toString();
-
-    std::cout << "nablaC_W: " << layer.getNablaC_W().toString() << std::endl;
-    std::cout << "nablaC_b: " << layer.getNablaC_b().toString() << std::endl;
-    std::cout << "u:        " << layer.getU().toString() << std::endl;
-
-    float sigmoid_prime_06 = 0.22878424045664325f;
-    Vector<float> nablaC_b_expected = v * sigmoid_prime_06;
-
+    // The expected values
+    Vector<float> nablaC_b_expected = v * sigmoid_prime(0.6);
     Matrix<float> nablaC_W_expected = outer(nablaC_b_expected, x);
     Vector u_expected = Matrix<float>(2, 2, 0.5f).transposeMult(nablaC_b_expected);
 
-    std::cout << "nablaC_W_expected: " << nablaC_W_expected.toString() << std::endl;
-    std::cout << "nablaC_b_expected: " << nablaC_b_expected.toString() << std::endl;
-    std::cout << "u_expected:        " << u_expected.toString() << std::endl;
+    // Check
+    EXPECT_EQ(layer.getNablaC_b(), nablaC_b_expected);
+    EXPECT_EQ(layer.getNablaC_W(), nablaC_W_expected);
+    EXPECT_EQ(layer.getU(), u_expected);
 }
 
-TEST(LayerTest, update)
+TEST_F(LayerTest, update)
 {
     // Create a network with default weights of 0.5 and bias of 0.
     Layer layer = Layer(2, 2);
@@ -79,66 +96,12 @@ TEST(LayerTest, update)
         layer.update(1.0f);
     }
 
-    std::cout << "W:    " << layer.getW().toString() << std::endl;
-    std::cout << "b:    " << layer.getB().toString() << std::endl;
-    std::cout << "Cost: " << 0.5f * v.dot(v) << std::endl;
-    std::cout << "y:    " << layer.getY().toString() << std::endl;
+    float cost = 0.5f * static_cast<float>(v.dot(v));
 
-    std::cout << std::endl;
+    EXPECT_LE(cost, 1e-3);
 }
 
-// float sigmoid(float z);
-// float sigmoid_prime(float z);
-// Vector<float> sigmoid(sw::Vector<float> z);
-// Vector<float> sigmoid_prime(sw::Vector<float> z);
-
-// float sigmoid(float z)
-// {
-//     return 1.0f / (1.0f + static_cast<float>(exp(-z)));
-// }
-
-// float sigmoid_prime(float z)
-// {
-//     float s = sigmoid(z);
-//     return (1.0f - s) * s;
-// }
-
-// Vector<float> sigmoid(sw::Vector<float> z)
-// {
-//     sw::Vector<float> y(z.size());
-
-//     for (uint32_t i = 0; i < z.size(); ++i)
-//     {
-//         y[i] = sigmoid(z[i]);
-//     }
-
-//     return y;
-// }
-
-// Vector<float> sigmoid_prime(sw::Vector<float> z)
-// {
-//     sw::Vector<float> y(z.size());
-
-//     for (uint32_t i = 0; i < z.size(); ++i)
-//     {
-//         y[i] = sigmoid_prime(z[i]);
-//     }
-
-//     return y;
-// }
-
-TEST(LayerTest, notest)
-{
-    Matrix<float> W{{0.272f, -0.185f}, {0.735f, 1.204f}};
-    Vector<float> b{-0.762f, 0.782f};
-    Vector x{0.3f, 0.9f};
-
-    Vector<float> z = W * x + b;
-    Vector<float> y = sigmoid(z);
-    std::cout << "y:    " << y.toString() << std::endl;
-}
-
-TEST(LayerTest, update2)
+TEST_F(LayerTest, update2)
 {
     // Create a network with default weights of 0.5 and bias of 0.
     Layer layer = Layer(2, 2);
@@ -147,179 +110,27 @@ TEST(LayerTest, update2)
     Vector x2{0.8f, 0.6f};
 
     Vector<float> v;
+    float cost1, cost2;
 
     for (int i = 0; i < 2000; i++)
     {
+        {
+            layer.feedForward(x1);
+            v = layer.getY() - x1; // u = dC / dx
+            cost1 = 0.5f * static_cast<float>(v.dot(v));
+            layer.backProp(x1, v);
+            layer.update(1.0f);
+        }
 
-        layer.feedForward(x1);
-        v = layer.getY() - x1; // u = dC / dx
-        layer.backProp(x1, v);
-        layer.update(1.0f);
-
-        layer.feedForward(x2);
-        v = layer.getY() - x2; // u = dC / dx
-        layer.backProp(x2, v);
-        layer.update(1.0f);
+        {
+            layer.feedForward(x2);
+            v = layer.getY() - x2; // u = dC / dx
+            cost2 = 0.5f * static_cast<float>(v.dot(v));
+            layer.backProp(x2, v);
+            layer.update(1.0f);
+        }
     }
 
-    std::cout << "W:    " << layer.getW().toString() << std::endl;
-    std::cout << "b:    " << layer.getB().toString() << std::endl;
-
-    layer.feedForward(x1);
-    std::cout << "Cost: " << 0.5f * v.dot(v) << std::endl;
-    std::cout << "y:    " << layer.getY().toString() << std::endl;
-
-    layer.feedForward(x2);
-    std::cout << "Cost: " << 0.5f * v.dot(v) << std::endl;
-    std::cout << "y:    " << layer.getY().toString() << std::endl;
-
-    std::cout << std::endl;
-}
-
-TEST(LayerTest, 3to2Layer)
-{
-    // Create a network with default weights of 0.5 and bias of 0.
-    Layer layer(3, 2);
-
-    Vector x{0.3f, 0.6f, 0.9f};
-
-    Vector<float> v;
-
-    layer.feedForward(x);
-    v = layer.getY() - x; // u = dC / dx
-    layer.backProp(x, v);
-    layer.update(1.0f);
-
-    std::cout << "W:    " << layer.getW().toString() << std::endl;
-    std::cout << "b:    " << layer.getB().toString() << std::endl;
-    std::cout << "Cost: " << 0.5f * v.dot(v) << std::endl;
-    std::cout << "y:    " << layer.getY().toString() << std::endl;
-
-    std::cout << std::endl;
-}
-
-TEST(NetworkTest, network_one_input_vector)
-{
-    Network network(std::vector<uint16_t>{2, 2});
-
-    Vector x1{0.3f, 0.9f};
-
-    Vector<float> v;
-
-    network.train(x1, x1);
-
-    network.feedforward(x1);
-    std::cout << network.getOutput().toString() << std::endl;
-}
-
-TEST(NetworkTest, network_two_intput_vectors)
-{
-    Network network(std::vector<uint16_t>{2, 2});
-
-    Vector x1{0.3f, 0.9f};
-    Vector x2{0.8f, 0.6f};
-
-    Vector<float> v;
-
-    for (int i = 0; i < 2000; i++)
-    {
-        network.train(x1, x1);
-        network.train(x2, x2);
-    }
-
-    network.feedforward(x1);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    network.feedforward(x2);
-    std::cout << network.getOutput().toString() << std::endl;
-}
-
-TEST(NetworkTest, multiLayeredNetwork)
-{
-    Network network(std::vector<uint16_t>{2, 2, 2});
-
-    Vector x1{0.3f, 0.9f};
-    Vector x2{0.8f, 0.6f};
-    Vector x3{0.7f, 0.8f};
-
-    for (int i = 0; i < 100; ++i)
-    {
-        network.train(x1, x1);
-        network.train(x2, x2);
-        network.train(x3, x3);
-    }
-
-    network.feedforward(x1);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    network.feedforward(x2);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    network.feedforward(x3);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    // TODO: make network return cost
-}
-
-TEST(NetworkTest, trainNet)
-{
-    uint16_t nEpochs = 1000;
-    uint16_t miniBatchSize = 2;
-    float learningRate = 1.0f;
-    std::vector<uint16_t> layersizes{2, 2, 2};
-
-    std::vector<Vector<float>> train_data{{0.0f, 0.0f}, {1.0f, 0.0f}, {0.5f, 0.5f}, {0.0f, 1.0f}};
-    std::vector<Vector<float>> train_labels{{1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f}};
-
-    Network network(layersizes);
-
-    for (int i = 0; i < nEpochs; ++i)
-    {
-        network.trainMiniBatches(miniBatchSize, learningRate, train_data, train_labels);
-    }
-
-    network.feedforward(train_data[0]);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    network.feedforward(train_data[1]);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    network.feedforward(train_data[2]);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    network.feedforward(train_data[3]);
-    std::cout << network.getOutput().toString() << std::endl;
-    // TODO: replace with evaluator
-}
-
-TEST(NetworkTest, trainNetRandomWB)
-{
-    uint16_t nEpochs = 1000;
-    uint16_t miniBatchSize = 2;
-    float learningRate = 1.0f;
-    std::vector<uint16_t> layersizes{2, 5, 2};
-
-    std::vector<Vector<float>> train_data{{0.0f, 0.0f}, {1.0f, 0.0f}, {0.5f, 0.5f}, {0.0f, 1.0f}};
-    std::vector<Vector<float>> train_labels{{1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f}};
-
-    Network network(layersizes);
-    network.randomizeWB(-2.0f, 2.0f);
-
-    for (int i = 0; i < nEpochs; ++i)
-    {
-        network.trainMiniBatches(miniBatchSize, learningRate, train_data, train_labels);
-    }
-
-    network.feedforward(train_data[0]);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    network.feedforward(train_data[1]);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    network.feedforward(train_data[2]);
-    std::cout << network.getOutput().toString() << std::endl;
-
-    network.feedforward(train_data[3]);
-    std::cout << network.getOutput().toString() << std::endl;
-    // TODO: replace with evaluator
+    EXPECT_LE(cost1, 1e-6);
+    EXPECT_LE(cost2, 1e-6);
 }
