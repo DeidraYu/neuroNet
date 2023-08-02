@@ -20,4 +20,5 @@ public:
     size_t numTestImages;
 
     void processMNIST();
+    void processMNIST(size_t trainingLimit, size_t testLimit);
 };
