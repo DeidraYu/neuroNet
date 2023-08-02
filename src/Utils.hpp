@@ -21,6 +21,9 @@ Vector<float> oneHotEncode(int value, int numClasses);
 
 namespace sw
 {
+
+    extern int verbosity;
+
     namespace prof
     {
         class Counter
