@@ -371,6 +371,12 @@ TEST(VectorTest, BinaryToVectorMultipleTypes)
         Vector<double> vecFromBin = parseBinaryData<double>(b);
         EXPECT_EQ(vecFromBin, v);
     }
+    /*{
+        Matrix<double> m{{3.0, 1.0, 4.0, 1.0, 5.0}, {2.0, 7.0, 1.0, 2.0, 8.0}};
+        std::vector<uint8_t> b = m.getBinaryString();
+        Vector<double> vecFromBin = parseBinaryData<double>(b);
+        EXPECT_EQ(vecFromBin, m);
+    }*/
 }
 
 #if 0 // for documentation
