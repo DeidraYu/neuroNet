@@ -121,11 +121,16 @@ add_test(
   )
   
 add_test(
-  NAME math_test
+  NAME vector_test
   COMMAND $<TARGET_FILE:vector_test>
   )
 
-  add_test(
+add_test(
+  NAME matrix_test
+  COMMAND $<TARGET_FILE:matrix_test>
+  )
+  
+add_test(
   NAME layer_test
   COMMAND $<TARGET_FILE:layer_test>
   )

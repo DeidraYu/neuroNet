@@ -4,3 +4,6 @@ target_link_libraries(math_utils_test gtest_main)
 
 add_executable(vector_test VectorTest.cpp  utilsTest.cpp ../../src/math/utils.cpp)
 target_link_libraries(vector_test gtest_main)
+
+add_executable(matrix_test MatrixTest.cpp  utilsTest.cpp ../../src/math/utils.cpp)
+target_link_libraries(matrix_test gtest_main)
