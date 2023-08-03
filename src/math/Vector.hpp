@@ -211,7 +211,6 @@ namespace sw
 
             // Comparison operators == and !=
             bool operator==(const Vector<T> &other) const { return (m_data == other.m_data); }
-            bool operator!=(const Vector<T> &other) const { return (m_data != other.m_data); }
 
             // Helper function to convert elements to string
             template <typename U>
