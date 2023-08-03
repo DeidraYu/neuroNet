@@ -4,6 +4,7 @@
 
 #include "../../src/math/Vector.hpp"
 #include "../../src/math/Matrix.hpp"
+#include "../../src/FileIO.hpp"
 
 using namespace sw::math;
 
@@ -307,6 +308,72 @@ TEST(VectorTest, VectorFunction_cos)
     Vector<float> expected{1.f, cosf(0.2f), cosf(0.4f), cosf(0.6f), cosf(0.8f), cosf(1.0f)};
 
     EXPECT_EQ(cos_v, expected);
+}
+
+TEST(VectorTest, VectorToBinary)
+{
+    // inputs
+    Vector<uint16_t> v{1, 2, 3, 4, 5, 8};
+
+    std::vector<uint8_t> b = v.getBinaryString();
+
+    size_t typeSize = sizeof(TypeInfo);
+    size_t numElementSize = sizeof(size_t);
+    size_t dataSize = sizeof(uint16_t) * v.size();
+
+    EXPECT_EQ(b.size(), typeSize + numElementSize + dataSize);
+}
+
+TEST(VectorTest, BinaryToVector)
+{
+    // inputs
+    Vector<uint16_t> v{1, 2, 3, 4, 5, 8};
+
+    std::vector<uint8_t> b = v.getBinaryString();
+
+    Vector<uint16_t> vecFromBin = parseBinaryData<uint16_t>(b);
+
+    EXPECT_EQ(vecFromBin, v);
+}
+
+TEST(VectorTest, BinaryToVectorMultipleTypes)
+{
+    {
+        Vector<uint8_t> v{3, 1, 4, 1, 5};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<uint8_t> vecFromBin = parseBinaryData<uint8_t>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
+    {
+        Vector<uint16_t> v{3, 1, 4, 1, 5};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<uint16_t> vecFromBin = parseBinaryData<uint16_t>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
+    {
+        Vector<size_t> v{3, 1, 4, 1, 5};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<size_t> vecFromBin = parseBinaryData<size_t>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
+    {
+        Vector<float> v{3.0f, 1.0f, 4.0f, 1.0f, 5.0f};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<float> vecFromBin = parseBinaryData<float>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
+    {
+        Vector<double> v{3.0, 1.0, 4.0, 1.0, 5.0};
+        std::vector<uint8_t> b = v.getBinaryString();
+        Vector<double> vecFromBin = parseBinaryData<double>(b);
+        EXPECT_EQ(vecFromBin, v);
+    }
+    /*{
+        Matrix<double> m{{3.0, 1.0, 4.0, 1.0, 5.0}, {2.0, 7.0, 1.0, 2.0, 8.0}};
+        std::vector<uint8_t> b = m.getBinaryString();
+        Vector<double> vecFromBin = parseBinaryData<double>(b);
+        EXPECT_EQ(vecFromBin, m);
+    }*/
 }
 
 #if 0 // for documentation

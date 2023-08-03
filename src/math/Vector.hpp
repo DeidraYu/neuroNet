@@ -8,10 +8,13 @@
 #include <cmath>
 #include <execution>
 #include <functional>
+#include <iostream>
 // #include <random>
 #include <stdexcept>
 #include <string>
+#include <typeindex>
 #include <vector>
+#include <variant>
 
 #include "utils.hpp"
 
@@ -19,6 +22,14 @@ namespace sw
 {
     namespace math
     {
+        struct TypeInfo
+        {
+            //            TypeInfo() = default;
+
+            std::type_index index;
+            size_t size;
+        };
+
         template <typename V>
         class VectorExpression
         {
@@ -286,6 +297,38 @@ namespace sw
                 auto maxElement = std::max_element(begin(), end());
                 uint64_t index = std::distance(begin(), maxElement);
                 return index;
+            }
+
+            const T *data() const
+            {
+                return m_data.data();
+            }
+
+            template <typename V>
+            TypeInfo getTypeInfo()
+            {
+                return {std::type_index(typeid(T)), sizeof(T)};
+            }
+
+            std::vector<uint8_t> getBinaryString()
+            {
+                std::vector<uint8_t> binaryData;
+
+                // Add the type information to binary data
+                TypeInfo typeInfo = getTypeInfo<T>();
+                const uint8_t *typeInfoPtr = reinterpret_cast<const uint8_t *>(&typeInfo);
+                binaryData.insert(binaryData.end(), typeInfoPtr, typeInfoPtr + sizeof(TypeInfo));
+
+                // Add the number of elements to binary data
+                size_t numElements = m_data.size();
+                const uint8_t *numElementsPtr = reinterpret_cast<const uint8_t *>(&numElements);
+                binaryData.insert(binaryData.end(), numElementsPtr, numElementsPtr + sizeof(size_t));
+
+                // Add the vector data to binary data
+                const uint8_t *dataPtr = reinterpret_cast<const uint8_t *>(m_data.data());
+                binaryData.insert(binaryData.end(), dataPtr, dataPtr + numElements * sizeof(T));
+
+                return binaryData;
             }
 
         private:

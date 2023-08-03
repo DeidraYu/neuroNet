@@ -14,11 +14,14 @@ using namespace sw::math;
 class Network
 {
 public:
+    Network() : m_layerSizes(std::vector<uint16_t>()) {}
+
     Network(std::vector<uint16_t> layerSizes) : m_layerSizes(layerSizes)
     {
         for (uint32_t k = 0; k < m_layerSizes.size() - 1; ++k)
         {
-            m_layers.push_back(Layer(layerSizes[k], layerSizes[k + 1]));
+            Layer newLayer(layerSizes[k], layerSizes[k + 1]);
+            m_layers.push_back(newLayer);
         }
     }
 
@@ -121,9 +124,24 @@ public:
         }
     }
 
+    void addLayer(Layer layer)
+    {
+        m_layers.push_back(layer);
+    }
+
     Vector<float> getOutput()
     {
         return m_layers.back().getY();
+    }
+
+    std::vector<Layer> &getLayers()
+    {
+        return m_layers;
+    }
+
+    uint16_t getNumLayers()
+    {
+        return m_layerSizes.size();
     }
 
     void randomizeWB(float min, float max)
