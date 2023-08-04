@@ -139,7 +139,7 @@ public:
         return m_layers;
     }
 
-    uint16_t getNumLayers()
+    size_t getNumLayers()
     {
         return m_layerSizes.size();
     }
