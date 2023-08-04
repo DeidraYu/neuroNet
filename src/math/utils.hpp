@@ -1,10 +1,7 @@
 #pragma once
 
-#include <algorithm> // for the std::unordered_map
-#include <chrono>    // for the profiling classes
 #include <cmath>
 #include <random>
-#include <string>
 
 #define NOINLINE
 #ifndef NOINLINE
@@ -22,8 +19,29 @@ namespace sw
         template <class T>
         concept arithmetic = std::is_arithmetic_v<T>;
 
-        NOINLINE double sigmoid(double z);
-        NOINLINE double sigmoid_prime(double z);
+        // NOINLINE template <arithmetic T>
+        // T sigmoid(T z);
+
+        NOINLINE template <arithmetic T>
+        T sigmoid(T z)
+        {
+            // bool isFloat = std::is_same_v<T, float>;
+            // bool isDouble = std::is_same_v<T, double>;
+
+            if constexpr (std::is_same_v<T, float>)
+                return T{1} / (T{1} + expf(-z));
+            else
+                return T{1} / (T{1} + exp(-z));
+        }
+
+        // NOINLINE double sigmoid_prime(double z);
+
+        NOINLINE template <arithmetic T>
+        T sigmoid_prime(T z)
+        {
+            T s = sigmoid(z);
+            return (1.0 - s) * s;
+        }
 
         class Random
         {

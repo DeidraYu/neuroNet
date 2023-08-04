@@ -403,3 +403,52 @@ TEST(VectorTest, random)
 
     EXPECT_EQ(isRandom, true);
 }
+
+TEST(VectorTest, typeTest)
+{
+    // Bools
+    EXPECT_EQ(bool(std::is_same_v<Vector<bool>::type, bool>), true);
+
+    // Unsigned integers
+    EXPECT_EQ(bool(std::is_same_v<Vector<uint8_t>::type, uint8_t>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<uint16_t>::type, uint16_t>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<uint32_t>::type, uint32_t>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<uint64_t>::type, uint64_t>), true);
+
+    // Signed integers
+    EXPECT_EQ(bool(std::is_same_v<Vector<int8_t>::type, int8_t>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<int16_t>::type, int16_t>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<int32_t>::type, int32_t>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<int64_t>::type, int64_t>), true);
+
+    // Floating point types
+    EXPECT_EQ(bool(std::is_same_v<Vector<float>::type, float>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<double>::type, double>), true);
+}
+
+TEST(VectorTest, typeTest_nestedVectors)
+{
+    EXPECT_EQ(bool(std::is_same_v<Vector<float>::type, float>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<Vector<uint16_t>>::type, uint16_t>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<Vector<Vector<double>>>::type, double>), true);
+    EXPECT_EQ(bool(std::is_same_v<Vector<Vector<Vector<Vector<int>>>>::type, int>), true);
+}
+
+TEST(VectorTest, typeTest_expressions_order)
+{
+    EXPECT_EQ(bool(std::is_same_v<VectorVectorAddition<Vector<float>, Vector<int>>::type, float>), true);
+    EXPECT_EQ(bool(std::is_same_v<VectorVectorAddition<Vector<int>, Vector<float>>::type, float>), true);
+}
+
+TEST(VectorTest, typeTest_expression_of_vectors)
+{
+    EXPECT_EQ(bool(std::is_same_v<VectorVectorAddition<Vector<int>, Vector<float>>::type, float>), true);
+    EXPECT_EQ(bool(std::is_same_v<VectorVectorSubtraction<Vector<int>, Vector<float>>::type, float>), true);
+    EXPECT_EQ(bool(std::is_same_v<VectorVectorMultiplication<Vector<int>, Vector<float>>::type, float>), true);
+
+    EXPECT_EQ(bool(std::is_same_v<VectorScalarAddition<Vector<int>, float>::type, float>), true);
+    EXPECT_EQ(bool(std::is_same_v<VectorScalarSubtraction<Vector<int>, float>::type, float>), true);
+    EXPECT_EQ(bool(std::is_same_v<VectorScalarMultiplication<Vector<int>, float>::type, float>), true);
+
+    EXPECT_EQ(bool(std::is_same_v<VectorFunction<Vector<float>>::type, float>), true);
+}

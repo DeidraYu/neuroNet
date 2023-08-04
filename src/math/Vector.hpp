@@ -24,19 +24,33 @@ namespace sw
     {
         struct TypeInfo
         {
-            //            TypeInfo() = default;
-
             std::type_index index;
             size_t size;
+        };
+
+        // Forward declaration of Vector for the special case
+        template <typename T>
+        class Vector;
+
+        // Generic implementation for the case when T is not a VectorExpression or VectorVectorAddition
+        template <typename T>
+        struct ExtractMostInnerType
+        {
+            using type = T;
+        };
+
+        // Specialization for the case when the template argument is VectorExpression<T>
+        // Recursive metafunction to extract the most inner type from nested Vectors
+        template <typename T>
+        struct ExtractMostInnerType<Vector<T>>
+        {
+            using type = typename ExtractMostInnerType<T>::type;
         };
 
         template <typename V>
         class VectorExpression
         {
         public:
-            // Define the value_type alias to match the Vector's element type
-            // using value_type = typename Vector<T>::value_type;
-
             static constexpr bool is_leaf = false;
 
             auto operator[](size_t i) const
@@ -61,21 +75,17 @@ namespace sw
             template <typename V2>
             auto dot(const V2 &other) const
             {
-                // auto sum = (*this)[0] * other[0];
-                // for (size_t i = 1; i < size(); ++i)
-                // {
-                //     sum += (*this)[i] * other[i];
-                // }
-                // return sum;
-                // return std::inner_product(begin(), end(), other.begin(), 0);
-
                 // Compute the inner product in parallel using C++20's execution policies
+                using thisType = typename V::type;
+                using otherType = typename V2::type;
+                using resultType = typename std::common_type<thisType, otherType>::type;
+
                 return std::transform_reduce(std::execution::par_unseq,
                                              cbegin(), cend(),
                                              other.cbegin(),
-                                             0.0,           // Initial value for the sum
+                                             resultType{0}, // Initial value for the sum
                                              std::plus<>(), // Binary operation (sum)
-                                             [](double x, double y)
+                                             [](thisType x, otherType y)
                                              { return x * y; }); // Element-wise multiplication
             }
 
@@ -92,10 +102,9 @@ namespace sw
         class Vector : public VectorExpression<Vector<T>>
         {
         public:
-            // Define the value_type alias to represent the element type
-            // using value_type = T;
-
             static constexpr bool is_leaf = true;
+
+            using type = typename ExtractMostInnerType<T>::type;
 
             Vector() = default;
 
@@ -111,11 +120,6 @@ namespace sw
             template <typename V>
             Vector(VectorExpression<V> const &expr) : m_data(expr.size())
             {
-                // for (size_t i = 0; i != expr.size(); ++i)
-                // {
-                //     m_data[i] = static_cast<T>(expr[i]);
-                // }
-
                 std::for_each(std::execution::par_unseq, m_data.begin(), m_data.end(), [&](auto &thisElement)
                               { 
                             size_t index = &thisElement - &m_data[0];
@@ -124,7 +128,6 @@ namespace sw
 
             template <typename V1>
             Vector<T> &operator+=(const VectorExpression<V1> &other)
-            // Vector<T> &operator+=(const Vector<T> &other)
             {
                 if (size() != other.size())
                 {
@@ -151,7 +154,6 @@ namespace sw
 
             template <typename V1>
             Vector<T> &operator-=(const VectorExpression<V1> &other)
-            // Vector<T> &operator-=(const Vector<T> &other)
             {
                 if (size() != other.size())
                 {
@@ -178,7 +180,6 @@ namespace sw
 
             template <typename V1>
             Vector<T> &operator*=(const VectorExpression<V1> &other)
-            // Vector<T> &operator*=(const Vector<T> &other)
             {
                 if (size() != other.size())
                 {
@@ -260,13 +261,10 @@ namespace sw
             }
 
             /**
-             * @brief Create a random matrix with values uniformly distributed between min and max (inclusive).
+             * @brief Create a random vector with values uniformly distributed between min and max (inclusive).
              */
             static Vector<T> rand(typename std::vector<T>::size_type sz, T min, T max)
             {
-                // std::random_device rd;  // Will be used to obtain a seed for the random number engine
-                // std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-
                 Vector<T> randVector(sz);
 
                 if constexpr (std::is_integral_v<T>)
@@ -347,6 +345,7 @@ namespace sw
 
         public:
             static constexpr bool is_leaf = false;
+            using type = typename std::common_type<typename V1::type, typename V2::type>::type;
 
             VectorVectorAddition(V1 const &u, V2 const &v) : m_u(u), m_v(v)
             {
@@ -371,6 +370,7 @@ namespace sw
         //-----------------------------------------------------------------------------------------
         // Vector-Scalar-Addition
         //-----------------------------------------------------------------------------------------
+
         template <typename V, arithmetic S>
         class VectorScalarAddition : public VectorExpression<VectorScalarAddition<V, S>>
         {
@@ -380,6 +380,7 @@ namespace sw
 
         public:
             static constexpr bool is_leaf = false;
+            using type = typename std::common_type<typename V::type, S>::type;
 
             VectorScalarAddition(V const &u, const S s) : m_u(u), m_s(s){};
 
@@ -407,6 +408,7 @@ namespace sw
 
         public:
             static constexpr bool is_leaf = false;
+            using type = typename std::common_type<typename V1::type, typename V2::type>::type;
 
             VectorVectorSubtraction(V1 const &u, V2 const &v) : m_u(u), m_v(v)
             {
@@ -440,6 +442,7 @@ namespace sw
 
         public:
             static constexpr bool is_leaf = false;
+            using type = typename std::common_type<typename V::type, S>::type;
 
             VectorScalarSubtraction(V const &u, const S s) : m_u(u), m_s(s){};
 
@@ -467,6 +470,7 @@ namespace sw
 
         public:
             static constexpr bool is_leaf = false;
+            using type = typename std::common_type<typename V1::type, typename V2::type>::type;
 
             VectorVectorMultiplication(V1 const &u, V2 const &v) : m_u(u), m_v(v)
             {
@@ -497,6 +501,7 @@ namespace sw
 
         public:
             static constexpr bool is_leaf = false;
+            using type = typename std::common_type<typename V::type, S>::type;
 
             VectorScalarMultiplication(V const &u, const S s) : m_u(u), m_s(s){};
 
@@ -520,12 +525,12 @@ namespace sw
         {
             // cref if leaf, copy otherwise
             std::conditional_t<U::is_leaf, const U &, const U> m_u;
-            std::function<double(double)> m_function;
 
         public:
             static constexpr bool is_leaf = false;
+            using type = typename U::type;
 
-            VectorFunction(const U &u, std::function<double(double)> function) : m_u(u), m_function(function) {}
+            VectorFunction(const U &u, std::function<type(type)> function) : m_u(u), m_function(function) {}
 
             auto operator[](size_t i) const
             {
@@ -533,19 +538,22 @@ namespace sw
             }
 
             size_t size() const { return m_u.size(); }
+
+        private:
+            std::function<type(type)> m_function;
         };
 
         template <typename U>
         VectorFunction<U> sigmoid(const VectorExpression<U> &u)
         {
-            return VectorFunction<U>(*static_cast<const U *>(&u), [](double x) -> double
+            return VectorFunction<U>(*static_cast<const U *>(&u), [](typename U::type x) -> typename U::type
                                      { return sigmoid(x); });
         }
 
         template <typename U>
         VectorFunction<U> sigmoid_prime(const VectorExpression<U> &u)
         {
-            return VectorFunction<U>(*static_cast<const U *>(&u), [](double x) -> double
+            return VectorFunction<U>(*static_cast<const U *>(&u), [](typename U::type x) -> typename U::type
                                      { return sigmoid_prime(x); });
         }
 

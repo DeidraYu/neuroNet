@@ -46,6 +46,7 @@ namespace sw
         {
         public:
             static constexpr bool is_leaf = true;
+            using type = typename ExtractMostInnerType<T>::type;
 
             Matrix() = default;
 
@@ -167,6 +168,7 @@ namespace sw
 
         public:
             static constexpr bool is_leaf = false;
+            using type = typename std::common_type<typename M::type, typename V::type>::type;
 
             MatrixVectorProduct(const M &m, const V &v) : m_m(m), m_v(v) {}
 

@@ -18,16 +18,17 @@ namespace sw
 {
     namespace math
     {
-        NOINLINE double sigmoid(double z)
-        {
-            return 1.0 / (1.0 + exp(-z));
-        }
+        // NOINLINE template <arithmetic T>
+        // T sigmoid(T z)
+        // {
+        //     return T{1} / (T{1} + exp(-z));
+        // }
 
-        NOINLINE double sigmoid_prime(double z)
-        {
-            double s = 1.0 / (1.0 + exp(-z));
-            return (1.0 - s) * s;
-        }
+        // NOINLINE double sigmoid_prime(double z)
+        // {
+        //     double s = 1.0 / (1.0 + exp(-z));
+        //     return (1.0 - s) * s;
+        // }
 
         void Random::seed()
         {
