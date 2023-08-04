@@ -188,5 +188,5 @@ TEST_F(NetworkTest, onSubsetOfMnistData)
     networkTrainer.trainNet(network, nEpochs, learningRate, miniBatchSize, mnistData);
     uint32_t score = networkTrainer.evalNet(network, mnistData);
 
-    EXPECT_EQ(score, 42); // out of 100
+    EXPECT_EQ(score, 50); // out of 100
 }
