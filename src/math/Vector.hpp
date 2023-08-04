@@ -559,14 +559,14 @@ namespace sw
         template <typename U>
         VectorFunction<U> sin(const VectorExpression<U> &u)
         {
-            return VectorFunction<U>(*static_cast<const U *>(&u), [](double x) -> double
+            return VectorFunction<U>(*static_cast<const U *>(&u), [](typename U::type x) -> typename U::type
                                      { return std::sin(x); });
         }
 
         template <typename U>
         VectorFunction<U> cos(const VectorExpression<U> &u)
         {
-            return VectorFunction<U>(*static_cast<const U *>(&u), [](double x) -> double
+            return VectorFunction<U>(*static_cast<const U *>(&u), [](typename U::type x) -> typename U::type
                                      { return std::cos(x); });
         }
 

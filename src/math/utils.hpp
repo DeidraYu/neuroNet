@@ -40,7 +40,7 @@ namespace sw
         T sigmoid_prime(T z)
         {
             T s = sigmoid(z);
-            return (1.0 - s) * s;
+            return (T{1} - s) * s;
         }
 
         class Random
