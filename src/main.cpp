@@ -16,8 +16,8 @@
 int main(int argc, char *argv[])
 {
     uint32_t nEpochs = 10;
-    uint16_t miniBatchSize = 5;
-    float learningRate = 5.0f;
+    uint16_t miniBatchSize = 10;
+    float learningRate = 1.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
 
     if (argc >= 4)
