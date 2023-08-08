@@ -15,7 +15,7 @@
 
 int main(int argc, char *argv[])
 {
-    uint32_t nEpochs = 10;
+    uint32_t nEpochs = 1;
     uint16_t miniBatchSize = 10;
     float learningRate = 1.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     }
 
     Network network(layersizes);
-    Random::seed(); // Use a randomized seed
+    uint32_t seed = Random::seed(); // Use a randomized seed
     network.randomizeWB(-2.0f, 2.0f);
 
     MnistData mnistData;
@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     NetworkTrainer networkTrainer;
     networkTrainer.trainNet(network, nEpochs, learningRate, miniBatchSize, mnistData);
 
+    std::cout << "nEpochs: " << nEpochs << ",  miniBatchSize: " << miniBatchSize << ",  learningRate: " << learningRate << ",  seed: " << seed << std::endl;
     std::cout << sw::prof::Times::toString(nEpochs) << std::endl;
 
     uint32_t score = networkTrainer.evalNet(network, mnistData);

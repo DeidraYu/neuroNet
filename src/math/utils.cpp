@@ -30,15 +30,18 @@ namespace sw
         //     return (1.0 - s) * s;
         // }
 
-        void Random::seed()
+        uint32_t Random::seed()
         {
             std::random_device rd;
-            seed(rd());
+            uint32_t rdSeed = rd();
+            seed(rdSeed);
+            return rdSeed;
         }
 
-        void Random::seed(uint32_t seed)
+        uint32_t Random::seed(uint32_t seed)
         {
             gen = std::mt19937(seed);
+            return seed;
         }
 
         std::mt19937 Random::gen = std::mt19937(0);

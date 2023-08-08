@@ -47,10 +47,10 @@ namespace sw
         {
         public:
             /** @brief Set a random seed for the random number generator.*/
-            static void seed();
+            static uint32_t seed();
 
             /** @brief Set the seed of the random number generator.*/
-            static void seed(uint32_t seed);
+            static uint32_t seed(uint32_t seed);
 
             /** @brief The random number generator which is seeded by 0 by default.*/
             static std::mt19937 gen; // Standard mersenne_twister_engine seeded with rd()
