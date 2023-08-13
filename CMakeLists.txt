@@ -84,6 +84,10 @@ endif(NOT MNIST_FOUND)
 
 include_directories(${MNIST_INCLUDE_DIR})
 
+find_package(CUDA REQUIRED)
+set(CUDA_NVCC_FLAGS "-arch=sm_61" CACHE STRING "NVCC flags" FORCE)
+
+
 ##
 # GTEST
 # see https://github.com/google/googletest/blob/main/googletest/README.md
