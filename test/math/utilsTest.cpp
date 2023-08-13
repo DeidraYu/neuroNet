@@ -42,3 +42,17 @@ TEST(utilsTest, random_with_reseed)
 
     EXPECT_EQ(r, s);
 }
+
+TEST(utilsTest, relu)
+{
+    EXPECT_EQ(relu(3.14f), 3.14f);
+    EXPECT_EQ(relu(0.0f), 0.0f);
+    EXPECT_EQ(relu(-2.0f), 0.0f);
+}
+
+TEST(utilsTest, relu_prime)
+{
+    EXPECT_EQ(relu_prime(3.14f), 1.0f);
+    EXPECT_EQ(relu_prime(0.0f), 0.0f);
+    EXPECT_EQ(relu_prime(-2.0f), 0.0f);
+}

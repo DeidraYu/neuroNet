@@ -13,12 +13,27 @@
 #include "math/utils.hpp"
 #include "FileIO.hpp"
 
+void printRunInfo(uint32_t nEpochs, uint16_t miniBatchSize, float learningRate, std::vector<uint16_t> layersizes, uint32_t seed)
+{
+    std::string layerSizesOutput = "(";
+    layerSizesOutput += std::to_string(layersizes[0]);
+    for (size_t i = 1; i < layersizes.size(); ++i)
+        layerSizesOutput += ", " + std::to_string(layersizes[i]);
+    layerSizesOutput += ")";
+
+    // Example output: ./neuronet 100 10 1 "(784, 30, 10)" 2964684087
+    std::cout << "./neuronet"
+              << " " << nEpochs << " " << miniBatchSize << " " << learningRate << " " << '"' << layerSizesOutput << '"' << " " << seed << std::endl;
+    std::cout << "nEpochs: " << nEpochs << ",  miniBatchSize: " << miniBatchSize << ",  learningRate: " << learningRate << ", layerSizes " << layerSizesOutput << ",  seed: " << seed << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
-    uint32_t nEpochs = 1;
+    uint32_t nEpochs = 10;
     uint16_t miniBatchSize = 10;
     float learningRate = 1.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
+    uint32_t seed = Random::seed(); // Use a randomized seed
 
     if (argc >= 4)
     {
@@ -49,20 +64,25 @@ int main(int argc, char *argv[])
                 if (ss.peek() == ',')
                     ss.ignore();
             }
+            if (argc >= 6)
+            {
+                int seedIn = std::strtoul(argv[5], nullptr, 10);
+                seed = Random::seed(seedIn);
+            }
         }
     }
 
     Network network(layersizes);
-    uint32_t seed = Random::seed(); // Use a randomized seed
-    network.randomizeWB(-2.0f, 2.0f);
+    // network.randomizeWB(-2.0f, 2.0f);
+    network.randomizeWB(-0.0001f, 0.0001f); // ./neuronet 10 10 1 "(784, 30, 10)" 1345823770
 
     MnistData mnistData;
     mnistData.processMNIST();
 
     NetworkTrainer networkTrainer;
+    printRunInfo(nEpochs, miniBatchSize, learningRate, layersizes, seed);
     networkTrainer.trainNet(network, nEpochs, learningRate, miniBatchSize, mnistData);
 
-    std::cout << "nEpochs: " << nEpochs << ",  miniBatchSize: " << miniBatchSize << ",  learningRate: " << learningRate << ",  seed: " << seed << std::endl;
     std::cout << sw::prof::Times::toString(nEpochs) << std::endl;
 
     uint32_t score = networkTrainer.evalNet(network, mnistData);

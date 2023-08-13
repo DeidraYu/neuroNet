@@ -280,6 +280,28 @@ TEST(VectorTest, sigmoid_prime)
     EXPECT_EQ(sigmoid_prime, expected);
 }
 
+TEST(VectorTest, relu)
+{
+    Vector<float> v{-2.0f, 0.0f, 2.0f};
+
+    Vector<float> relu_v = relu(v);
+
+    Vector<float> expected{0.0f, 0.0f, 2.0f};
+
+    EXPECT_EQ(relu_v, expected);
+}
+
+TEST(VectorTest, relu_prime)
+{
+    Vector<float> v{-2.0f, 0.0f, 2.0f};
+
+    Vector<float> relu_prime_v = relu_prime(v);
+
+    Vector<float> expected{0.0f, 0.0f, 1.0f};
+
+    EXPECT_EQ(relu_prime_v, expected);
+}
+
 TEST(VectorTest, VectorFunction_sin)
 {
     // inputs

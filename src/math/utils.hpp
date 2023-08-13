@@ -43,6 +43,20 @@ namespace sw
             return (T{1} - s) * s;
         }
 
+        NOINLINE template <arithmetic T>
+        T relu(T z)
+        {
+            return std::max(z, T{0});
+        }
+
+        // NOINLINE double sigmoid_prime(double z);
+
+        NOINLINE template <arithmetic T>
+        T relu_prime(T z)
+        {
+            return (z > T{0});
+        }
+
         class Random
         {
         public:

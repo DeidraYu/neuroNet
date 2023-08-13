@@ -124,25 +124,10 @@ public:
     const auto &getNablaC_W() const { return m_nablaC_W; }
     const auto &getNablaC_b() const { return m_nablaC_b; }
 
-    uint16_t getNumInputs()
-    {
-        return m_numInputs;
-    }
-
-    uint16_t getNumOutputs()
-    {
-        return m_numOutputs;
-    }
-
-    Matrix<float> &getWeights()
-    {
-        return m_W;
-    }
-
-    Vector<float> &getBiases()
-    {
-        return m_b;
-    }
+    uint16_t getNumInputs() { return m_numInputs; }
+    uint16_t getNumOutputs() { return m_numOutputs; }
+    Matrix<float> &getWeights() { return m_W; }
+    Vector<float> &getBiases() { return m_b; }
 
 private:
     // void feedforward(Vector<float> &x);

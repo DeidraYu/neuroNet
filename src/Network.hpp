@@ -60,6 +60,8 @@ public:
 
     void train(const Vector<float> &x, const Vector<float> &label)
     {
+        sw::prof::Measure M("NetworkTrainer.train");
+
         feedforward(x);
         Vector<float> v = computeLoss(label);
         backProp(x, v);
@@ -117,6 +119,8 @@ public:
 
     void updateLayers()
     {
+        sw::prof::Measure M("NetworkTrainer.updateLayers");
+
         // update
         for (uint32_t k = 0; k < m_layers.size(); ++k)
         {

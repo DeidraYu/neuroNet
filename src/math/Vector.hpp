@@ -557,6 +557,20 @@ namespace sw
         }
 
         template <typename U>
+        VectorFunction<U> relu(const VectorExpression<U> &u)
+        {
+            return VectorFunction<U>(*static_cast<const U *>(&u), [](typename U::type x) -> typename U::type
+                                     { return relu(x); });
+        }
+
+        template <typename U>
+        VectorFunction<U> relu_prime(const VectorExpression<U> &u)
+        {
+            return VectorFunction<U>(*static_cast<const U *>(&u), [](typename U::type x) -> typename U::type
+                                     { return relu_prime(x); });
+        }
+
+        template <typename U>
         VectorFunction<U> sin(const VectorExpression<U> &u)
         {
             return VectorFunction<U>(*static_cast<const U *>(&u), [](typename U::type x) -> typename U::type
