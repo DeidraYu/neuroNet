@@ -20,7 +20,12 @@ public:
     {
         for (uint32_t k = 0; k < m_layerSizes.size() - 1; ++k)
         {
-            Layer newLayer(layerSizes[k], layerSizes[k + 1]);
+            ActivationType activationType = ActivationType::Sigmoid;
+            if (k < m_layerSizes.size() - 2)
+            {
+                activationType = ActivationType::Relu;
+            }
+            Layer newLayer(layerSizes[k], layerSizes[k + 1], activationType);
             m_layers.push_back(newLayer);
         }
     }

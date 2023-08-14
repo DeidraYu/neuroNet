@@ -10,7 +10,7 @@
 
 using namespace sw::math;
 
-void printNumber(std::vector<uint8_t> &vec);
+void printNumber(const std::vector<uint8_t> &vec);
 
 void printProgress(int part, int total, std::string labelString);
 

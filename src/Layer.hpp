@@ -38,43 +38,76 @@
 
 using namespace sw::math;
 
+enum class ActivationType
+{
+    Relu,
+    Sigmoid
+};
+
 class Layer
 {
 public:
-    Layer(uint16_t numInputs, uint16_t numOutputs) : m_numInputs(numInputs),
-                                                     m_numOutputs(numOutputs),
-                                                     m_W(numOutputs, numInputs, 0.5f),
-                                                     m_b(numOutputs, 0.0f),
-                                                     m_z(numOutputs, 0.0f),
-                                                     m_y(numOutputs, 0.0f),
-                                                     m_gamma(numOutputs, 0.0f),
-                                                     m_nablaC_b(numOutputs, 0.0f),
-                                                     m_nablaC_W(numOutputs, numInputs, 0.0f),
-                                                     m_u(numInputs) {}
+    Layer(uint16_t numInputs, uint16_t numOutputs, ActivationType activationType = ActivationType::Sigmoid) : m_numInputs(numInputs),
+                                                                                                              m_numOutputs(numOutputs),
+                                                                                                              m_W(numOutputs, numInputs, 0.5f),
+                                                                                                              m_b(numOutputs, 0.0f),
+                                                                                                              m_z(numOutputs, 0.0f),
+                                                                                                              m_y(numOutputs, 0.0f),
+                                                                                                              m_gamma(numOutputs, 0.0f),
+                                                                                                              m_nablaC_b(numOutputs, 0.0f),
+                                                                                                              m_nablaC_W(numOutputs, numInputs, 0.0f),
+                                                                                                              m_u(numInputs),
+                                                                                                              m_activationType(activationType) {}
 
-    Layer(uint16_t numInputs, uint16_t numOutputs, Matrix<float> weights, Vector<float> biases) : m_numInputs(numInputs),
-                                                                                                  m_numOutputs(numOutputs),
-                                                                                                  m_W(weights),
-                                                                                                  m_b(biases),
-                                                                                                  m_z(numOutputs, 0.0f),
-                                                                                                  m_y(numOutputs, 0.0f),
-                                                                                                  m_gamma(numOutputs, 0.0f),
-                                                                                                  m_nablaC_b(numOutputs, 0.0f),
-                                                                                                  m_nablaC_W(numOutputs, numInputs, 0.0f),
-                                                                                                  m_u(numInputs) {}
+    Layer(uint16_t numInputs, uint16_t numOutputs, Matrix<float> weights, Vector<float> biases, ActivationType activationType = ActivationType::Sigmoid) : m_numInputs(numInputs),
+                                                                                                                                                           m_numOutputs(numOutputs),
+                                                                                                                                                           m_W(weights),
+                                                                                                                                                           m_b(biases),
+                                                                                                                                                           m_z(numOutputs, 0.0f),
+                                                                                                                                                           m_y(numOutputs, 0.0f),
+                                                                                                                                                           m_gamma(numOutputs, 0.0f),
+                                                                                                                                                           m_nablaC_b(numOutputs, 0.0f),
+                                                                                                                                                           m_nablaC_W(numOutputs, numInputs, 0.0f),
+                                                                                                                                                           m_u(numInputs),
+                                                                                                                                                           m_activationType(activationType) {}
 
     NOINLINE void feedForward(const Vector<float> &x)
     {
         m_z = m_W * x + m_b;
-        m_y = sigmoid(m_z);
+        if (m_activationType == ActivationType::Relu)
+        {
+            m_y = relu(m_z);
+        }
+        else
+        {
+            m_y = sigmoid(m_z);
+        }
     }
 
     NOINLINE void fastFeedForward(const Vector<float> &x)
     {
-        m_y = sigmoid(m_W * x + m_b);
+        if (m_activationType == ActivationType::Relu)
+        {
+            m_y = relu(m_W * x + m_b);
+        }
+        else
+        {
+            m_y = sigmoid(m_W * x + m_b);
+        }
     }
 
-    NOINLINE void update_gamma(const Vector<float> &v) { m_gamma = v * sigmoid_prime(m_z); }
+    NOINLINE void update_gamma(const Vector<float> &v)
+    {
+        if (m_activationType == ActivationType::Relu)
+        {
+            m_gamma = v * relu_prime(m_z);
+        }
+        else
+        {
+            m_gamma = v * sigmoid_prime(m_z);
+        }
+    }
+
     NOINLINE void update_nablaC_b() { m_nablaC_b += m_gamma; }
     NOINLINE void update_nablaC_W(const Vector<float> &x) { m_nablaC_W += outer(m_gamma, x); }
     NOINLINE void update_u() { m_u = m_W.transposeMult(m_gamma); }
@@ -148,4 +181,6 @@ private:
     Vector<float> m_u;
 
     uint16_t m_miniBatchSize{0};
+
+    ActivationType m_activationType;
 };

@@ -29,7 +29,7 @@ void printRunInfo(uint32_t nEpochs, uint16_t miniBatchSize, float learningRate, 
 
 int main(int argc, char *argv[])
 {
-    uint32_t nEpochs = 10;
+    uint32_t nEpochs = 1;
     uint16_t miniBatchSize = 10;
     float learningRate = 1.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
