@@ -29,47 +29,61 @@ void printRunInfo(uint32_t nEpochs, uint16_t miniBatchSize, float learningRate, 
 
 int main(int argc, char *argv[])
 {
-    uint32_t nEpochs = 1;
+    uint32_t nEpochs = 10;
     uint16_t miniBatchSize = 10;
     float learningRate = 1.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
     uint32_t seed = Random::seed(); // Use a randomized seed
 
+    if (argc >= 2)
+    {
+        nEpochs = std::stoi(argv[1]); // Convert to uint32_t
+    }
+
+    if (argc >= 3)
+    {
+        miniBatchSize = std::stoi(argv[2]); // Convert to uint16_t
+    }
+
     if (argc >= 4)
     {
-        nEpochs = std::stoi(argv[1]);       // Convert to uint32_t
-        miniBatchSize = std::stoi(argv[2]); // Convert to uint16_t
-        learningRate = std::stof(argv[3]);  // Convert to float
+        learningRate = std::stof(argv[3]); // Convert to float
+    }
 
-        // Extract layersizes input from the command-line argument
-        if (argc >= 5)
+    // Extract layersizes input from the command-line argument
+    if (argc >= 5)
+    {
+        std::string layersizesInput = argv[4];
+        layersizes.clear(); // Clear the default layersizes
+
+        // Remove the leading and trailing parentheses, if any
+        if (layersizesInput.front() == '(')
+            layersizesInput.erase(0, 1);
+        if (layersizesInput.back() == ')')
+            layersizesInput.pop_back();
+
+        // Convert the layersizes input to a stringstream
+        std::stringstream ss(layersizesInput);
+
+        // Split the input string using ',' as a delimiter and add to layersizes vector
+        uint16_t size;
+        while (ss >> size)
         {
-            std::string layersizesInput = argv[4];
-            layersizes.clear(); // Clear the default layersizes
-
-            // Remove the leading and trailing parentheses, if any
-            if (layersizesInput.front() == '(')
-                layersizesInput.erase(0, 1);
-            if (layersizesInput.back() == ')')
-                layersizesInput.pop_back();
-
-            // Convert the layersizes input to a stringstream
-            std::stringstream ss(layersizesInput);
-
-            // Split the input string using ',' as a delimiter and add to layersizes vector
-            uint16_t size;
-            while (ss >> size)
-            {
-                layersizes.push_back(size);
-                if (ss.peek() == ',')
-                    ss.ignore();
-            }
-            if (argc >= 6)
-            {
-                int seedIn = std::strtoul(argv[5], nullptr, 10);
-                seed = Random::seed(seedIn);
-            }
+            layersizes.push_back(size);
+            if (ss.peek() == ',')
+                ss.ignore();
         }
+    }
+
+    if (argc >= 6)
+    {
+        int seedIn = std::strtoul(argv[5], nullptr, 10);
+        seed = Random::seed(seedIn);
+    }
+
+    if (argc >= 7)
+    {
+        sw::verbosity = std::stoi(argv[6]); // Convert to uint16_t
     }
 
     Network network(layersizes);

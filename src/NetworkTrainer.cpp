@@ -29,17 +29,17 @@ uint32_t NetworkTrainer::evalNet(Network &network, MnistData &mnistData)
         {
             ++score;
         }
-        else
-        {
-            int dummy = 0;
-            Vector<uint8_t> intData = mnistData.test_data[i] * 256;
-            std::vector<uint8_t> stdVector(intData.size());
-            stdVector.assign(intData.data(), intData.data() + intData.size());
-            printNumber(stdVector);
-            std::cout << "label: " << mnistData.dataset.test_labels[i] << std::endl;
-            std::cout << "inferred: " << output.argmax() << std::endl;
-            std::cout << std::endl;
-        }
+        // else
+        // {
+        //     int dummy = 0;
+        //     Vector<uint8_t> intData = mnistData.test_data[i] * 256;
+        //     std::vector<uint8_t> stdVector(intData.size());
+        //     stdVector.assign(intData.data(), intData.data() + intData.size());
+        //     printNumber(stdVector);
+        //     std::cout << "label: " << uint16_t(mnistData.dataset.test_labels[i]) << std::endl;
+        //     std::cout << "inferred: " << output.argmax() << std::endl;
+        //     std::cout << std::endl;
+        // }
         // printf("%d: ", mnistData.dataset.test_labels[i]);
         // std::cout << network.getOutput().toString() << std::endl;
     }
