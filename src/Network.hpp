@@ -7,6 +7,7 @@
 #include "math/Vector.hpp"
 #include "math/Matrix.hpp"
 #include "Layer.hpp"
+#include "MnistData.hpp"
 #include "Utils.hpp"
 
 using namespace sw::math;
@@ -28,6 +29,11 @@ public:
             Layer newLayer(layerSizes[k], layerSizes[k + 1], activationType);
             m_layers.push_back(newLayer);
         }
+    }
+
+    void trainMiniBatches(uint16_t miniBatchSize, float learningRate, MnistData &mnistData)
+    {
+        trainMiniBatches(miniBatchSize, learningRate, mnistData.train_data, mnistData.train_labels);
     }
 
     void trainMiniBatches(uint16_t miniBatchSize, float learningRate, std::vector<Vector<float>> &train_data, std::vector<Vector<float>> &train_labels)

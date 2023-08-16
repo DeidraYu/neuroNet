@@ -163,10 +163,6 @@ public:
     Vector<float> &getBiases() { return m_b; }
 
 private:
-    // void feedforward(Vector<float> &x);
-
-    Vector<float> oneHotEncode(int value, int numClasses);
-
     uint16_t m_numInputs;
     uint16_t m_numOutputs;
 

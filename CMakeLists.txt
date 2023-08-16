@@ -107,9 +107,23 @@ FetchContent_MakeAvailable(googletest)
 # Our own application
 ##
 add_subdirectory(src)
-
-
 add_subdirectory(test)
+
+# For the Python bindings
+set(PYBIND11_FINDPYTHON ON)
+add_subdirectory(extern/pybind11)
+
+# Python module: network
+# pybind11_add_module(network src/network_python_module.cpp src/Utils.cpp)
+# target_compile_definitions(network PRIVATE MNIST_DATA_LOCATION="${MNIST_DATA_DIR}")
+
+# Python module: mnist
+# pybind11_add_module(mnist src/mnistdata_python_module.cpp src/MnistData.cpp src/Utils.cpp)
+# target_compile_definitions(mnist PRIVATE MNIST_DATA_LOCATION="${MNIST_DATA_DIR}")
+
+# Python module: neuronet
+pybind11_add_module(neuronetpy src/neuronet_python_module.cpp src/MnistData.cpp src/NetworkTrainer.cpp src/math/utils.cpp src/Utils.cpp)
+target_compile_definitions(neuronetpy PRIVATE MNIST_DATA_LOCATION="${MNIST_DATA_DIR}")
 
 # enable testing functionality
 enable_testing()

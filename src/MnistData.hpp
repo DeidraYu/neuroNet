@@ -9,6 +9,8 @@ using namespace sw::math;
 class MnistData
 {
 public:
+    MnistData() = default;
+
     mnist::MNIST_dataset<std::vector, std::vector<uint8_t>, uint8_t> dataset;
     std::vector<Vector<float>> train_data;
     std::vector<Vector<float>> train_labels;
