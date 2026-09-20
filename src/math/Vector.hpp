@@ -279,11 +279,15 @@ namespace sw
                 }
                 else if constexpr (std::is_floating_point_v<T>)
                 {
-                    // std::uniform_real_distribution<T> dis(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-                    std::uniform_real_distribution<T> dis(min, max);
+                    // Note: std::uniform_real_distribution is deliberately left implementation-defined
+                    // by the standard, so libstdc++ and the MSVC STL turn the same engine output into
+                    // different floats. The engine itself (std::mt19937) is specified exactly, so we do
+                    // the integer-to-float conversion here to keep results identical on every platform.
                     for (uint32_t i = 0; i < sz; ++i)
                     {
-                        randVector[i] = dis(Random::gen);
+                        const uint32_t bits = static_cast<uint32_t>(Random::gen());
+                        const double u = bits / 4294967296.0; // [0, 1), exact: 2^32 is a power of two
+                        randVector[i] = static_cast<T>(min + u * (max - min));
                     }
                 }
                 return randVector;
