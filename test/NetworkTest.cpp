@@ -185,8 +185,41 @@ TEST_F(NetworkTest, onSubsetOfMnistData)
     Random::seed(0);
     network.randomizeWB(-2.0f, 2.0f);
 
+    uint32_t scoreBefore = networkTrainer.evalNet(network, mnistData);
     networkTrainer.trainNet(network, nEpochs, learningRate, miniBatchSize, mnistData);
-    uint32_t score = networkTrainer.evalNet(network, mnistData);
+    uint32_t scoreAfter = networkTrainer.evalNet(network, mnistData);
 
-    EXPECT_EQ(score, 50); // out of 100
+    // Assert on properties rather than on one exact score. std::expf is allowed to
+    // differ by an ulp between standard libraries, which is enough to move the final
+    // score, so an exact value would only ever hold on the platform it was measured
+    // on. These two properties hold for any correct implementation, on any platform,
+    // and keep holding if we later move to approximate math or to the GPU.
+    EXPECT_GT(scoreAfter, scoreBefore);
+    EXPECT_GT(scoreAfter, 25u); // out of 100; guessing scores about 10
+}
+
+TEST_F(NetworkTest, trainingIsReproducibleWithinOnePlatform)
+{
+    uint32_t nEpochs = 2;
+    uint16_t miniBatchSize = 5;
+    float learningRate = 10.0f;
+    std::vector<uint16_t> layersizes{784, 30, 10};
+
+    MnistData mnistData;
+    mnistData.processMNIST(600, 100);
+
+    // Train twice from the same seed. Same input, same code, so the same answer:
+    // anything else means an order dependency somewhere in the maths. This is what
+    // catches a parallel reduction summing floats in thread-completion order.
+    auto trainAndScore = [&]()
+    {
+        Network network(layersizes);
+        NetworkTrainer networkTrainer;
+        Random::seed(0);
+        network.randomizeWB(-2.0f, 2.0f);
+        networkTrainer.trainNet(network, nEpochs, learningRate, miniBatchSize, mnistData);
+        return networkTrainer.evalNet(network, mnistData);
+    };
+
+    EXPECT_EQ(trainAndScore(), trainAndScore());
 }
