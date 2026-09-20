@@ -7,6 +7,7 @@
 #include "../src/Network.hpp"
 
 #include "../src/math/Vector.hpp"
+#include "NearComparison.hpp"
 
 using namespace sw;
 
@@ -73,9 +74,9 @@ TEST_F(LayerTest, backProp)
     Vector u_expected = Matrix<float>(2, 2, 0.5f).transposeMult(nablaC_b_expected);
 
     // Check
-    EXPECT_EQ(layer.getNablaC_b(), nablaC_b_expected);
-    EXPECT_EQ(layer.getNablaC_W(), nablaC_W_expected);
-    EXPECT_EQ(layer.getU(), u_expected);
+    EXPECT_TRUE(sw::test::vectorNear(layer.getNablaC_b(), nablaC_b_expected));
+    EXPECT_TRUE(sw::test::matrixNear(layer.getNablaC_W(), nablaC_W_expected));
+    EXPECT_TRUE(sw::test::vectorNear(layer.getU(), u_expected));
 }
 
 TEST_F(LayerTest, update)

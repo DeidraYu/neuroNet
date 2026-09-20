@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 
 #include "../../src/math/Vector.hpp"
+#include "../NearComparison.hpp"
 #include "../../src/math/Matrix.hpp"
 #include "../../src/FileIO.hpp"
 
@@ -177,7 +178,7 @@ TEST(VectorTest, VectorDotProduct)
     Vector<float> expected{8.8f, 9.8f, 10.8f};
 
     Vector<float> y = u + u.dot(v);
-    EXPECT_EQ(y, expected);
+    EXPECT_TRUE(sw::test::vectorNear(y, expected));
 }
 
 TEST(VectorTest, composition)
@@ -260,7 +261,7 @@ TEST(VectorTest, sigmoid)
     Vector<float> expected{0.5f, 0.5498339973124953f, 0.5986876601124858f, 0.6456563062258437f, 0.6899744811276725f, 0.731058578630074f};
     // Vector<float> expected{0.25f, 0.2475165727118582f, 0.24026074574152248f, 0.22878424045664325f, 0.2139096965202716f, 0.19661193324144993f};
 
-    EXPECT_EQ(sigmoid_v, expected);
+    EXPECT_TRUE(sw::test::vectorNear(sigmoid_v, expected));
 }
 
 TEST(VectorTest, sigmoid_prime)
@@ -277,7 +278,7 @@ TEST(VectorTest, sigmoid_prime)
     // Vector<float> expected{0.5f, 0.5498339973124953f, 0.5986876601124858f, 0.6456563062258437f, 0.6899744811276725f, 0.731058578630074f};
     Vector<float> expected{0.25f, 0.2475165727118582f, 0.24026074574152248f, 0.22878424045664325f, 0.2139096965202716f, 0.19661193324144993f};
 
-    EXPECT_EQ(sigmoid_prime, expected);
+    EXPECT_TRUE(sw::test::vectorNear(sigmoid_prime, expected));
 }
 
 TEST(VectorTest, VectorFunction_sin)
@@ -292,7 +293,7 @@ TEST(VectorTest, VectorFunction_sin)
 
     Vector<float> expected{0.f, 0.19866933f, 0.38941834f, 0.56464247f, 0.71735609f, 0.84147098f};
 
-    EXPECT_EQ(sin_v, expected);
+    EXPECT_TRUE(sw::test::vectorNear(sin_v, expected));
 }
 
 TEST(VectorTest, VectorFunction_cos)

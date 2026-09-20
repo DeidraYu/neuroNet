@@ -4,6 +4,7 @@
 
 #include "../../src/math/Vector.hpp"
 #include "../../src/math/Matrix.hpp"
+#include "../NearComparison.hpp"
 
 using namespace sw::math;
 
@@ -52,7 +53,7 @@ TEST(MatrixTest, operatorPlusIs)
     Vector<float> expected{13.8f, 31.8f, 15.8f};
 
     y += A * b + u.dot(v);
-    EXPECT_EQ(y, expected);
+    EXPECT_TRUE(sw::test::vectorNear(y, expected));
 }
 
 TEST(MatrixTest, MatrixScalarAddition)
