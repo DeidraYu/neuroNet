@@ -80,7 +80,7 @@ namespace sw
                 using otherType = typename V2::type;
                 using resultType = typename std::common_type<thisType, otherType>::type;
 
-                return std::transform_reduce(std::execution::seq,
+                return std::transform_reduce(std::execution::unseq,
                                              cbegin(), cend(),
                                              other.cbegin(),
                                              resultType{0}, // Initial value for the sum
@@ -120,7 +120,7 @@ namespace sw
             template <typename V>
             Vector(VectorExpression<V> const &expr) : m_data(expr.size())
             {
-                std::for_each(std::execution::seq, m_data.begin(), m_data.end(), [&](auto &thisElement)
+                std::for_each(std::execution::unseq, m_data.begin(), m_data.end(), [&](auto &thisElement)
                               { 
                             size_t index = &thisElement - &m_data[0];
                             thisElement = static_cast<T>(expr[index]); });
