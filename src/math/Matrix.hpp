@@ -78,7 +78,7 @@ namespace sw
                 //     m_rows[i] = expr[i];
                 // }
 
-                std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](Vector<T> &thisRow)
+                std::for_each(std::execution::seq, m_rows.begin(), m_rows.end(), [&](Vector<T> &thisRow)
                               { 
                             size_t rowIndex = &thisRow - &m_rows[0];
                             thisRow = expr[rowIndex]; });
@@ -123,7 +123,7 @@ namespace sw
                 //     m_rows[i] += other[i];
                 // }
 
-                std::for_each(std::execution::par_unseq, m_rows.begin(), m_rows.end(), [&](Vector<T> &thisRow)
+                std::for_each(std::execution::seq, m_rows.begin(), m_rows.end(), [&](Vector<T> &thisRow)
                               { 
                             size_t rowIndex = &thisRow - &m_rows[0];
                             thisRow += other[rowIndex]; });
