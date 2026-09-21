@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <vector>
 #include "math/Vector.hpp"
 #include "math/Matrix.hpp"
@@ -110,6 +111,27 @@ public:
     {
         m_W = Matrix<float>::rand(m_W.getNumRows(), m_W.getNumCols(), min, max);
         m_b = Vector<float>::rand(m_b.size(), min, max);
+    }
+
+    /**
+     * @brief Initialize the weights with a range scaled to the size of the layer.
+     *
+     * Draws uniformly from [-limit, limit] with
+     *
+     *     limit = sqrt(6 / (numInputs + numOutputs))
+     *
+     * so that the spread of z stays roughly independent of how wide the layer is, and the
+     * layer starts on the steep part of the sigmoid rather than out on its flat tails.
+     * The biases start at zero.
+     *
+     * The derivation, and why the 6 is there, is in doc/Trainer.md, "Initializing the
+     * weights".
+     */
+    void initializeWB()
+    {
+        const float limit = std::sqrt(6.0f / static_cast<float>(m_numInputs + m_numOutputs));
+        m_W = Matrix<float>::rand(m_W.getNumRows(), m_W.getNumCols(), -limit, limit);
+        m_b.fill(0.0f);
     }
 
     constexpr uint16_t size() const { return m_numOutputs; }

@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 {
     uint32_t nEpochs = 10;
     uint16_t miniBatchSize = 10;
-    float learningRate = 1.0f;
+    float learningRate = 3.0f; // measured best with the scaled initialization; see doc/Trainer.md
     std::vector<uint16_t> layersizes{784, 30, 10};
 
     if (argc >= 4)
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
     Network network(layersizes);
     Random::seed(); // Use a randomized seed
-    network.randomizeWB(-2.0f, 2.0f);
+    network.initializeWB();
 
     MnistData mnistData;
     mnistData.processMNIST();

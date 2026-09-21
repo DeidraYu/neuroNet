@@ -169,7 +169,7 @@ TEST_F(NetworkTest, onSubsetOfMnistData)
 {
     uint32_t nEpochs = 2;
     uint16_t miniBatchSize = 5;
-    float learningRate = 10.0f;
+    float learningRate = 3.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
 
     // Read MNIST dataset and convert to our own Vector format
@@ -183,7 +183,7 @@ TEST_F(NetworkTest, onSubsetOfMnistData)
     NetworkTrainer networkTrainer;
 
     Random::seed(0);
-    network.randomizeWB(-2.0f, 2.0f);
+    network.initializeWB();
 
     uint32_t scoreBefore = networkTrainer.evalNet(network, mnistData);
     networkTrainer.trainNet(network, nEpochs, learningRate, miniBatchSize, mnistData);
@@ -195,14 +195,14 @@ TEST_F(NetworkTest, onSubsetOfMnistData)
     // on. These two properties hold for any correct implementation, on any platform,
     // and keep holding if we later move to approximate math or to the GPU.
     EXPECT_GT(scoreAfter, scoreBefore);
-    EXPECT_GT(scoreAfter, 25u); // out of 100; guessing scores about 10
+    EXPECT_GT(scoreAfter, 50u); // out of 100; guessing scores about 10
 }
 
 TEST_F(NetworkTest, trainingIsReproducibleWithinOnePlatform)
 {
     uint32_t nEpochs = 2;
     uint16_t miniBatchSize = 5;
-    float learningRate = 10.0f;
+    float learningRate = 3.0f;
     std::vector<uint16_t> layersizes{784, 30, 10};
 
     MnistData mnistData;
@@ -216,7 +216,7 @@ TEST_F(NetworkTest, trainingIsReproducibleWithinOnePlatform)
         Network network(layersizes);
         NetworkTrainer networkTrainer;
         Random::seed(0);
-        network.randomizeWB(-2.0f, 2.0f);
+        network.initializeWB();
         networkTrainer.trainNet(network, nEpochs, learningRate, miniBatchSize, mnistData);
         return networkTrainer.evalNet(network, mnistData);
     };
