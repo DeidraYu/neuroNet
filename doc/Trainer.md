@@ -204,6 +204,22 @@ $$
 $$
 
 
+## Initializing the weights
+
+Before the first sample arrives the weights need some starting value. We do not draw them
+from a fixed range: the range has to shrink as a layer gets wider, otherwise ${\bf z}$ lands
+far out on the flat tails of the sigmoid where $\sigma^\prime(z)$ is almost zero and the
+layer hardly learns at all.
+
+We use Xavier initialization, drawing uniformly from $[-a, a]$ with
+
+$$a = \sqrt{\frac{6}{n_{\text{in}} + n_{\text{out}}}}$$
+
+and setting the biases to zero. This is `Layer::initializeWB`.
+
+The derivation, including where that 6 comes from and what it costs to get it wrong, is in
+[Initialization.md](Initialization.md).
+
 ## How does this relate to the Python code
 
 Call ${\pmb\delta}_\ell = {\bf u}_{\ell+1} \odot \sigma^\prime({\bf z}_\ell)$. The system of equations then becomes
