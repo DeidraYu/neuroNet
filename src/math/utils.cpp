@@ -41,6 +41,28 @@ namespace sw
             gen = std::mt19937(seed);
         }
 
+        uint32_t Random::below(uint32_t bound)
+        {
+            if (bound <= 1)
+            {
+                return 0;
+            }
+
+            // The engine produces every value in [0, 2^32). Taking that modulo `bound`
+            // would favour the first 2^32 % bound values, so we discard the values that
+            // do not fit a whole number of times and draw again.
+            const uint64_t range = 1ULL << 32;
+            const uint64_t usable = range - (range % bound);
+
+            uint64_t draw;
+            do
+            {
+                draw = static_cast<uint32_t>(gen());
+            } while (draw >= usable);
+
+            return static_cast<uint32_t>(draw % bound);
+        }
+
         std::mt19937 Random::gen = std::mt19937(0);
 
     } // namespace math

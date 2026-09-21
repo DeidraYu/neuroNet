@@ -52,6 +52,17 @@ namespace sw
             /** @brief Set the seed of the random number generator.*/
             static void seed(uint32_t seed);
 
+            /**
+             * @brief A uniformly distributed integer in [0, bound).
+             *
+             * std::uniform_int_distribution and std::shuffle are both left implementation
+             * defined by the standard, so they hand out different numbers on libstdc++ and
+             * on the MSVC STL. We draw from the engine, which is specified exactly, and
+             * reject the tail that would not divide evenly, which keeps the result both
+             * uniform and identical on every platform.
+             */
+            static uint32_t below(uint32_t bound);
+
             /** @brief The random number generator which is seeded by 0 by default.*/
             static std::mt19937 gen; // Standard mersenne_twister_engine seeded with rd()
         };

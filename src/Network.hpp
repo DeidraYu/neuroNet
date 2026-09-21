@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <numeric>
 #include <vector>
 // #include "Vector.hpp"
 // #include "Matrix.hpp"
@@ -34,8 +35,20 @@ public:
         int numMiniBatches = static_cast<int>((train_data.size() - 1) / miniBatchSize + 1);
         int miniBatchCounter = 0;
 
-        for (uint16_t i = 0; i < train_data.size(); ++i)
+        // Visit the training samples in a fresh random order every epoch. Without this
+        // every epoch sees exactly the same mini batches, so the gradient estimates are
+        // correlated from one epoch to the next and the descent is not really stochastic.
+        // We shuffle indices rather than the data itself, so nothing large is copied.
+        if (m_sampleOrder.size() != train_data.size())
         {
+            m_sampleOrder.resize(train_data.size());
+            std::iota(m_sampleOrder.begin(), m_sampleOrder.end(), size_t{0});
+        }
+        shuffleSampleOrder();
+
+        for (size_t n = 0; n < train_data.size(); ++n)
+        {
+            const size_t i = m_sampleOrder[n];
             train(train_data[i], train_labels[i]);
 
             if (mbIndex == miniBatchSize - 1)
@@ -152,11 +165,36 @@ public:
         }
     }
 
+    /**
+     * @brief Initialize the weights and biases scaled to the size of each layer.
+     *
+     * See Layer::initializeWB for why the scale matters.
+     */
+    void initializeWB()
+    {
+        for (Layer &layer : m_layers)
+        {
+            layer.initializeWB();
+        }
+    }
+
     std::string progressLabel;
 
 private:
+    /** @brief Fisher-Yates, using our own bounded draw so that a given seed produces the
+     *         same order on every standard library. */
+    void shuffleSampleOrder()
+    {
+        for (size_t i = m_sampleOrder.size(); i > 1; --i)
+        {
+            const size_t j = Random::below(static_cast<uint32_t>(i));
+            std::swap(m_sampleOrder[i - 1], m_sampleOrder[j]);
+        }
+    }
+
     float m_eta = 1.0f;
 
     std::vector<Layer> m_layers;
     std::vector<uint16_t> m_layerSizes;
+    std::vector<size_t> m_sampleOrder;
 };
