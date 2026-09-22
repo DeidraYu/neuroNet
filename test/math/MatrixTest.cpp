@@ -52,7 +52,9 @@ TEST(MatrixTest, operatorPlusIs)
     // expected output
     Vector<float> expected{13.8f, 31.8f, 15.8f};
 
-    y += A * b + u.dot(v);
+    // Types are not mixed inside an operation, so each conversion is written out.
+    const float s = Vector<float>(u).dot(v);
+    y += Vector<float>(A * b) + s;
     EXPECT_TRUE(sw::test::vectorNear(y, expected));
 }
 

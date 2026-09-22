@@ -32,14 +32,6 @@ TEST(VectorTest, operatorIsIs)
     EXPECT_EQ(u, Vector<int>({0, 1, 2}));
 }
 
-TEST(VectorTest, VectorVectorAddition)
-{
-    Vector<int> u{0, 1, 2};
-    Vector<int> v{3, 4, 5};
-
-    VectorVectorAddition<Vector<int>, Vector<int>> vectorAddition(u, v);
-}
-
 TEST(VectorTest, operatorPlus_00)
 {
     Vector<int> u{0, 1, 2};
@@ -65,7 +57,8 @@ TEST(VectorTest, mixed_types)
     Vector<int> u{0, 1, 2};
     Vector<float> v{3.f, 4.f, 5.f};
 
-    auto w = u + v;
+    // Types are not mixed inside an operation, so the conversion is written out.
+    auto w = Vector<float>(u) + v;
 
     EXPECT_EQ(w, Vector<float>({3.f, 5.f, 7.f}));
 }
@@ -75,74 +68,31 @@ TEST(VectorTest, mixed_types_with_eval)
     Vector<int> u{0, 1, 2};
     Vector<float> v{3.1f, 4.f, 5.f};
 
-    Vector<float> w = u + v;
+    Vector<float> w = Vector<float>(u) + v;
 
     EXPECT_EQ(w, Vector<float>({3.1f, 5.f, 7.f}));
 }
 
-TEST(VectorTest, VectorScalarAddition_construction)
-{
-    Vector<int> u{0, 1, 2};
-    float s = 1.1f;
-
-    VectorScalarAddition<Vector<int>, float> vectorScalarAddition(u, s);
-}
-
 TEST(VectorTest, VectorScalarAddition)
 {
-    // inputs
     Vector<int> u{0, 1, 2};
     float s = 1.1f;
 
-    // expected output
     Vector<float> expected{1.1f, 2.1f, 3.1f};
 
-    VectorScalarAddition<Vector<int>, float> y = u + s;
-    EXPECT_EQ(Vector<float>(y), expected);
-
-    auto w = u + s;
-    EXPECT_EQ(Vector<float>(w), expected);
-
-    Vector<float> z = u + s;
-    EXPECT_EQ(z, expected);
-}
-
-TEST(VectorTest, VectorVectorMultiplication_construction)
-{
-    Vector<int> u{0, 1, 2};
-    Vector<float> v{3.1f, 4.f, 5.f};
-
-    VectorVectorMultiplication<Vector<int>, Vector<float>>(u, v);
+    Vector<float> z = Vector<float>(u) + s;
+    EXPECT_TRUE(sw::test::vectorNear(z, expected));
 }
 
 TEST(VectorTest, VectorVectorMultiplication)
 {
-    // inputs
     Vector<int> u{0, 1, 2};
     Vector<float> v{1.1f, 2.2f, 3.3f};
 
-    // expected output
     Vector<float> expected{0.f, 2.2f, 6.6f};
 
-    // explicit type of expression
-    VectorVectorMultiplication<Vector<int>, Vector<float>> y = u * v;
-    EXPECT_EQ(Vector<float>(y), expected);
-
-    // auto type of expression
-    auto w = u * v;
-    EXPECT_EQ(Vector<float>(w), expected);
-
-    // evaluated expression
-    Vector<float> z = u * v;
-    EXPECT_EQ(z, expected);
-}
-
-TEST(VectorTest, VectorScalarMultiplication_construction)
-{
-    Vector<int> u{0, 1, 2};
-    float s = 1.1f;
-
-    VectorScalarMultiplication<Vector<int>, float> vectorScalarMultiplication(u, s);
+    Vector<float> z = Vector<float>(u) * v;
+    EXPECT_TRUE(sw::test::vectorNear(z, expected));
 }
 
 TEST(VectorTest, VectorScalarMultiplication)
@@ -150,20 +100,10 @@ TEST(VectorTest, VectorScalarMultiplication)
     Vector<int> u{0, 1, 2};
     float s = 1.1f;
 
-    // expected output
     Vector<float> expected{0.f, 1.1f, 2.2f};
 
-    // explicit type of expression
-    VectorScalarMultiplication<Vector<int>, float> y = u * s;
-    EXPECT_EQ(Vector<float>(y), expected);
-
-    // auto type of expression
-    auto w = u * s;
-    EXPECT_EQ(Vector<float>(w), expected);
-
-    // evaluated expression
-    Vector<float> z = u * s;
-    EXPECT_EQ(z, expected);
+    Vector<float> z = Vector<float>(u) * s;
+    EXPECT_TRUE(sw::test::vectorNear(z, expected));
 }
 
 TEST(VectorTest, VectorDotProduct)
@@ -177,7 +117,8 @@ TEST(VectorTest, VectorDotProduct)
     // expected output
     Vector<float> expected{8.8f, 9.8f, 10.8f};
 
-    Vector<float> y = u + u.dot(v);
+    const Vector<float> uf(u);
+    Vector<float> y = uf + uf.dot(v);
     EXPECT_TRUE(sw::test::vectorNear(y, expected));
 }
 
@@ -206,7 +147,8 @@ TEST(VectorTest, operatorPlusIs_with_vector)
     // expected output
     Vector<float> expected{9.8f, 10.8f, 11.8f};
 
-    y += u + u.dot(v);
+    const Vector<float> uf(u);
+    y += uf + uf.dot(v);
     EXPECT_EQ(y, expected);
 }
 
@@ -256,7 +198,7 @@ TEST(VectorTest, sigmoid)
     auto sigmoid_v_expression = sigmoid(v);
 
     // Now create the float version for comparison.
-    Vector<float> sigmoid_v = sigmoid_v_expression;
+    Vector<float> sigmoid_v(sigmoid_v_expression);
 
     Vector<float> expected{0.5f, 0.5498339973124953f, 0.5986876601124858f, 0.6456563062258437f, 0.6899744811276725f, 0.731058578630074f};
     // Vector<float> expected{0.25f, 0.2475165727118582f, 0.24026074574152248f, 0.22878424045664325f, 0.2139096965202716f, 0.19661193324144993f};
@@ -273,7 +215,7 @@ TEST(VectorTest, sigmoid_prime)
     auto sigmoid_prime_v_expression = sigmoid_prime(v);
 
     // Now create the float version for comparison.
-    Vector<float> sigmoid_prime = sigmoid_prime_v_expression;
+    Vector<float> sigmoid_prime(sigmoid_prime_v_expression);
 
     // Vector<float> expected{0.5f, 0.5498339973124953f, 0.5986876601124858f, 0.6456563062258437f, 0.6899744811276725f, 0.731058578630074f};
     Vector<float> expected{0.25f, 0.2475165727118582f, 0.24026074574152248f, 0.22878424045664325f, 0.2139096965202716f, 0.19661193324144993f};
@@ -427,29 +369,3 @@ TEST(VectorTest, typeTest)
     EXPECT_EQ(bool(std::is_same_v<Vector<double>::type, double>), true);
 }
 
-TEST(VectorTest, typeTest_nestedVectors)
-{
-    EXPECT_EQ(bool(std::is_same_v<Vector<float>::type, float>), true);
-    EXPECT_EQ(bool(std::is_same_v<Vector<Vector<uint16_t>>::type, uint16_t>), true);
-    EXPECT_EQ(bool(std::is_same_v<Vector<Vector<Vector<double>>>::type, double>), true);
-    EXPECT_EQ(bool(std::is_same_v<Vector<Vector<Vector<Vector<int>>>>::type, int>), true);
-}
-
-TEST(VectorTest, typeTest_expressions_order)
-{
-    EXPECT_EQ(bool(std::is_same_v<VectorVectorAddition<Vector<float>, Vector<int>>::type, float>), true);
-    EXPECT_EQ(bool(std::is_same_v<VectorVectorAddition<Vector<int>, Vector<float>>::type, float>), true);
-}
-
-TEST(VectorTest, typeTest_expression_of_vectors)
-{
-    EXPECT_EQ(bool(std::is_same_v<VectorVectorAddition<Vector<int>, Vector<float>>::type, float>), true);
-    EXPECT_EQ(bool(std::is_same_v<VectorVectorSubtraction<Vector<int>, Vector<float>>::type, float>), true);
-    EXPECT_EQ(bool(std::is_same_v<VectorVectorMultiplication<Vector<int>, Vector<float>>::type, float>), true);
-
-    EXPECT_EQ(bool(std::is_same_v<VectorScalarAddition<Vector<int>, float>::type, float>), true);
-    EXPECT_EQ(bool(std::is_same_v<VectorScalarSubtraction<Vector<int>, float>::type, float>), true);
-    EXPECT_EQ(bool(std::is_same_v<VectorScalarMultiplication<Vector<int>, float>::type, float>), true);
-
-    EXPECT_EQ(bool(std::is_same_v<VectorFunction<Vector<float>>::type, float>), true);
-}

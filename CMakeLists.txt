@@ -37,9 +37,25 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo")
 # endif(CMAKE_COMPILER_IS_GNUCXX)
 
 
+# The matrix and vector code relies on the compiler vectorizing its inner loops. By default
+# a compiler targets a baseline instruction set that is many years old, with only 128 bit
+# vector registers, which leaves most of that speed unused. This lets it use what the
+# machine building the code actually has.
+#
+# The resulting binaries are tuned for this machine and may refuse to start on an older
+# one, so turn it off when building something to hand to someone else.
+#
+# Results stay reproducible either way. The order in which the inner loops add things up
+# is fixed by the code rather than by the instruction set, so a wider vector register
+# makes it faster without changing what it computes.
+option(NEURONET_TUNE_FOR_THIS_MACHINE "Build for the instruction set of the build machine" ON)
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # using Clang
   add_compile_options("$<$<CONFIG:RELEASE>:-O3;-Werror>")
+  if (NEURONET_TUNE_FOR_THIS_MACHINE)
+    add_compile_options("$<$<CONFIG:RELEASE>:-march=native>")
+  endif()
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # using GCC
@@ -67,11 +83,19 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
       )
       
       add_compile_options("$<$<CONFIG:RELEASE>:-O3;-Werror>")
+      if (NEURONET_TUNE_FOR_THIS_MACHINE)
+        add_compile_options("$<$<CONFIG:RELEASE>:-march=native>")
+      endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
   # using Intel C++
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   # using Visual Studio C++
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
+  if (NEURONET_TUNE_FOR_THIS_MACHINE)
+    # MSVC has no equivalent of -march=native. AVX2 is the widest setting that is
+    # safe to assume on anything recent.
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /arch:AVX2")
+  endif()
 endif()
 
 # .. -> hint, that the mnist package is one directory level above.

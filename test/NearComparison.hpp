@@ -63,11 +63,17 @@ namespace sw
 
             for (size_t r = 0; r < actual.getNumRows(); ++r)
             {
-                const ::testing::AssertionResult rowResult =
-                    vectorNear(actual[r], expected[r], tolerance);
-                if (!rowResult)
+                for (size_t c = 0; c < actual.getNumCols(); ++c)
                 {
-                    return ::testing::AssertionFailure() << "row " << r << ": " << rowResult.message();
+                    const double difference = std::abs(static_cast<double>(actual(r, c)) -
+                                                       static_cast<double>(expected(r, c)));
+                    if (difference > tolerance)
+                    {
+                        return ::testing::AssertionFailure()
+                               << "element (" << r << ", " << c << ") differs: "
+                               << actual(r, c) << " vs " << expected(r, c)
+                               << " (|difference| = " << difference << " > " << tolerance << ")";
+                    }
                 }
             }
             return ::testing::AssertionSuccess();

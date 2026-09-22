@@ -69,7 +69,7 @@ TEST_F(LayerTest, backProp)
     layer.backProp(x, v);
 
     // The expected values
-    Vector<float> nablaC_b_expected = v * sigmoid_prime(0.6);
+    Vector<float> nablaC_b_expected = v * sigmoid_prime(0.6f);
     Matrix<float> nablaC_W_expected = outer(nablaC_b_expected, x);
     Vector u_expected = Matrix<float>(2, 2, 0.5f).transposeMult(nablaC_b_expected);
 
